@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Artify</string>
+    <string name="artify_photo_editing">Artify -Photo Editing</string>
+    <string name="easy_one_click_photo_editing">Easy one-click photo editing!</string>
+    <string name="lorem_ipsum">Lorem ipsum dolor sit amet consectetur odigisang elit, sed do eiusmod tempor Lorem ipsum dolor sit amet consectetur</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="next">Next</string>
+</resources>

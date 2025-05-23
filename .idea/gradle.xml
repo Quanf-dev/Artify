@@ -12,8 +12,10 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/FirebaseAuth" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/artify" />
           </set>
         </option>
+        <option name="resolveExternalAnnotations" value="false" />
       </GradleProjectSettings>
     </option>
   </component>

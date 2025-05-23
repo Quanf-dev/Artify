@@ -26,7 +26,7 @@ object FirebaseModule {
     @Singleton
     fun provideGoogleSignInOptions(): GoogleSignInOptions {
         return GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken("YOUR_WEB_CLIENT_ID") // Sẽ được cấu hình bởi người dùng
+            .requestIdToken("473029705570-dmb135q15j03bb29ljpfto5icek3j5au.apps.googleusercontent.com")
             .requestEmail()
             .build()
     }

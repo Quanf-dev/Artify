@@ -24,3 +24,4 @@ dependencyResolutionManagement {
 rootProject.name = "Artify"
 include(":app")
 include(":FirebaseAuth")
+include(":artify")

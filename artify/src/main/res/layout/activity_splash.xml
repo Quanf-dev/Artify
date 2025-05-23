@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.splash.SplashActivity"
+    android:background="@color/app_background">
+
+    <ImageView
+        android:id="@+id/imgLogo"
+        android:layout_width="@dimen/_188sdp"
+        android:layout_height="@dimen/_207sdp"
+        android:contentDescription="@null"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="@dimen/_123sdp"
+        android:src="@drawable/logo"
+        />
+    <TextView
+        android:id="@+id/tvAppName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/artify_photo_editing"
+        app:layout_constraintTop_toBottomOf="@+id/imgLogo"
+        app:layout_constraintStart_toStartOf="@+id/imgLogo"
+        app:layout_constraintEnd_toEndOf="@+id/imgLogo"
+        android:layout_marginTop="@dimen/_26sdp"
+        android:textSize="@dimen/_24ssp"
+        />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="@dimen/_50sdp"
+        android:layout_height="@dimen/_50sdp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:indeterminateOnly="true"
+        android:indeterminateDrawable="@drawable/progress_gradient"
+        android:progressDrawable="@drawable/progress_gradient"
+        android:layout_marginBottom="@dimen/_62sdp"
+        />
+
+    <RadioGroup
+        android:id="@+id/radioGroupTheme"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp">
+
+        <RadioButton
+            android:id="@+id/radioLight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Light Mode" />
+
+        <RadioButton
+            android:id="@+id/radioDark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Dark Mode" />
+
+        <RadioButton
+            android:id="@+id/radioSystem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="System Default" />
+
+    </RadioGroup>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
