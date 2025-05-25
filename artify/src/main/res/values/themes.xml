@@ -8,5 +8,6 @@
 
         <!-- Màu chữ phụ -->
         <item name="android:textColorSecondary">@color/desc_text</item>
+        <item name="android:fontFamily">@font/work_sans</item>
     </style>
 </resources>

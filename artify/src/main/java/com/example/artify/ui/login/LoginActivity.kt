@@ -22,6 +22,8 @@ class LoginActivity : AppCompatActivity() {
         setupRegisterButton()
         setupPhoneLoginButton()
         setupFacebookLoginButton()
+
+
     }
 
     private fun setupRegisterButton() {

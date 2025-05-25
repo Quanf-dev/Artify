@@ -3,10 +3,8 @@ package com.example.artify.utils
 import android.graphics.*
 import android.graphics.drawable.Drawable
 
-class GradientDotDrawable(
-    private val width: Int? = null,             // nullable: nếu null sẽ dùng bounds.width()
-    private val height: Int,
-    private val cornerRadius: Float = 10f
+class FullGradientDrawable(
+    private val cornerRadius: Float = 0f
 ) : Drawable() {
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -21,20 +19,15 @@ class GradientDotDrawable(
     private val positions = floatArrayOf(0f, 0.38f, 0.68f, 0.96f)
 
     override fun draw(canvas: Canvas) {
-        val actualWidth = width ?: bounds.width()         // nếu width null thì dùng bounds.width()
-        val actualLeft = 0f
-        val actualRight = actualWidth.toFloat()
-        val actualTop = bounds.height() - height.toFloat()
-        val actualBottom = bounds.height().toFloat()
+        val rect = RectF(bounds)
 
         val shader = LinearGradient(
-            actualLeft, actualTop, actualRight, actualTop,
+            rect.left, rect.top, rect.right, rect.top, // trái → phải
             colors, positions, Shader.TileMode.CLAMP
         )
         paint.shader = shader
 
-        val rectF = RectF(actualLeft, actualTop, actualRight, actualBottom)
-        canvas.drawRoundRect(rectF, cornerRadius, cornerRadius, paint)
+        canvas.drawRoundRect(rect, cornerRadius, cornerRadius, paint)
     }
 
     override fun setAlpha(alpha: Int) {
@@ -49,6 +42,7 @@ class GradientDotDrawable(
 
     override fun getOpacity(): Int = PixelFormat.TRANSLUCENT
 
-    override fun getIntrinsicWidth(): Int = width ?: -1 // -1 nghĩa là không xác định → sẽ dùng bounds
-    override fun getIntrinsicHeight(): Int = height
+    // 👉 Thêm đoạn này để kích hoạt kích thước tự động
+    override fun getIntrinsicWidth(): Int = -1
+    override fun getIntrinsicHeight(): Int = -1
 }

@@ -10,4 +10,10 @@
     <string name="facebook_app_id">995758542751417</string>
     <string name="facebook_client_token">0461d43cde94ee7746cfda5e6013e30e</string>
     <string name="fb_login_protocol_scheme">fb995758542751417</string>
+    <string name="welcome_back">Welcome Back !</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="sign_in">Sign in</string>
+    <string name="or">Or</string>
 </resources>

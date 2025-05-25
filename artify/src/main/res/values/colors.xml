@@ -4,5 +4,9 @@
     <color name="title_text">#000000</color>
     <color name="desc_text">#555555</color>
     <color name="white">#FFFFFF</color>
+    <color name="icon_color">#000000</color> <!-- Đen cho light mode -->
+    <color name="label_text">#222222</color> <!-- Đen đậm -->
+    <color name="holder_text">#757575</color> <!-- Xám trung bình -->
+
 
 </resources>
