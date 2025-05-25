@@ -1,16 +1,51 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+# Android Studio
+.idea/
+.gradle/
 local.properties
-/app/
+*.iml
+.DS_Store
+/build/
+captures/
+.externalNativeBuild
+
+# Gradle
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Signing files
+*.jks
+*.keystore
+key.properties
+
+# Crashlytics / Firebase
+fabric.properties
+firebase-appindexing.json
+
+# Android Patch files
+*.orig
+
+# Log files
+*.log
+
+# Generated files
+gen/
+out/
+bin/
+
+# NDK
+obj/
+
+# IntelliJ
+*.iws
+*.ipr
+
+# Kotlin
+*.kotlin_module
+
+# Unit test reports
+test-results/
+test-report/
+
+# Misc
+*.swp
+*.swo

@@ -1,5 +1,6 @@
 package com.example.firebaseauth.repository
 
+import android.app.Activity
 import android.content.Intent
 import com.example.firebaseauth.FirebaseAuthResult
 import com.example.firebaseauth.model.User
@@ -18,9 +19,13 @@ interface AuthRepository {
     fun getGoogleSignInIntent(): Intent
     suspend fun signInWithGoogle(credential: AuthCredential): FirebaseAuthResult<User>
     
+    // Facebook Sign-In
+    suspend fun signInWithFacebook(credential: AuthCredential): FirebaseAuthResult<User>
+    
     // Phone Authentication
     suspend fun sendPhoneVerificationCode(
         phoneNumber: String,
+        activity: Activity,
         onCodeSent: (String) -> Unit,
         onVerificationFailed: (Exception) -> Unit
     )
@@ -29,6 +34,7 @@ interface AuthRepository {
     
     // Common
     fun getCurrentUser(): User?
+    suspend fun reloadCurrentUser(): FirebaseAuthResult<Unit>
     suspend fun signOut()
     fun isUserSignedIn(): Boolean
     fun getAuthStateFlow(): Flow<User?>

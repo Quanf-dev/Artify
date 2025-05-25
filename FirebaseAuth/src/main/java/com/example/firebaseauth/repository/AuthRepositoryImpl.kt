@@ -1,13 +1,10 @@
 package com.example.firebaseauth.repository
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import com.example.firebaseauth.FirebaseAuthResult
 import com.example.firebaseauth.model.User
-import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
@@ -24,7 +21,6 @@ import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
-    private val context: Context,
     private val googleSignInClient: GoogleSignInClient
 ) : AuthRepository {
 
@@ -90,38 +86,49 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun signInWithFacebook(credential: AuthCredential): FirebaseAuthResult<User> {
+        return try {
+            val result = firebaseAuth.signInWithCredential(credential).await()
+            result.user?.let {
+                FirebaseAuthResult.success(it.toUser())
+            } ?: FirebaseAuthResult.error(Exception("Đăng nhập Facebook thất bại"))
+        } catch (e: Exception) {
+            FirebaseAuthResult.error(e)
+        }
+    }
+
     override suspend fun sendPhoneVerificationCode(
         phoneNumber: String,
+        activity: Activity,
         onCodeSent: (String) -> Unit,
         onVerificationFailed: (Exception) -> Unit
     ) {
-        val options = PhoneAuthOptions.newBuilder(firebaseAuth)
-            .setPhoneNumber(phoneNumber)
-            .setTimeout(60L, TimeUnit.SECONDS)
-            .setActivity(context as Activity)
-            .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-                override fun onVerificationCompleted(credential: PhoneAuthCredential) {
-                    // Tự động xác thực nếu có thể
-                }
+        try {
+            val options = PhoneAuthOptions.newBuilder(firebaseAuth)
+                .setPhoneNumber(phoneNumber)
+                .setTimeout(60L, TimeUnit.SECONDS)
+                .setActivity(activity)
+                .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                    override fun onVerificationCompleted(credential: PhoneAuthCredential) {
+                        // Tự động xác thực nếu có thể
+                    }
 
-                override fun onVerificationFailed(p0: FirebaseException) {
-                    TODO("Not yet implemented")
-                }
+                    override fun onVerificationFailed(e: FirebaseException) {
+                        onVerificationFailed(e)
+                    }
 
-//                override fun onVerificationFailed(e: Exception) {
-//                    onVerificationFailed(e)
-//
-//                }
-
-                override fun onCodeSent(
-                    verificationId: String,
-                    token: PhoneAuthProvider.ForceResendingToken
-                ) {
-                    onCodeSent(verificationId)
-                }
-            })
-            .build()
-        PhoneAuthProvider.verifyPhoneNumber(options)
+                    override fun onCodeSent(
+                        verificationId: String,
+                        token: PhoneAuthProvider.ForceResendingToken
+                    ) {
+                        onCodeSent(verificationId)
+                    }
+                })
+                .build()
+            PhoneAuthProvider.verifyPhoneNumber(options)
+        } catch (e: Exception) {
+            onVerificationFailed(e)
+        }
     }
 
     override suspend fun verifyPhoneNumberWithCode(
@@ -147,6 +154,16 @@ class AuthRepositoryImpl @Inject constructor(
 
     override fun getCurrentUser(): User? {
         return firebaseAuth.currentUser?.toUser()
+    }
+
+    override suspend fun reloadCurrentUser(): FirebaseAuthResult<Unit> {
+        return try {
+            firebaseAuth.currentUser?.reload()?.await()
+                ?: return FirebaseAuthResult.error(Exception("Không có người dùng đăng nhập"))
+            FirebaseAuthResult.success(Unit)
+        } catch (e: Exception) {
+            FirebaseAuthResult.error(e)
+        }
     }
 
     override suspend fun signOut() {

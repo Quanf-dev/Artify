@@ -5,9 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.artify.databinding.ActivityLoginBinding
-import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -21,22 +19,31 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setupViewPager()
+        setupRegisterButton()
+        setupPhoneLoginButton()
+        setupFacebookLoginButton()
     }
 
-    private fun setupViewPager() {
-        val adapter = LoginPagerAdapter(this)
-        binding.viewPager.adapter = adapter
+    private fun setupRegisterButton() {
+        binding.registerButton.setOnClickListener {
+            startActivity(Intent(this, com.example.artify.ui.register.RegisterActivity::class.java))
+        }
+    }
 
-        TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
-            tab.text = when (position) {
-                0 -> "Email"
-                1 -> "Điện thoại"
-                else -> null
-            }
-        }.attach()
+    private fun setupPhoneLoginButton() {
+        binding.phoneLoginButton.setOnClickListener {
+            startActivity(Intent(this, PhoneLoginActivity::class.java))
+        }
+    }
+
+    private fun setupFacebookLoginButton() {
+        binding.facebookLoginButton.setOnClickListener {
+            // Sử dụng Facebook login thực
+            viewModel.loginWithFacebook(this)
+        }
     }
     
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         
@@ -45,16 +52,9 @@ class LoginActivity : AppCompatActivity() {
         if (requestCode == LoginViewModel.GOOGLE_SIGN_IN_REQUEST_CODE) {
             Log.d("LoginActivity", "Nhận kết quả đăng nhập Google")
             viewModel.handleGoogleSignInResult(data)
+        } else {
+            // Xử lý Facebook login result
+            viewModel.handleFacebookActivityResult(requestCode, resultCode, data)
         }
-    }
-}
-
-class LoginPagerAdapter(activity: AppCompatActivity) : FragmentStateAdapter(activity) {
-    override fun getItemCount(): Int = 2
-
-    override fun createFragment(position: Int) = when (position) {
-        0 -> EmailLoginFragment()
-        1 -> PhoneLoginFragment()
-        else -> throw IllegalArgumentException("Invalid position $position")
     }
 }

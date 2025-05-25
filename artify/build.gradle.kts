@@ -82,8 +82,9 @@ dependencies {
     // Google Sign-In
     implementation("com.google.android.gms:play-services-auth:20.7.0")
 
+    // Facebook SDK
+    implementation("com.facebook.android:facebook-login:16.2.0")
 
     implementation ("androidx.fragment:fragment-ktx:1.5.2")
-
 
 }

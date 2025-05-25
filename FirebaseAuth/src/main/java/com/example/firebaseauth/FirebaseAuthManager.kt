@@ -1,41 +1,24 @@
 package com.example.firebaseauth
 
-import android.content.Context
+import android.app.Activity
 import android.content.Intent
-import com.example.firebaseauth.di.FirebaseAuthEntryPoint
 import com.example.firebaseauth.model.User
 import com.example.firebaseauth.repository.AuthRepository
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import dagger.hilt.android.EntryPointAccessors
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class FirebaseAuthManager @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val facebookLoginManager: FacebookLoginManager
 ) {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    companion object {
-        @Volatile
-        private var instance: FirebaseAuthManager? = null
-
-        fun getInstance(context: Context): FirebaseAuthManager {
-            return instance ?: synchronized(this) {
-                val entryPoint = EntryPointAccessors.fromApplication(
-                    context.applicationContext,
-                    FirebaseAuthEntryPoint::class.java
-                )
-                val manager = entryPoint.firebaseAuthManager()
-                instance = manager
-                manager
-            }
-        }
-    }
 
     // Email & Password
     suspend fun signInWithEmailAndPassword(
@@ -52,10 +35,6 @@ class FirebaseAuthManager @Inject constructor(
         return authRepository.createUserWithEmailAndPassword(email, password)
     }
 
-    suspend fun sendPasswordResetEmail(email: String): FirebaseAuthResult<Unit> {
-        return authRepository.sendPasswordResetEmail(email)
-    }
-
     suspend fun sendEmailVerification(): FirebaseAuthResult<Unit> {
         return authRepository.sendEmailVerification()
     }
@@ -65,21 +44,21 @@ class FirebaseAuthManager @Inject constructor(
         return authRepository.getGoogleSignInIntent()
     }
 
-    suspend fun handleGoogleSignInResult(data: Intent?): FirebaseAuthResult<User> {
+     suspend fun handleGoogleSignInResult(data: Intent?): FirebaseAuthResult<User> {
         return try {
             if (data == null) {
                 return FirebaseAuthResult.Error(Exception("Không nhận được dữ liệu đăng nhập"))
             }
-            
+
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             val account = task.getResult(ApiException::class.java)
             val idToken = account.idToken
-            
+
             if (idToken != null) {
                 val credential = GoogleAuthProvider.getCredential(idToken, null)
                 val authResult = auth.signInWithCredential(credential).await()
                 val firebaseUser = authResult.user
-                
+
                 if (firebaseUser != null) {
                     val user = User(
                         uid = firebaseUser.uid,
@@ -103,14 +82,53 @@ class FirebaseAuthManager @Inject constructor(
         }
     }
 
+    // Facebook Sign-In
+    suspend fun signInWithFacebook(accessToken: String): FirebaseAuthResult<User> {
+        return try {
+            val credential = com.google.firebase.auth.FacebookAuthProvider.getCredential(accessToken)
+            authRepository.signInWithFacebook(credential)
+        } catch (e: Exception) {
+            FirebaseAuthResult.Error(e)
+        }
+    }
+
+    fun loginWithFacebook(
+        activity: Activity,
+        onSuccess: (User) -> Unit,
+        onError: (Exception) -> Unit,
+        onCancel: () -> Unit
+    ) {
+        facebookLoginManager.loginWithFacebook(
+            activity = activity,
+            onSuccess = { accessToken ->
+                // Sử dụng coroutine để gọi suspend function
+                kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main).launch {
+                    when (val result = signInWithFacebook(accessToken.token)) {
+                        is FirebaseAuthResult.Success -> onSuccess(result.data)
+                        is FirebaseAuthResult.Error -> onError(result.exception)
+                        is FirebaseAuthResult.Loading -> { /* Handle loading if needed */ }
+                    }
+                }
+            },
+            onError = onError,
+            onCancel = onCancel
+        )
+    }
+
+    fun handleFacebookActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        facebookLoginManager.handleActivityResult(requestCode, resultCode, data)
+    }
+
     // Phone Authentication
     suspend fun sendPhoneVerificationCode(
         phoneNumber: String,
+        activity: Activity,
         onCodeSent: (String) -> Unit,
         onVerificationFailed: (Exception) -> Unit
     ) {
         authRepository.sendPhoneVerificationCode(
             phoneNumber = phoneNumber,
+            activity = activity,
             onCodeSent = onCodeSent,
             onVerificationFailed = onVerificationFailed
         )
@@ -128,6 +146,10 @@ class FirebaseAuthManager @Inject constructor(
         return authRepository.getCurrentUser()
     }
 
+    suspend fun reloadCurrentUser(): FirebaseAuthResult<Unit> {
+        return authRepository.reloadCurrentUser()
+    }
+
     suspend fun signOut() {
         authRepository.signOut()
     }
@@ -136,7 +158,4 @@ class FirebaseAuthManager @Inject constructor(
         return authRepository.isUserSignedIn()
     }
 
-    fun getAuthStateFlow(): Flow<User?> {
-        return authRepository.getAuthStateFlow()
-    }
 }

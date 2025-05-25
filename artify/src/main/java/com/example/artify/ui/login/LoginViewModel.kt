@@ -1,29 +1,27 @@
 package com.example.artify.ui.login
 
 import android.app.Activity
-import android.content.Context
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.firebaseauth.FirebaseAuthManager
 import com.example.firebaseauth.FirebaseAuthResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
     private val firebaseAuthManager: FirebaseAuthManager,
-    private val savedStateHandle: SavedStateHandle  // Add this parameter
 ) : ViewModel() {
 
     private val _loginState = MutableLiveData<LoginState>()
     val loginState: LiveData<LoginState> = _loginState
+
+    var verificationId: String? = null
+        private set
 
     fun loginWithEmail(email: String, password: String) {
         viewModelScope.launch {
@@ -32,7 +30,12 @@ class LoginViewModel @Inject constructor(
                 val result = firebaseAuthManager.signInWithEmailAndPassword(email, password)
                 when (result) {
                     is FirebaseAuthResult.Success -> {
-                        _loginState.value = LoginState.Success(result.data)
+                        // Kiểm tra xem email đã được xác thực chưa
+                        if (result.data.isEmailVerified) {
+                            _loginState.value = LoginState.Success(result.data)
+                        } else {
+                            _loginState.value = LoginState.EmailNotVerified
+                        }
                     }
                     is FirebaseAuthResult.Error -> {
                         _loginState.value = LoginState.Error(result.exception.message ?: "Đăng nhập thất bại")
@@ -43,28 +46,6 @@ class LoginViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 _loginState.value = LoginState.Error(e.message ?: "Đăng nhập thất bại")
-            }
-        }
-    }
-
-    fun registerWithEmail(email: String, password: String) {
-        viewModelScope.launch {
-            _loginState.value = LoginState.Loading
-            try {
-                val result = firebaseAuthManager.createUserWithEmailAndPassword(email, password)
-                when (result) {
-                    is FirebaseAuthResult.Success -> {
-                        _loginState.value = LoginState.Success(result.data)
-                    }
-                    is FirebaseAuthResult.Error -> {
-                        _loginState.value = LoginState.Error(result.exception.message ?: "Đăng ký thất bại")
-                    }
-                    is FirebaseAuthResult.Loading -> {
-                        _loginState.value = LoginState.Loading
-                    }
-                }
-            } catch (e: Exception) {
-                _loginState.value = LoginState.Error(e.message ?: "Đăng ký thất bại")
             }
         }
     }
@@ -116,8 +97,9 @@ class LoginViewModel @Inject constructor(
                 // Gửi mã xác thực đến số điện thoại
                 firebaseAuthManager.sendPhoneVerificationCode(
                     phoneNumber,
+                    activity,
                     onCodeSent = { verificationId ->
-                        // Lưu verificationId để sử dụng khi xác thực mã
+                        this@LoginViewModel.verificationId = verificationId
                         _loginState.value = LoginState.PhoneVerificationSent
                     },
                     onVerificationFailed = { e ->
@@ -152,26 +134,24 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun resetPassword(email: String) {
-        viewModelScope.launch {
-            _loginState.value = LoginState.Loading
-            try {
-                val result = firebaseAuthManager.sendPasswordResetEmail(email)
-                when (result) {
-                    is FirebaseAuthResult.Success -> {
-                        _loginState.value = LoginState.PasswordResetEmailSent
-                    }
-                    is FirebaseAuthResult.Error -> {
-                        _loginState.value = LoginState.Error(result.exception.message ?: "Gửi email đặt lại mật khẩu thất bại")
-                    }
-                    is FirebaseAuthResult.Loading -> {
-                        _loginState.value = LoginState.Loading
-                    }
-                }
-            } catch (e: Exception) {
-                _loginState.value = LoginState.Error(e.message ?: "Gửi email đặt lại mật khẩu thất bại")
+    fun loginWithFacebook(activity: Activity) {
+        _loginState.value = LoginState.Loading
+        firebaseAuthManager.loginWithFacebook(
+            activity = activity,
+            onSuccess = { user ->
+                _loginState.value = LoginState.Success(user)
+            },
+            onError = { exception ->
+                _loginState.value = LoginState.Error(exception.message ?: "Đăng nhập Facebook thất bại")
+            },
+            onCancel = {
+                _loginState.value = LoginState.Error("Đăng nhập Facebook bị hủy")
             }
-        }
+        )
+    }
+
+    fun handleFacebookActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
+        firebaseAuthManager.handleFacebookActivityResult(requestCode, resultCode, data)
     }
     
     companion object {
@@ -185,4 +165,6 @@ sealed class LoginState {
     data class Error(val message: String) : LoginState()
     object PhoneVerificationSent : LoginState()
     object PasswordResetEmailSent : LoginState()
+    object EmailVerificationSent : LoginState()
+    object EmailNotVerified : LoginState()
 }

@@ -60,6 +60,9 @@ dependencies {
     // ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+
+    // Facebook SDK
+    implementation ("com.facebook.android:facebook-login:16.2.0")
     
     // Testing
     testImplementation(libs.junit)
