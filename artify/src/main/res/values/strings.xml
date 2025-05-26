@@ -17,4 +17,5 @@
     <string name="sign_in">Sign in</string>
     <string name="or">Or</string>
     <string name="skip">Skip</string>
+    <string name="sign_up_text">Don’t have an account? <b>Sign Up</b></string>
 </resources>
