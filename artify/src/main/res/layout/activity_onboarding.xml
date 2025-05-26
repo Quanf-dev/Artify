@@ -1,11 +1,11 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/main"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".ui.onboard.OnboardingActivity"
-    android:background="@color/app_background">
+    android:background="@color/app_background"
+    tools:context=".ui.onboard.OnboardingActivity">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline_bottom"
@@ -24,25 +24,41 @@
         app:layout_constraintVertical_bias="0.0"
         tools:layout_editor_absoluteX="0dp" />
 
+    <TextView
+        android:id="@+id/tvSkip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/skip"
+        app:layout_constraintTop_toTopOf="@+id/viewPager"
+        app:layout_constraintEnd_toEndOf="@id/viewPager"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="40dp"
+        android:textColor="@color/title_text"
+        android:textStyle="bold"
+        android:textSize="@dimen/_14ssp"
+        />
+
     <com.example.artify.utils.CustomDotsIndicator
         android:id="@+id/custom_dots_indicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        app:layout_constraintTop_toBottomOf="@+id/viewPager"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/viewPager"
         />
     <androidx.appcompat.widget.AppCompatButton
-        android:layout_width="@dimen/_149sdp"
-        android:layout_height="@dimen/_48sdp"
-        android:text="@string/next"
-        android:textSize="@dimen/_16ssp"
-        android:textColor="?android:textColorPrimary"
-        android:textStyle="bold"
+        android:id="@+id/btnNext"
+        android:layout_width="@dimen/_129sdp"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_marginTop="@dimen/_15sdp"
         android:background="@drawable/btn_secondary"
+        android:text="@string/next"
+        android:textColor="?android:textColorPrimary"
+        android:textSize="@dimen/_13ssp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/custom_dots_indicator"
-        app:layout_constraintEnd_toEndOf="parent"
         />
 </androidx.constraintlayout.widget.ConstraintLayout>

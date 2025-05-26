@@ -24,7 +24,7 @@ class CustomDotsIndicator @JvmOverloads constructor(
     private val dotSizeActiveWidth = dpToPx(32)
     private val dotSizeActiveHeight = dpToPx(6)
     private val dotSizeInactive = dpToPx(8)
-    private val dotMargin = dpToPx(4)
+    private val dotMargin = dpToPx(2)
 
     private var selectedDotDrawable: Drawable? = null
     private var unselectedDotDrawable: Drawable? = null

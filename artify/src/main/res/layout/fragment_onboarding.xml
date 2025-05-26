@@ -10,13 +10,17 @@
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_394sdp"
-        android:scaleType="centerCrop"
+        android:layout_height="@dimen/_430sdp"
+        android:contentDescription="@null"
+        android:scaleType="fitXY"
+        android:adjustViewBounds="true"
         android:src="@drawable/step1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+
 
     <TextView
         android:id="@+id/tvTitle"
@@ -24,9 +28,8 @@
         android:layout_height="wrap_content"
         android:text="@string/easy_one_click_photo_editing"
         android:textColor="@color/title_text"
-        android:textSize="@dimen/_20ssp"
+        android:textSize="@dimen/_18ssp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.493"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
@@ -35,8 +38,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:textSize="@dimen/_12ssp"
-        android:paddingHorizontal="@dimen/_43sdp"
+        android:textSize="@dimen/_10ssp"
+        android:paddingHorizontal="@dimen/_13sdp"
         android:layout_marginTop="@dimen/_18sdp"
         android:text="@string/lorem_ipsum"
         app:layout_constraintEnd_toEndOf="@+id/tvTitle"

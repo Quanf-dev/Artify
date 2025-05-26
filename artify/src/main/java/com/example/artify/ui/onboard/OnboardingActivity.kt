@@ -1,7 +1,7 @@
 package com.example.artify.ui.onboard
 
-import android.graphics.Color
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.viewpager2.widget.ViewPager2
@@ -53,8 +53,26 @@ class OnboardingActivity : AppCompatActivity() {
 
         // Kết nối viewpager
         binding.customDotsIndicator?.setupWithViewPager(binding.viewPager!!, adapter.itemCount)
+
+        binding.btnNext.setOnClickListener {
+            val currentItem = binding.viewPager?.currentItem ?: 0
+            if (currentItem < adapter.itemCount - 1) {
+                binding.viewPager?.currentItem = currentItem + 1
+            }
+        }
+        binding.viewPager?.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                val fragment = adapter.getFragmentAt(position)
+                fragment?.playAnimation()
+                binding.tvSkip.visibility =
+                    if (position == adapter.itemCount - 1) View.GONE else View.VISIBLE
+            }
+        })
     }
     fun dpToPx(dp: Int): Int {
         return (dp * resources.displayMetrics.density).toInt()
     }
+
+
 }

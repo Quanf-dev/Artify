@@ -4,38 +4,40 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#101010"
+    android:background="@color/app_background"
     >
-
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/_224sdp"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/_180sdp"
+        android:contentDescription="@null"
         android:src="@drawable/step1_land"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/imageView"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         android:text="@string/easy_one_click_photo_editing"
-        android:textColor="@color/white"
-        android:textSize="@dimen/_20ssp"
-        />
+        android:textColor="@color/title_text"
+        android:textSize="@dimen/_18ssp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
     <TextView
         android:id="@+id/tvDesc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:paddingHorizontal="@dimen/_43sdp"
-        android:layout_marginTop="@dimen/_18sdp"
+        android:layout_marginTop="10dp"
+        android:paddingHorizontal="@dimen/_13sdp"
+        android:textSize="@dimen/_10ssp"
         android:text="@string/lorem_ipsum"
         app:layout_constraintEnd_toEndOf="@+id/tvTitle"
         app:layout_constraintHorizontal_bias="0.506"

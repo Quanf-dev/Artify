@@ -18,7 +18,7 @@
             android:value="@string/facebook_client_token"/>
         
         <activity
-            android:name=".LoginActivity"
+            android:name=".ui.onboard.OnboardingActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
