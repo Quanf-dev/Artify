@@ -13,14 +13,14 @@
         android:layout_height="wrap_content"
         android:background="@color/app_background"
         android:paddingHorizontal="20dp"
-        android:paddingTop="20dp"
-        android:paddingBottom="40dp">
+        android:paddingBottom="60dp"
+        >
 
         <TextView
             android:id="@+id/tv_welcome_back_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="45dp"
             android:text="@string/welcome_back"
             android:textColor="@color/title_text"
             android:textSize="@dimen/_30ssp"
@@ -31,7 +31,7 @@
         <TextView
             android:id="@+id/tv_login_subtitle"
             style="@style/TextViewLabel"
-            android:layout_marginTop="68dp"
+            android:layout_marginTop="38dp"
             android:text="@string/email"
             app:layout_constraintStart_toStartOf="@+id/tv_welcome_back_title"
             app:layout_constraintTop_toBottomOf="@+id/tv_welcome_back_title" />
@@ -78,7 +78,7 @@
         <Button
             android:id="@+id/btn_sign_in"
             android:layout_width="match_parent"
-            android:layout_height="55dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/_31sdp"
             android:paddingVertical="5dp"
             android:text="@string/sign_in"
@@ -160,16 +160,14 @@
             android:id="@+id/tvRegister"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_30sdp"
-            android:layout_marginBottom="20dp"
             android:text="@string/sign_up_text"
             android:textColor="@color/label_text"
             android:textSize="@dimen/_14ssp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="@dimen/_20sdp"
             app:layout_constraintTop_toBottomOf="@+id/ln2"
-            app:layout_constraintVertical_bias="1.0" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

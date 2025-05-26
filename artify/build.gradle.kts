@@ -53,6 +53,9 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+    //BaseActity
+    implementation ("androidx.core:core-ktx:1.12.0")
+
 
     implementation ("com.intuit.ssp:ssp-android:1.1.1")
     implementation ("com.intuit.sdp:sdp-android:1.1.1")
@@ -86,5 +89,8 @@ dependencies {
     implementation("com.facebook.android:facebook-login:16.2.0")
 
     implementation ("androidx.fragment:fragment-ktx:1.5.2")
+
+    // BlurView
+    implementation("com.github.Dimezis:BlurView:version-2.0.6")
 
 }

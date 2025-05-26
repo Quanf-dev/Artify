@@ -2,61 +2,181 @@ package com.example.artify.ui.login
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
+import android.view.MotionEvent
+import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import com.example.artify.R
 import com.example.artify.databinding.ActivityLoginBinding
+import com.example.artify.ui.base.BaseActivity
+import com.example.artify.ui.phone.PhoneLoginActivity
+import com.example.artify.utils.FullGradientDrawable
+import com.example.artify.utils.GradientDotDrawable
+import com.example.artify.utils.dpToPx
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class LoginActivity : AppCompatActivity() {
+class LoginActivity : BaseActivity<ActivityLoginBinding>() {
 
-    private lateinit var binding: ActivityLoginBinding
+    override fun inflateBinding(): ActivityLoginBinding {
+        return ActivityLoginBinding.inflate(layoutInflater)
+    }
+
     private val viewModel: LoginViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityLoginBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        setupRegisterButton()
-        setupPhoneLoginButton()
-        setupFacebookLoginButton()
-
-
+        setupListeners()
+        observeViewModel()
+        setupUI()
     }
 
-    private fun setupRegisterButton() {
-        binding.registerButton.setOnClickListener {
+    private fun setupListeners() {
+        binding.tvRegister.setOnClickListener {
             startActivity(Intent(this, com.example.artify.ui.register.RegisterActivity::class.java))
         }
-    }
 
-    private fun setupPhoneLoginButton() {
-        binding.phoneLoginButton.setOnClickListener {
+        binding.ivPhone.setOnClickListener {
             startActivity(Intent(this, PhoneLoginActivity::class.java))
         }
-    }
 
-    private fun setupFacebookLoginButton() {
-        binding.facebookLoginButton.setOnClickListener {
-            // Sử dụng Facebook login thực
+        binding.ivFacebook.setOnClickListener {
             viewModel.loginWithFacebook(this)
         }
+
+        binding.ivGoogle.setOnClickListener {
+            viewModel.loginWithGoogle(this)
+        }
+
+        binding.tvForgotPassword.setOnClickListener {
+            startActivity(Intent(this, com.example.artify.ui.forgot.ForgotPasswordActivity::class.java))
+        }
+
+        binding.btnSignIn.setOnClickListener {
+            val email = binding.edtInputEmail.text.toString().trim()
+            val password = binding.edtInputPassword.text.toString().trim()
+            if (validateInput(email, password)) {
+                viewModel.loginWithEmail(email, password)
+            }
+        }
     }
-    
+
+    private fun observeViewModel() {
+        viewModel.loginState.observe(this) { state ->
+            when (state) {
+                is LoginState.Loading -> {
+                    showLoading()
+                    Log.d("LoginActivity", "Đang đăng nhập...")
+                }
+                is LoginState.Success -> {
+                    hideLoading()
+                    Toast.makeText(this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show()
+                    Log.d("LoginActivity", "Đăng nhập thành công: ${state.user}")
+                    // TODO: Chuyển đến màn hình chính
+                }
+                is LoginState.Error -> {
+                    hideLoading()
+                    Toast.makeText(this, state.message, Toast.LENGTH_SHORT).show()
+                    Log.e("LoginActivity", "Lỗi đăng nhập: ${state.message}")
+                }
+                is LoginState.PasswordResetEmailSent -> {
+                    hideLoading()
+                    Toast.makeText(this, "Email đặt lại mật khẩu đã được gửi", Toast.LENGTH_SHORT).show()
+                }
+                is LoginState.EmailNotVerified -> {
+                    hideLoading()
+                    Toast.makeText(this, "Email chưa được xác thực. Chuyển đến màn hình xác thực.", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, com.example.artify.ui.verification.EmailVerificationActivity::class.java))
+                }
+                else -> {
+                    hideLoading()
+                }
+            }
+        }
+    }
+
+    private fun validateInput(email: String, password: String): Boolean {
+        var isValid = true
+
+        if (email.isEmpty()) {
+            binding.edtInputEmail.error = "Email không được để trống"
+            isValid = false
+        } else {
+            binding.edtInputEmail.error = null
+        }
+
+        if (password.isEmpty()) {
+            binding.edtInputPassword.error = "Mật khẩu không được để trống"
+            isValid = false
+        } else if (password.length < 6) {
+            binding.edtInputPassword.error = "Mật khẩu phải có ít nhất 6 ký tự"
+            isValid = false
+        } else {
+            binding.edtInputPassword.error = null
+        }
+
+        return isValid
+    }
+
+
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        
-        Log.d("LoginActivity", "onActivityResult: requestCode=$requestCode, resultCode=$resultCode")
-        
         if (requestCode == LoginViewModel.GOOGLE_SIGN_IN_REQUEST_CODE) {
-            Log.d("LoginActivity", "Nhận kết quả đăng nhập Google")
             viewModel.handleGoogleSignInResult(data)
         } else {
-            // Xử lý Facebook login result
             viewModel.handleFacebookActivityResult(requestCode, resultCode, data)
         }
     }
+
+    private fun setupUI() {
+        // Giả sử bạn đã có binding với các view tương ứng:
+//        val backButton = binding.ivBackButton
+        val emailEditText = binding.edtInputEmail
+        val btnSignIn = binding.btnSignIn
+        val edtPassword = binding.edtInputPassword
+
+//        backButton.setOnClickListener {
+//            finish()
+//        }
+
+        val gradientBorder = GradientDotDrawable(
+            height = dpToPx(2),
+            cornerRadius = dpToPx(10).toFloat()
+        )
+        val gradientBackground = FullGradientDrawable(
+            cornerRadius = dpToPx(50).toFloat()
+        )
+
+        emailEditText.background = gradientBorder
+        btnSignIn.backgroundTintList = null
+        btnSignIn.background = gradientBackground
+
+        edtPassword.background = gradientBorder
+        var isPasswordVisible = false
+
+        edtPassword.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_UP) {
+                val drawableStart = 0 // drawableStart index
+                if (event.rawX <= (edtPassword.left + edtPassword.compoundDrawables[drawableStart].bounds.width() + edtPassword.paddingStart)) {
+                    if (isPasswordVisible) {
+                        // Ẩn mật khẩu
+                        edtPassword.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                        edtPassword.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_eye, 0, 0, 0)
+                        isPasswordVisible = false
+                    } else {
+                        // Hiển thị mật khẩu
+                        edtPassword.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                        edtPassword.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_eye_close, 0, 0, 0)
+                        isPasswordVisible = true
+                    }
+                    edtPassword.setSelection(edtPassword.text.length)
+                    return@setOnTouchListener true
+                }
+            }
+            false
+        }
+    }
+
 }

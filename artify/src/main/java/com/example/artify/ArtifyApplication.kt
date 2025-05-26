@@ -9,10 +9,6 @@ class ArtifyApplication : Application() {
     
     override fun onCreate() {
         super.onCreate()
-        
-
         AppEventsLogger.activateApp(this)
     }
-    
-
 }

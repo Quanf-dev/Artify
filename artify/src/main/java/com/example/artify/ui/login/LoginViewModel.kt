@@ -20,9 +20,6 @@ class LoginViewModel @Inject constructor(
     private val _loginState = MutableLiveData<LoginState>()
     val loginState: LiveData<LoginState> = _loginState
 
-    var verificationId: String? = null
-        private set
-
     fun loginWithEmail(email: String, password: String) {
         viewModelScope.launch {
             _loginState.value = LoginState.Loading
@@ -90,50 +87,6 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun loginWithPhone(phoneNumber: String, activity: Activity) {
-        viewModelScope.launch {
-            _loginState.value = LoginState.Loading
-            try {
-                // Gửi mã xác thực đến số điện thoại
-                firebaseAuthManager.sendPhoneVerificationCode(
-                    phoneNumber,
-                    activity,
-                    onCodeSent = { verificationId ->
-                        this@LoginViewModel.verificationId = verificationId
-                        _loginState.value = LoginState.PhoneVerificationSent
-                    },
-                    onVerificationFailed = { e ->
-                        _loginState.value = LoginState.Error(e.message ?: "Gửi mã xác thực thất bại")
-                    }
-                )
-            } catch (e: Exception) {
-                _loginState.value = LoginState.Error(e.message ?: "Gửi mã xác thực thất bại")
-            }
-        }
-    }
-
-    fun verifyPhoneNumberWithCode(verificationId: String, code: String) {
-        viewModelScope.launch {
-            _loginState.value = LoginState.Loading
-            try {
-                val result = firebaseAuthManager.verifyPhoneNumberWithCode(verificationId, code)
-                when (result) {
-                    is FirebaseAuthResult.Success -> {
-                        _loginState.value = LoginState.Success(result.data)
-                    }
-                    is FirebaseAuthResult.Error -> {
-                        _loginState.value = LoginState.Error(result.exception.message ?: "Xác thực mã thất bại")
-                    }
-                    is FirebaseAuthResult.Loading -> {
-                        _loginState.value = LoginState.Loading
-                    }
-                }
-            } catch (e: Exception) {
-                _loginState.value = LoginState.Error(e.message ?: "Xác thực mã thất bại")
-            }
-        }
-    }
-
     fun loginWithFacebook(activity: Activity) {
         _loginState.value = LoginState.Loading
         firebaseAuthManager.loginWithFacebook(
@@ -163,7 +116,6 @@ sealed class LoginState {
     object Loading : LoginState()
     data class Success(val user: Any) : LoginState()
     data class Error(val message: String) : LoginState()
-    object PhoneVerificationSent : LoginState()
     object PasswordResetEmailSent : LoginState()
     object EmailVerificationSent : LoginState()
     object EmailNotVerified : LoginState()

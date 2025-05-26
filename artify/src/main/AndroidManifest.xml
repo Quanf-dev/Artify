@@ -18,7 +18,7 @@
             android:value="@string/facebook_client_token"/>
         
         <activity
-            android:name=".LoginActivity"
+            android:name=".ui.login.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,7 +27,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.login.PhoneLoginActivity"
+            android:name=".ui.phone.PhoneLoginActivity"
             android:exported="false" />
         
         <activity
