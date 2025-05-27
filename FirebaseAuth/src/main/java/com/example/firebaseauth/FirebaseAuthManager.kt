@@ -9,7 +9,6 @@ import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -39,12 +38,29 @@ class FirebaseAuthManager @Inject constructor(
         return authRepository.sendEmailVerification()
     }
 
+    // Password Reset
+    suspend fun sendPasswordResetEmail(email: String): FirebaseAuthResult<Unit> {
+        return authRepository.sendPasswordResetEmail(email)
+    }
+
+    suspend fun checkUsernameExists(username: String): FirebaseAuthResult<Boolean> {
+        return authRepository.checkUsernameExists(username)
+    }
+
+    suspend fun saveUsername(uid: String, username: String): FirebaseAuthResult<Unit> {
+        return authRepository.saveUsername(uid, username)
+    }
+
+    suspend fun getUser(uid: String): FirebaseAuthResult<User?> {
+        return authRepository.getUser(uid)
+    }
+
     // Google Sign-In
     fun getGoogleSignInIntent(): Intent {
         return authRepository.getGoogleSignInIntent()
     }
 
-     suspend fun handleGoogleSignInResult(data: Intent?): FirebaseAuthResult<User> {
+    suspend fun handleGoogleSignInResult(data: Intent?): FirebaseAuthResult<User> {
         return try {
             if (data == null) {
                 return FirebaseAuthResult.Error(Exception("Không nhận được dữ liệu đăng nhập"))
@@ -56,22 +72,7 @@ class FirebaseAuthManager @Inject constructor(
 
             if (idToken != null) {
                 val credential = GoogleAuthProvider.getCredential(idToken, null)
-                val authResult = auth.signInWithCredential(credential).await()
-                val firebaseUser = authResult.user
-
-                if (firebaseUser != null) {
-                    val user = User(
-                        uid = firebaseUser.uid,
-                        email = firebaseUser.email,
-                        displayName = firebaseUser.displayName,
-                        phoneNumber = firebaseUser.phoneNumber,
-                        isEmailVerified = firebaseUser.isEmailVerified,
-                        photoUrl = firebaseUser.photoUrl?.toString()
-                    )
-                    FirebaseAuthResult.Success(user)
-                } else {
-                    FirebaseAuthResult.Error(Exception("Không thể lấy thông tin người dùng"))
-                }
+                authRepository.signInWithGoogle(credential)
             } else {
                 FirebaseAuthResult.Error(Exception("Không thể lấy token xác thực"))
             }
@@ -101,7 +102,6 @@ class FirebaseAuthManager @Inject constructor(
         facebookLoginManager.loginWithFacebook(
             activity = activity,
             onSuccess = { accessToken ->
-                // Sử dụng coroutine để gọi suspend function
                 kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main).launch {
                     when (val result = signInWithFacebook(accessToken.token)) {
                         is FirebaseAuthResult.Success -> onSuccess(result.data)

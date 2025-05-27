@@ -1,56 +1,63 @@
 package com.example.artify.ui.verification
 
+import android.app.Dialog
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
+import android.os.CountDownTimer
+import android.view.LayoutInflater
+import android.view.Window
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import com.example.artify.R
 import com.example.artify.databinding.ActivityEmailVerificationBinding
+import com.example.artify.databinding.DialogVerificationStatusBinding
+import com.example.artify.ui.base.BaseActivity
 import com.example.artify.ui.login.LoginActivity
 import com.example.artify.ui.profile.SetupUsernameActivity
+import com.example.artify.utils.FullGradientDrawable
+import com.example.artify.utils.dpToPx
 import dagger.hilt.android.AndroidEntryPoint
+import androidx.core.graphics.drawable.toDrawable
 
 @AndroidEntryPoint
-class EmailVerificationActivity : AppCompatActivity() {
+class EmailVerificationActivity : BaseActivity<ActivityEmailVerificationBinding>() {
 
-    private lateinit var binding: ActivityEmailVerificationBinding
     private val viewModel: EmailVerificationViewModel by viewModels()
+    private var resendTimer: CountDownTimer? = null
+
+    override fun inflateBinding(): ActivityEmailVerificationBinding {
+        return ActivityEmailVerificationBinding.inflate(layoutInflater)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityEmailVerificationBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        setupViews()
+        setupListeners()
         observeViewModel()
-        
-        // Kiểm tra trạng thái email verification ngay khi mở
         viewModel.checkEmailVerification()
+        setupUI()
     }
 
     override fun onResume() {
         super.onResume()
-        // Kiểm tra lại khi user quay lại app (có thể đã xác thực email)
         viewModel.checkEmailVerification()
     }
 
-    private fun setupViews() {
-        binding.checkVerificationButton.setOnClickListener {
+    override fun onDestroy() {
+        resendTimer?.cancel()
+        super.onDestroy()
+    }
+
+    private fun setupListeners() {
+        binding.btnCheckVerification.setOnClickListener {
             viewModel.checkEmailVerification()
         }
-
-        binding.resendEmailButton.setOnClickListener {
+        binding.btnResendEmail.setOnClickListener {
             viewModel.resendVerificationEmail()
         }
-
-        binding.logoutButton.setOnClickListener {
+        binding.btnLogout.setOnClickListener {
             viewModel.logout()
             navigateToLogin()
-        }
-
-        binding.testAuthButton.setOnClickListener {
-            // Debug: kiểm tra auth state
-            viewModel.debugAuthState()
         }
     }
 
@@ -58,56 +65,107 @@ class EmailVerificationActivity : AppCompatActivity() {
         viewModel.verificationState.observe(this) { state ->
             when (state) {
                 is EmailVerificationState.Loading -> {
-                    binding.progressBar.visibility = android.view.View.VISIBLE
-                    binding.checkVerificationButton.isEnabled = false
-                    binding.resendEmailButton.isEnabled = false
+                    showLoading()
+                    binding.btnResendEmail.isEnabled = false
                 }
                 is EmailVerificationState.Verified -> {
-                    binding.progressBar.visibility = android.view.View.GONE
-                    android.util.Log.d("EmailVerificationActivity", "Email đã được xác thực! Chuyển đến SetupUsernameActivity")
-                    Toast.makeText(this, "Email đã được xác thực!", Toast.LENGTH_SHORT).show()
-                    
-                    // Chuyển đến setup username
-                    val intent = Intent(this, SetupUsernameActivity::class.java)
-                    android.util.Log.d("EmailVerificationActivity", "Bắt đầu SetupUsernameActivity")
-                    startActivity(intent)
-                    finish()
+                    hideLoading()
+                    showStatusDialog(
+                        isSuccess = true,
+                        title = getString(R.string.verification_successful),
+                        message = getString(R.string.email_verified_proceed_setup)
+                    ) { navigateToSetupUsername() }
                 }
                 is EmailVerificationState.NotVerified -> {
-                    binding.progressBar.visibility = android.view.View.GONE
-                    binding.checkVerificationButton.isEnabled = true
-                    binding.resendEmailButton.isEnabled = true
-                    
-                    binding.statusTextView.text = "Email chưa được xác thực. Vui lòng kiểm tra hộp thư của bạn."
+                    hideLoading()
+                    binding.btnResendEmail.isEnabled = true
+                    binding.tvVerificationMessage.text =
+                        getString(R.string.email_not_verified_check_mailbox)
                 }
                 is EmailVerificationState.EmailSent -> {
-                    binding.progressBar.visibility = android.view.View.GONE
-                    binding.checkVerificationButton.isEnabled = true
-                    binding.resendEmailButton.isEnabled = true
-                    
-                    Toast.makeText(this, "Email xác thực đã được gửi lại!", Toast.LENGTH_SHORT).show()
+                    hideLoading()
+                    Toast.makeText(
+                        this,
+                        getString(R.string.verification_email_resent_success),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    startResendEmailCountdown()
                 }
                 is EmailVerificationState.Error -> {
-                    binding.progressBar.visibility = android.view.View.GONE
-                    binding.checkVerificationButton.isEnabled = true
-                    binding.resendEmailButton.isEnabled = true
-                    
-                    Toast.makeText(this, state.message, Toast.LENGTH_SHORT).show()
-                    
-                    // Nếu phiên đăng nhập hết hạn, chuyển về login
-                    if (state.message.contains("Phiên đăng nhập đã hết hạn") || 
-                        state.message.contains("Không tìm thấy người dùng")) {
-                        navigateToLogin()
+                    hideLoading()
+                    binding.btnResendEmail.isEnabled = true
+
+                    if (state.message.contains("Phiên đăng nhập đã hết hạn") ||
+                        state.message.contains("Không tìm thấy người dùng")
+                    ) {
+                        showStatusDialog(
+                            false,
+                            getString(R.string.session_expired),
+                            state.message
+                        ) { navigateToLogin() }
+                    } else {
+                        showStatusDialog(false, getString(R.string.error_occurred), state.message)
                     }
                 }
             }
         }
     }
 
+    private fun startResendEmailCountdown() {
+        binding.btnResendEmail.isEnabled = false
+
+        resendTimer = object : CountDownTimer(60_000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                val secondsLeft = millisUntilFinished / 1000
+                binding.btnResendEmail.text =
+                    getString(R.string.resend_in_seconds, secondsLeft)
+            }
+
+            override fun onFinish() {
+                binding.btnResendEmail.isEnabled = true
+                binding.btnResendEmail.text =
+                    getString(R.string.resend_verification_email)
+            }
+        }.start()
+    }
+
+    private fun showStatusDialog(
+        isSuccess: Boolean,
+        title: String,
+        message: String,
+        onDismissAction: (() -> Unit)? = null
+    ) {
+        val dialogBinding =
+            DialogVerificationStatusBinding.inflate(LayoutInflater.from(this))
+        val dialog = Dialog(this)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setContentView(dialogBinding.root)
+        dialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
+        dialog.setCancelable(false)
+
+        dialogBinding.tvStatusTitle.text = title
+        dialogBinding.tvStatusMessage.text = message
+
+        dialog.show()
+    }
+
     private fun navigateToLogin() {
         val intent = Intent(this, LoginActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
-        finish()
+        finishAffinity()
     }
-} 
+
+    private fun navigateToSetupUsername() {
+        val intent = Intent(this, SetupUsernameActivity::class.java)
+        startActivity(intent)
+        finishAffinity()
+    }
+
+    private fun setupUI() {
+        val gradientBackground = FullGradientDrawable(
+            cornerRadius = dpToPx(50).toFloat()
+        )
+        binding.btnResendEmail.background = gradientBackground
+    }
+}

@@ -29,7 +29,11 @@ class LoginViewModel @Inject constructor(
                     is FirebaseAuthResult.Success -> {
                         // Kiểm tra xem email đã được xác thực chưa
                         if (result.data.isEmailVerified) {
-                            _loginState.value = LoginState.Success(result.data)
+                            if (result.data.username.isNullOrEmpty()) {
+                                _loginState.value = LoginState.UsernameSetupRequired
+                            } else {
+                                _loginState.value = LoginState.Success(result.data)
+                            }
                         } else {
                             _loginState.value = LoginState.EmailNotVerified
                         }
@@ -71,7 +75,11 @@ class LoginViewModel @Inject constructor(
                 Log.d("LoginViewModel", "Kết quả đăng nhập Google: $result")
                 when (result) {
                     is FirebaseAuthResult.Success -> {
-                        _loginState.value = LoginState.Success(result.data)
+                        if (result.data.username.isNullOrEmpty()) {
+                            _loginState.value = LoginState.UsernameSetupRequired
+                        } else {
+                            _loginState.value = LoginState.Success(result.data)
+                        }
                     }
                     is FirebaseAuthResult.Error -> {
                         _loginState.value = LoginState.Error(result.exception.message ?: "Đăng nhập Google thất bại")
@@ -92,7 +100,11 @@ class LoginViewModel @Inject constructor(
         firebaseAuthManager.loginWithFacebook(
             activity = activity,
             onSuccess = { user ->
-                _loginState.value = LoginState.Success(user)
+                if (user.username.isNullOrEmpty()) {
+                    _loginState.value = LoginState.UsernameSetupRequired
+                } else {
+                    _loginState.value = LoginState.Success(user)
+                }
             },
             onError = { exception ->
                 _loginState.value = LoginState.Error(exception.message ?: "Đăng nhập Facebook thất bại")
@@ -114,7 +126,8 @@ class LoginViewModel @Inject constructor(
 
 sealed class LoginState {
     object Loading : LoginState()
-    data class Success(val user: Any) : LoginState()
+    data class Success(val user: com.example.firebaseauth.model.User) : LoginState()
+    object UsernameSetupRequired : LoginState()
     data class Error(val message: String) : LoginState()
     object PasswordResetEmailSent : LoginState()
     object EmailVerificationSent : LoginState()

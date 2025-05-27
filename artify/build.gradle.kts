@@ -93,4 +93,10 @@ dependencies {
     // BlurView
     implementation("com.github.Dimezis:BlurView:version-2.0.6")
 
+    // Country Code Picker
+    implementation ("com.hbb20:ccp:2.5.0")
+
+    // OTP View
+    implementation ("com.github.mukeshsolanki.android-otpview-pinview:otpview:3.1.0")
+
 }

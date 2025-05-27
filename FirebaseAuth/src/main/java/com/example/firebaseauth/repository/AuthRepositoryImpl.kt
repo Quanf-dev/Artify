@@ -12,6 +12,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -21,8 +22,15 @@ import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
-    private val googleSignInClient: GoogleSignInClient
+    private val googleSignInClient: GoogleSignInClient,
+    private val firestore: FirebaseFirestore
 ) : AuthRepository {
+
+    companion object {
+        private const val USERS_COLLECTION = "users"
+        private const val USERNAMES_COLLECTION = "usernames"
+        private const val USERNAME_FIELD = "username"
+    }
 
     override suspend fun signInWithEmailAndPassword(
         email: String,
@@ -31,10 +39,10 @@ class AuthRepositoryImpl @Inject constructor(
         return try {
             val result = firebaseAuth.signInWithEmailAndPassword(email, password).await()
             result.user?.let {
-                FirebaseAuthResult.success(it.toUser())
-            } ?: FirebaseAuthResult.error(Exception("Đăng nhập thất bại"))
+                fetchUserWithUsername(it.uid)
+            } ?: FirebaseAuthResult.Error(Exception("Đăng nhập thất bại"))
         } catch (e: Exception) {
-            FirebaseAuthResult.error(e)
+            FirebaseAuthResult.Error(e)
         }
     }
 
@@ -45,29 +53,29 @@ class AuthRepositoryImpl @Inject constructor(
         return try {
             val result = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
             result.user?.let {
-                FirebaseAuthResult.success(it.toUser())
-            } ?: FirebaseAuthResult.error(Exception("Tạo tài khoản thất bại"))
+                FirebaseAuthResult.Success(it.toUser())
+            } ?: FirebaseAuthResult.Error(Exception("Tạo tài khoản thất bại"))
         } catch (e: Exception) {
-            FirebaseAuthResult.error(e)
+            FirebaseAuthResult.Error(e)
         }
     }
 
     override suspend fun sendPasswordResetEmail(email: String): FirebaseAuthResult<Unit> {
         return try {
             firebaseAuth.sendPasswordResetEmail(email).await()
-            FirebaseAuthResult.success(Unit)
+            FirebaseAuthResult.Success(Unit)
         } catch (e: Exception) {
-            FirebaseAuthResult.error(e)
+            FirebaseAuthResult.Error(e)
         }
     }
 
     override suspend fun sendEmailVerification(): FirebaseAuthResult<Unit> {
         return try {
             firebaseAuth.currentUser?.sendEmailVerification()?.await()
-                ?: return FirebaseAuthResult.error(Exception("Không có người dùng đăng nhập"))
-            FirebaseAuthResult.success(Unit)
+                ?: return FirebaseAuthResult.Error(Exception("Không có người dùng đăng nhập"))
+            FirebaseAuthResult.Success(Unit)
         } catch (e: Exception) {
-            FirebaseAuthResult.error(e)
+            FirebaseAuthResult.Error(e)
         }
     }
 
@@ -79,10 +87,10 @@ class AuthRepositoryImpl @Inject constructor(
         return try {
             val result = firebaseAuth.signInWithCredential(credential).await()
             result.user?.let {
-                FirebaseAuthResult.success(it.toUser())
-            } ?: FirebaseAuthResult.error(Exception("Đăng nhập Google thất bại"))
+                fetchUserWithUsername(it.uid)
+            } ?: FirebaseAuthResult.Error(Exception("Đăng nhập Google thất bại"))
         } catch (e: Exception) {
-            FirebaseAuthResult.error(e)
+            FirebaseAuthResult.Error(e)
         }
     }
 
@@ -90,10 +98,10 @@ class AuthRepositoryImpl @Inject constructor(
         return try {
             val result = firebaseAuth.signInWithCredential(credential).await()
             result.user?.let {
-                FirebaseAuthResult.success(it.toUser())
-            } ?: FirebaseAuthResult.error(Exception("Đăng nhập Facebook thất bại"))
+                fetchUserWithUsername(it.uid)
+            } ?: FirebaseAuthResult.Error(java.lang.Exception("Đăng nhập Facebook thất bại"))
         } catch (e: Exception) {
-            FirebaseAuthResult.error(e)
+            FirebaseAuthResult.Error(e)
         }
     }
 
@@ -145,10 +153,10 @@ class AuthRepositoryImpl @Inject constructor(
         return try {
             val result = firebaseAuth.signInWithCredential(credential).await()
             result.user?.let {
-                FirebaseAuthResult.success(it.toUser())
-            } ?: FirebaseAuthResult.error(Exception("Xác thực số điện thoại thất bại"))
+                fetchUserWithUsername(it.uid)
+            } ?: FirebaseAuthResult.Error(Exception("Xác thực số điện thoại thất bại"))
         } catch (e: Exception) {
-            FirebaseAuthResult.error(e)
+            FirebaseAuthResult.Error(e)
         }
     }
 
@@ -159,10 +167,10 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun reloadCurrentUser(): FirebaseAuthResult<Unit> {
         return try {
             firebaseAuth.currentUser?.reload()?.await()
-                ?: return FirebaseAuthResult.error(Exception("Không có người dùng đăng nhập"))
-            FirebaseAuthResult.success(Unit)
+                ?: return FirebaseAuthResult.Error(Exception("Không có người dùng đăng nhập"))
+            FirebaseAuthResult.Success(Unit)
         } catch (e: Exception) {
-            FirebaseAuthResult.error(e)
+            FirebaseAuthResult.Error(e)
         }
     }
 
@@ -185,14 +193,99 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
-    private fun FirebaseUser.toUser(): User {
+    override suspend fun checkUsernameExists(username: String): FirebaseAuthResult<Boolean> {
+        return try {
+            val document = firestore.collection(USERNAMES_COLLECTION).document(username).get().await()
+            FirebaseAuthResult.Success(document.exists())
+        } catch (e: Exception) {
+            FirebaseAuthResult.Error(e)
+        }
+    }
+
+    override suspend fun saveUsername(uid: String, username: String): FirebaseAuthResult<Unit> {
+        return try {
+            firestore.runTransaction { transaction ->
+                val userDocRef = firestore.collection(USERS_COLLECTION).document(uid)
+                val usernameDocRef = firestore.collection(USERNAMES_COLLECTION).document(username)
+
+                // Check if username is already taken in the transaction
+                val usernameSnapshot = transaction.get(usernameDocRef)
+                if (usernameSnapshot.exists()) {
+                    throw FirebaseException("Username already taken.")
+                }
+
+                // Save username in users collection
+                transaction.update(userDocRef, USERNAME_FIELD, username)
+                // Save username in usernames collection for quick lookup
+                transaction.set(usernameDocRef, mapOf("uid" to uid)) 
+                null
+            }.await()
+            FirebaseAuthResult.Success(Unit)
+        } catch (e: Exception) {
+            FirebaseAuthResult.Error(e)
+        }
+    }
+
+    override suspend fun getUser(uid: String): FirebaseAuthResult<User?> {
+        return try {
+            val documentSnapshot = firestore.collection(USERS_COLLECTION).document(uid).get().await()
+            if (documentSnapshot.exists()) {
+                val firebaseUser = firebaseAuth.currentUser
+                val user = documentSnapshot.toObject(User::class.java)?.copy(
+                    uid = firebaseUser?.uid ?: uid,
+                    email = firebaseUser?.email,
+                    displayName = firebaseUser?.displayName,
+                    phoneNumber = firebaseUser?.phoneNumber,
+                    photoUrl = firebaseUser?.photoUrl?.toString(),
+                    isEmailVerified = firebaseUser?.isEmailVerified ?: false
+                )
+                FirebaseAuthResult.Success(user)
+            } else {
+                // If no user document in Firestore, create one from Auth data if user is signed in
+                firebaseAuth.currentUser?.let {
+                    val newUser = it.toUser()
+                    firestore.collection(USERS_COLLECTION).document(it.uid).set(newUser).await()
+                    FirebaseAuthResult.Success(newUser)
+                } ?: FirebaseAuthResult.Success(null)
+            }
+        } catch (e: Exception) {
+            FirebaseAuthResult.Error(e)
+        }
+    }
+
+    private suspend fun fetchUserWithUsername(uid: String): FirebaseAuthResult<User> {
+        return try {
+            val userSnapshot = firestore.collection(USERS_COLLECTION).document(uid).get().await()
+            val firebaseUser = firebaseAuth.currentUser
+
+            if (firebaseUser == null) {
+                return FirebaseAuthResult.Error(Exception("User not authenticated."))
+            }
+
+            if (userSnapshot.exists()) {
+                val username = userSnapshot.getString(USERNAME_FIELD)
+                val user = firebaseUser.toUser(username)
+                FirebaseAuthResult.Success(user)
+            } else {
+                // User document doesn't exist in Firestore, create it without username yet
+                val newUser = firebaseUser.toUser() // username will be null
+                firestore.collection(USERS_COLLECTION).document(uid).set(newUser).await() // Save the basic user object
+                FirebaseAuthResult.Success(newUser) // Return user without username, will prompt setup
+            }
+        } catch (e: Exception) {
+            FirebaseAuthResult.Error(e)
+        }
+    }
+
+    private fun FirebaseUser.toUser(username: String? = null): User {
         return User(
             uid = uid,
             email = email,
             displayName = displayName,
             phoneNumber = phoneNumber,
             photoUrl = photoUrl?.toString(),
-            isEmailVerified = isEmailVerified
+            isEmailVerified = isEmailVerified,
+            username = username
         )
     }
 }

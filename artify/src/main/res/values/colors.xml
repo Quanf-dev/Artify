@@ -7,6 +7,6 @@
     <color name="icon_color">#000000</color> <!-- Đen cho light mode -->
     <color name="label_text">#222222</color> <!-- Đen đậm -->
     <color name="holder_text">#757575</color> <!-- Xám trung bình -->
-
+    <color name="dialog_background_color">#F5F5F5</color> <!-- Or a specific dialog color e.g. #EFEFEF -->
 
 </resources>

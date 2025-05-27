@@ -1,82 +1,65 @@
 package com.example.artify.ui.forgot
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.viewModels
+import androidx.lifecycle.Observer
+import com.example.artify.R
 import com.example.artify.databinding.ActivityForgotPasswordBinding
+import com.example.artify.ui.base.BaseActivity
+import com.example.artify.utils.FullGradientDrawable
+import com.example.artify.utils.dpToPx
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class ForgotPasswordActivity : AppCompatActivity() {
+class ForgotPasswordActivity : BaseActivity<ActivityForgotPasswordBinding>() {
 
-    private lateinit var binding: ActivityForgotPasswordBinding
-//    private val viewModel: ForgotPasswordViewModel by viewModels()
+    private val viewModel: ForgotPasswordViewModel by viewModels()
+
+    override fun inflateBinding(): ActivityForgotPasswordBinding {
+        return ActivityForgotPasswordBinding.inflate(layoutInflater)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityForgotPasswordBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        setupViews()
-//        observeViewModel()
+        setupObservers()
+        setupClickListeners()
+        setupUI()
     }
 
-    private fun setupViews() {
-        binding.backButton.setOnClickListener {
-            finish()
-        }
-
-        binding.sendResetButton.setOnClickListener {
-            val email = binding.emailEditText.text.toString().trim()
-            if (validateEmail(email)) {
-//                viewModel.sendPasswordResetEmail(email)
+    private fun setupObservers() {
+        viewModel.forgotPasswordState.observe(this, Observer { state ->
+            when (state) {
+                is ForgotPasswordState.Idle -> {
+                    hideLoading()
+                }
+                is ForgotPasswordState.Loading -> {
+                    showLoading()
+                }
+                is ForgotPasswordState.EmailSentSuccess -> {
+                    hideLoading()
+                    showSuccessMessage(getString(R.string.reset_email_sent_success))
+                    // Optionally finish activity after success
+                    finish()
+                }
+                is ForgotPasswordState.Error -> {
+                    hideLoading()
+                    showErrorMessage(state.message)
+                }
             }
-        }
-
-        binding.backToLoginButton.setOnClickListener {
-            finish()
-        }
+        })
     }
 
-    private fun validateEmail(email: String): Boolean {
-        if (email.isEmpty()) {
-            binding.emailLayout.error = "Email không được để trống"
-            return false
-        } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            binding.emailLayout.error = "Email không hợp lệ"
-            return false
-        } else {
-            binding.emailLayout.error = null
-            return true
+    private fun setupClickListeners() {
+        binding.btnSendResetEmail?.setOnClickListener {
+            val email = binding.edtEmailForgot.text.toString().trim()
+            viewModel.sendPasswordResetEmail(email)
         }
     }
-
-//    private fun observeViewModel() {
-//        viewModel.resetState.observe(this) { state ->
-//            when (state) {
-//                is LoginState.Loading -> {
-//                    binding.progressBar.visibility = android.view.View.VISIBLE
-//                    binding.sendResetButton.isEnabled = false
-//                }
-//                is LoginState.PasswordResetEmailSent -> {
-//                    binding.progressBar.visibility = android.view.View.GONE
-//                    binding.sendResetButton.isEnabled = true
-//
-//                    // Hiển thị thông báo thành công
-//                    binding.successLayout.visibility = android.view.View.VISIBLE
-//                    binding.formLayout.visibility = android.view.View.GONE
-//
-//                    Toast.makeText(this, "Email đặt lại mật khẩu đã được gửi!", Toast.LENGTH_LONG).show()
-//                }
-//                is LoginState.Error -> {
-//                    binding.progressBar.visibility = android.view.View.GONE
-//                    binding.sendResetButton.isEnabled = true
-//                    Toast.makeText(this, state.message, Toast.LENGTH_SHORT).show()
-//                }
-//                else -> {
-//                    binding.progressBar.visibility = android.view.View.GONE
-//                    binding.sendResetButton.isEnabled = true
-//                }
-//            }
-//        }
-//    }
+    private fun setupUI(){
+        val gradientBackground = FullGradientDrawable(
+            cornerRadius = dpToPx(50).toFloat()
+        )
+        binding.btnSendResetEmail?.backgroundTintList = null
+        binding.btnSendResetEmail?.background = gradientBackground
+    }
 } 

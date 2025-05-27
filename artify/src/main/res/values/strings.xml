@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources >
     <string name="app_name">Artify</string>
     <string name="artify_photo_editing">Artify -Photo Editing</string>
     <string name="easy_one_click_photo_editing">Easy one-click photo editing!</string>
     <string name="lorem_ipsum">Lorem ipsum dolor sit amet consectetur odigisang elit, sed do eiusmod tempor Lorem ipsum dolor sit amet consectetur</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="next">Next</string>
     <string name="facebook_app_id">995758542751417</string>
@@ -17,5 +16,73 @@
     <string name="sign_in">Sign in</string>
     <string name="or">Or</string>
     <string name="skip">Skip</string>
-    <string name="sign_up_text">Don’t have an account? <b>Sign Up</b></string>
+    <string name="sign_up_text">Don\'t have an account? <b>Sign Up</b></string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="create_account">Create Account</string>
+    <string name="already_have_a_account_sign_in">Already have a account? Sign In</string>
+    <string name="error_email_empty">Email must not be empty</string>
+    <string name="error_password_empty">Password must not be empty</string>
+    <string name="error_password_length">Password must be at least 6 characters long</string>
+    <string name="error_confirm_password_empty">Confirm Password must not be empty</string>
+    <string name="error_password_mismatch">Passwords do not match</string>
+    <string name="register_success">Registration successful! Please check your email to verify your account.</string>
+    <string name="email_verification_sent">Verification email has been sent!</string>
+    <string name="phone_hint">Phone number</string>
+    <string name="send_code">Send verification code</string>
+    <string name="verification_code_hint">Verification code</string>
+    <string name="verify">Verify</string>
+    <string name="reset_your_password">Reset your password ?</string>
+    <string name="please_enter_your_email">Please enter your email and we will send an OTP code in the next step to reset your password.</string>
+    <string name="resend_in_seconds">Gửi lại (%1$ds)</string>
+
+    <!-- Strings for EmailVerificationActivity & Dialog -->
+    <string name="email_verification_art_desc">Email verification illustration</string>
+    <string name="verify_your_email">Check verify Your Email</string>
+    <string name="verification_email_sent_message">We\'ve sent a verification link to your email address. Please check your inbox and click the link to complete the process.</string>
+    <string name="check_verification_status">Check Status</string>
+    <string name="resend_verification_email">Resend Verification Email</string>
+    <string name="logout">Logout</string>
+    <string name="status_icon_desc">Status icon</string>
+    <string name="verification_successful">Verification Successful!</string>
+    <string name="you_can_now_proceed">You will be directed to the homepage.</string>
+    <string name="ok">OK</string>
+    <string name="email_verified_proceed_setup">Your email has been successfully verified! You can now set up your profile.</string>
+    <string name="email_not_verified_check_mailbox">Email not verified. Please check your mailbox or resend the verification email.</string>
+    <string name="verification_email_resent_success">Verification email has been resent successfully!</string>
+    <string name="session_expired">Session Expired</string>
+    <string name="error_occurred">An Error Occurred</string>
+    <string name="send_an_email_to_reset_the_password">Send an email to reset the password.</string>
+
+    <!-- Strings for ForgotPasswordActivity -->
+    <string name="forgot_password_art_desc">Forgot password illustration</string>
+    <string name="forgot_your_password_title">Forgot Your Password?</string>
+    <string name="forgot_password_instructions">Please enter your email address and we\'ll send you a link to reset your password.</string>
+    <string name="send_reset_link">Send Reset Link</string>
+    <string name="error_email_empty_forgot">Email cannot be empty.</string>
+    <string name="error_email_invalid_format">Invalid email format.</string>
+    <string name="error_reset_email_failed">Failed to send reset email.</string>
+    <string name="error_unexpected_occurred">An unexpected error occurred.</string>
+    <string name="reset_email_sent_success">Password reset email sent successfully! Please check your inbox.</string>
+    <string name="user_name">UserName</string>
+    <string name="title_username_setup">Set up your username</string>
+    <string name="subtitle_username_setup">Choose a username to complete your account setup</string>
+    <string name="username_hint">Username can only contain letters, numbers, and underscores (_)</string>
+
+    <!-- Strings for SetupUsernameActivity -->
+    <string name="username_art_desc">Username setup illustration</string>
+    <string name="setup_your_username">Set Up Your Username</string>
+    <string name="username_setup_instructions">Choose a unique username for your profile. This will be visible to other users.</string>
+    <string name="continue_button">Continue</string>
+    <string name="skip_button">Skip for now</string>
+    <string name="username_set_success_toast">Username \'\%1$s\' set successfully!</string>
+    <string name="welcome_back_username_toast">Welcome back, \%1$s!</string>
+    <string name="username_error_min_length">Username must be at least 3 characters long.</string>
+    <string name="username_error_invalid_chars">Username can only contain letters, numbers, and underscores.</string>
+    <string name="username_error_taken">Username already taken.</string>
+    <string name="username_error_generic_save">Failed to save username.</string>
+    <string name="username_error_generic_check">Failed to check username availability.</string>
+    <string name="user_not_authenticated_error">User not authenticated.</string>
+    <string name="please_setup_username">Please set up your username.</string>
+    <string name="Ok">OK</string>
 </resources>

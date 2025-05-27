@@ -1,5 +1,6 @@
 package com.example.artify.ui.login
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
@@ -73,7 +74,15 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                     hideLoading()
                     Toast.makeText(this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show()
                     Log.d("LoginActivity", "Đăng nhập thành công: ${state.user}")
-                    // TODO: Chuyển đến màn hình chính
+                    // TODO: Chuyển đến màn hình chính (MainActivity)
+                    // Example: startActivity(Intent(this, MainActivity::class.java))
+                    // finishAffinity() // Close all previous activities
+                }
+                is LoginState.UsernameSetupRequired -> {
+                    hideLoading()
+                    Toast.makeText(this, getString(R.string.please_setup_username), Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, com.example.artify.ui.profile.SetupUsernameActivity::class.java))
+                    // Do not finish LoginActivity yet, user might come back
                 }
                 is LoginState.Error -> {
                     hideLoading()
@@ -130,16 +139,9 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setupUI() {
-        // Giả sử bạn đã có binding với các view tương ứng:
-//        val backButton = binding.ivBackButton
-        val emailEditText = binding.edtInputEmail
-        val btnSignIn = binding.btnSignIn
         val edtPassword = binding.edtInputPassword
-
-//        backButton.setOnClickListener {
-//            finish()
-//        }
 
         val gradientBorder = GradientDotDrawable(
             height = dpToPx(2),
@@ -149,9 +151,9 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
             cornerRadius = dpToPx(50).toFloat()
         )
 
-        emailEditText.background = gradientBorder
-        btnSignIn.backgroundTintList = null
-        btnSignIn.background = gradientBackground
+        binding.edtInputEmail.background = gradientBorder
+        binding.btnSignIn.backgroundTintList = null
+        binding.btnSignIn.background = gradientBackground
 
         edtPassword.background = gradientBorder
         var isPasswordVisible = false

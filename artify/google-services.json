@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "473029705570-4ot9943138re6puig4vdee7lt3th5c1d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.artify",
+            "certificate_hash": "d30624fc8e7da42af982231837b3424d5355691b"
+          }
+        },
+        {
           "client_id": "473029705570-dmb135q15j03bb29ljpfto5icek3j5au.apps.googleusercontent.com",
           "client_type": 3
         }

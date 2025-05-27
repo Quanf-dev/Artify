@@ -8,7 +8,6 @@ import android.widget.FrameLayout
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.viewbinding.ViewBinding
 import com.example.artify.R
 import com.google.android.material.appbar.AppBarLayout
@@ -83,5 +82,13 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
 
     protected fun showError(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    protected fun showErrorMessage(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    protected fun showSuccessMessage(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 }
