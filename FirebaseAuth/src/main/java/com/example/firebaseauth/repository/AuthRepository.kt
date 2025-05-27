@@ -16,6 +16,8 @@ interface AuthRepository {
     suspend fun sendEmailVerification(): FirebaseAuthResult<Unit>
     suspend fun checkUsernameExists(username: String): FirebaseAuthResult<Boolean>
     suspend fun saveUsername(uid: String, username: String): FirebaseAuthResult<Unit>
+    suspend fun saveUsernamePhotoUrl(uid: String, username: String, photoUrl: String): FirebaseAuthResult<Unit>
+
     suspend fun getUser(uid: String): FirebaseAuthResult<User?>
     
     // Google Sign-In

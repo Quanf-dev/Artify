@@ -23,7 +23,7 @@
             android:value="@string/facebook_client_token" />
 
         <activity
-            android:name=".ui.login.LoginActivity"
+            android:name=".ui.profile.SetupUsernameActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -37,9 +37,9 @@
         <activity
             android:name=".ui.register.RegisterActivity"
             android:exported="false" />
-        <activity
-            android:name=".ui.profile.SetupUsernameActivity"
-            android:exported="false" />
+<!--        <activity-->
+<!--            android:name=".ui.profile.SetupUsernameActivity"-->
+<!--            android:exported="false" />-->
         <activity
             android:name=".ui.forgot.ForgotPasswordActivity"
             android:exported="false" />

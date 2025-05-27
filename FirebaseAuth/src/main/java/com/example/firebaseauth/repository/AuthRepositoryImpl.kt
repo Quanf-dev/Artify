@@ -217,7 +217,35 @@ class AuthRepositoryImpl @Inject constructor(
                 // Save username in users collection
                 transaction.update(userDocRef, USERNAME_FIELD, username)
                 // Save username in usernames collection for quick lookup
-                transaction.set(usernameDocRef, mapOf("uid" to uid)) 
+                transaction.set(usernameDocRef, mapOf("uid" to uid))
+                null
+            }.await()
+            FirebaseAuthResult.Success(Unit)
+        } catch (e: Exception) {
+            FirebaseAuthResult.Error(e)
+        }
+    }
+
+    override suspend fun saveUsernamePhotoUrl(
+        uid: String,
+        username: String,
+        photoUrl: String
+    ): FirebaseAuthResult<Unit> {
+        return try {
+            firestore.runTransaction { transaction ->
+                val userDocRef = firestore.collection(USERS_COLLECTION).document(uid)
+                val usernameDocRef = firestore.collection(USERNAMES_COLLECTION).document(username)
+
+                // Check if username is already taken in the transaction
+                val usernameSnapshot = transaction.get(usernameDocRef)
+                if (usernameSnapshot.exists() && usernameSnapshot.getString("uid") != uid) {
+                    throw FirebaseException("Username '$username' already taken by another user.")
+                }
+
+                // Save username and photoUrl in users collection
+                transaction.update(userDocRef, mapOf(USERNAME_FIELD to username, "photoUrl" to photoUrl))
+                // Save username in usernames collection for quick lookup
+                transaction.set(usernameDocRef, mapOf("uid" to uid))
                 null
             }.await()
             FirebaseAuthResult.Success(Unit)

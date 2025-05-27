@@ -47,8 +47,17 @@ class FirebaseAuthManager @Inject constructor(
         return authRepository.checkUsernameExists(username)
     }
 
-    suspend fun saveUsername(uid: String, username: String): FirebaseAuthResult<Unit> {
+    @Deprecated("Use saveUsernameAndPhotoUrl instead to ensure photoUrl is also handled.")
+    suspend fun saveUsername(uid: String, username: String,): FirebaseAuthResult<Unit> {
+        // This now should ideally call the new method with a null or existing photoUrl,
+        // or be removed if all username saves also handle photoUrl.
+        // For now, let it point to the old repository method if it still exists,
+        // but the primary way should be saveUsernameAndPhotoUrl.
         return authRepository.saveUsername(uid, username)
+    }
+
+    suspend fun saveUsernameAndPhotoUrl(uid: String, username: String, photoUrl: String): FirebaseAuthResult<Unit> {
+        return authRepository.saveUsernamePhotoUrl(uid, username, photoUrl)
     }
 
     suspend fun getUser(uid: String): FirebaseAuthResult<User?> {

@@ -99,4 +99,8 @@ dependencies {
     // OTP View
     implementation ("com.github.mukeshsolanki.android-otpview-pinview:otpview:3.1.0")
 
+    //glide
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+
+
 }
