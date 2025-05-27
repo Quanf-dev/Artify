@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "473029705570",
+    "project_id": "artify-dev-f7731",
+    "storage_bucket": "artify-dev-f7731.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:473029705570:android:4aeb9c224f674c2d2db63b",
+        "android_client_info": {
+          "package_name": "com.example.artify"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "473029705570-2rr0vtjdl30gjgqeil505qqms2aajfps.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.artify",
+            "certificate_hash": "045e1827b247e54c2996d936809fdce7af470bfb"
+          }
+        },
+        {
+          "client_id": "473029705570-4ot9943138re6puig4vdee7lt3th5c1d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.artify",
+            "certificate_hash": "d30624fc8e7da42af982231837b3424d5355691b"
+          }
+        },
+        {
+          "client_id": "473029705570-dmb135q15j03bb29ljpfto5icek3j5au.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPni5YOedH8_22UfTwQCuMhJqy4hpDV9I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "473029705570-dmb135q15j03bb29ljpfto5icek3j5au.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

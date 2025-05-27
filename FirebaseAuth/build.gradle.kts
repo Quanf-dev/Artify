@@ -45,7 +45,9 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-analytics-ktx")
-    
+    implementation("com.google.firebase:firebase-firestore-ktx")
+
+
     // Google Sign-In
     implementation("com.google.android.gms:play-services-auth:20.7.0")
     
@@ -60,6 +62,9 @@ dependencies {
     // ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+
+    // Facebook SDK
+    implementation ("com.facebook.android:facebook-login:16.2.0")
     
     // Testing
     testImplementation(libs.junit)

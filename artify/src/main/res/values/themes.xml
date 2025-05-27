@@ -1,0 +1,13 @@
+<resources>
+    <style name="Theme.Artify" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Màu nền chung -->
+        <item name="android:windowBackground">@color/app_background</item>
+
+        <!-- Màu chữ chính -->
+        <item name="android:textColorPrimary">@color/title_text</item>
+
+        <!-- Màu chữ phụ -->
+        <item name="android:textColorSecondary">@color/desc_text</item>
+        <item name="android:fontFamily">@font/work_sans</item>
+    </style>
+</resources>

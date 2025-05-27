@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context=".ui.phone.PhoneLoginActivity">
+
+    <com.hbb20.CountryCodePicker
+        android:id="@+id/ccp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:ccp_countryPreference="VN,US,GB"
+        app:ccp_defaultNameCode="VN"
+        app:ccp_showArrow="true"
+        app:ccp_showFlag="true"
+        app:ccp_showFullName="false"
+        app:ccp_showNameCode="false"
+        app:layout_constraintBottom_toBottomOf="@+id/edtPhone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/edtPhone" />
+
+
+    <EditText
+        android:id="@+id/edtPhone"
+        android:layout_width="0dp"
+        style="@style/EditTextInput"
+        android:autofillHints="phone"
+        android:hint="@string/phone_hint"
+        android:inputType="phone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@id/ccp"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:ignore="PrivateResource,DuplicateSpeakableTextCheck,VisualLintTextFieldSize,VisualLintBounds" />
+
+
+    <Button
+        android:id="@+id/sendCodeButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/send_code"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/edtPhone" />
+
+    <com.mukeshsolanki.OtpView
+        android:id="@+id/otp_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:inputType="number"
+        android:textColor="@android:color/black"
+        app:OtpItemCount="6"
+        app:OtpItemSpacing="8dp"
+        app:OtpViewType="rectangle"
+        app:OtpState_filled="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sendCodeButton" />
+
+    <Button
+        android:id="@+id/verifyCodeButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="@string/verify"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/otp_view" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
