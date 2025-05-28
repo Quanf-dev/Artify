@@ -11,9 +11,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Artify">
-        <activity
-            android:name=".ui.home.HomeActivity"
-            android:exported="false" />
+<!--        <activity-->
+<!--            android:name=".ui.home.HomeActivity"-->
+<!--            android:exported="false" />-->
         <!-- Facebook Configuration -->
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
@@ -22,24 +22,24 @@
             android:name="com.facebook.sdk.ClientToken"
             android:value="@string/facebook_client_token" />
 
-        <activity
-            android:name=".ui.profile.SetupUsernameActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+<!--        <activity-->
+<!--            android:name=".ui.home.HomeActivity"-->
+<!--            android:exported="true">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
+<!--        </activity>-->
         <activity
             android:name=".ui.phone.PhoneLoginActivity"
             android:exported="false" />
         <activity
             android:name=".ui.register.RegisterActivity"
             android:exported="false" />
-<!--        <activity-->
-<!--            android:name=".ui.profile.SetupUsernameActivity"-->
-<!--            android:exported="false" />-->
+        <activity
+            android:name=".ui.profile.SetupUsernameActivity"
+            android:exported="false" />
         <activity
             android:name=".ui.forgot.ForgotPasswordActivity"
             android:exported="false" />
@@ -59,6 +59,14 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="@string/fb_login_protocol_scheme" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ui.ImageEditorTestActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>

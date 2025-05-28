@@ -105,4 +105,7 @@ dependencies {
     //shimmer
     implementation ("com.facebook.shimmer:shimmer:0.5.0")
 
+    // Image Editor Library
+    implementation(project(":ImageEditor"))
+
 }
