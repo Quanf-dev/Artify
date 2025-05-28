@@ -93,4 +93,11 @@
     <string name="avatar_image_description">Avatar image</string>
     <string name="avatar_not_selected_error">Please select an avatar</string>
     <string name="user_details_save_error">Failed to save user details</string>
+    <string name="pro">PRO</string>
+    <string name="edit_photo">Edit Photo</string>
+    <string name="unleash_your_creativit_with_the_al_multi_editing_toolbox">Unleash your creativit with the Al multi- editing toolbox!</string>
+    <string name="select_photo">Select Photo</string>
+    <string name="al_avatar_generator">Al Avatar Generator</string>
+    <string name="al_scene_generator">Al Scene Generator</string>
+    <string name="ai_cartoonizer">AI\nCartoonizer</string>
 </resources>

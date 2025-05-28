@@ -37,6 +37,29 @@
         <item name="layout_constraintEnd_toEndOf">parent</item>
     </style>
 
+    <style name="TextStyle_AlAvatarTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">@dimen/_18ssp</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:layout_gravity">bottom|center</item>
+        <item name="android:layout_marginBottom">15dp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="FrameStyle_AvatarBox">
+        <item name="android:layout_width">@dimen/_130sdp</item>
+        <item name="android:layout_height">@dimen/_130sdp</item>
+        <item name="android:layout_marginTop">20dp</item>
+    </style>
+
+    <style name="FrameStyle_AvatarBoxLand">
+        <item name="android:layout_width">@dimen/_170sdp</item>
+        <item name="android:layout_height">@dimen/_170sdp</item>
+        <item name="android:layout_marginTop">20dp</item>
+    </style>
+
 
 
 </resources>
