@@ -15,8 +15,6 @@ import com.example.artify.databinding.DialogVerificationStatusBinding
 import com.example.artify.ui.base.BaseActivity
 import com.example.artify.ui.login.LoginActivity
 import com.example.artify.ui.profile.SetupUsernameActivity
-import com.example.artify.utils.FullGradientDrawable
-import com.example.artify.utils.dpToPx
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.core.graphics.drawable.toDrawable
 
@@ -35,7 +33,6 @@ class EmailVerificationActivity : BaseActivity<ActivityEmailVerificationBinding>
         setupListeners()
         observeViewModel()
         viewModel.checkEmailVerification()
-        setupUI()
     }
 
     override fun onResume() {
@@ -55,7 +52,7 @@ class EmailVerificationActivity : BaseActivity<ActivityEmailVerificationBinding>
         binding.btnResendEmail.setOnClickListener {
             viewModel.resendVerificationEmail()
         }
-        binding.btnLogout.setOnClickListener {
+        binding.tvLogout?.setOnClickListener {
             viewModel.logout()
             navigateToLogin()
         }
@@ -162,10 +159,4 @@ class EmailVerificationActivity : BaseActivity<ActivityEmailVerificationBinding>
         finishAffinity()
     }
 
-    private fun setupUI() {
-        val gradientBackground = FullGradientDrawable(
-            cornerRadius = dpToPx(50).toFloat()
-        )
-        binding.btnResendEmail.background = gradientBackground
-    }
 }

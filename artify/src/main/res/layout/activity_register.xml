@@ -85,7 +85,7 @@
             app:layout_constraintTop_toBottomOf="@id/tv_login_confirm_password"
             tools:ignore="PrivateResource,DuplicateSpeakableTextCheck,VisualLintTextFieldSize,VisualLintBounds" />
 
-        <Button
+        <com.example.artify.utils.GradientButton
             android:id="@+id/btn_sign_up"
             android:layout_width="match_parent"
             android:layout_height="55dp"
@@ -93,7 +93,7 @@
             android:paddingVertical="5dp"
             android:text="@string/sign_up"
             android:textAllCaps="false"
-            android:textColor="@color/label_text"
+            android:textColor="@color/white"
             android:textSize="@dimen/_14ssp"
             android:textStyle="bold"
             app:layout_constraintTop_toBottomOf="@+id/edt_input_confirm_password"

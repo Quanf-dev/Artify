@@ -1,6 +1,5 @@
 package com.example.artify.ui.phone
 
-import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -8,7 +7,6 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import com.example.artify.databinding.ActivityPhoneLoginBinding
 import com.example.artify.ui.base.BaseActivity
-import com.example.artify.utils.FullGradientDrawable
 import com.example.artify.utils.GradientDotDrawable
 import com.example.artify.utils.dpToPx
 import dagger.hilt.android.AndroidEntryPoint
@@ -101,13 +99,8 @@ class PhoneLoginActivity : BaseActivity<ActivityPhoneLoginBinding>() {
             height = dpToPx(2),
             cornerRadius = dpToPx(10).toFloat()
         )
-        val gradientBackground = FullGradientDrawable(
-            cornerRadius = dpToPx(50).toFloat()
-        )
         binding.edtPhone.background = gradientBorder
         binding.verifyCodeButton.backgroundTintList = null
-        binding.verifyCodeButton.background = gradientBackground
         binding.sendCodeButton.backgroundTintList = null
-        binding.sendCodeButton.background = gradientBackground
     }
 } 

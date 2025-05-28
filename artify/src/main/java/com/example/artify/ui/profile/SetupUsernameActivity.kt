@@ -2,10 +2,17 @@ package com.example.artify.ui.profile
 
 import android.annotation.SuppressLint
 import android.content.Intent
+// import android.graphics.drawable.Drawable // No longer needed here
 import android.os.Bundle
+// import android.view.View // No longer needed here
+import android.widget.Toast // Added import for Toast
 import androidx.activity.viewModels
 // import androidx.recyclerview.widget.LinearLayoutManager // No longer needed here
 import com.bumptech.glide.Glide
+// import com.bumptech.glide.load.DataSource // No longer needed here
+// import com.bumptech.glide.load.engine.GlideException // No longer needed here
+// import com.bumptech.glide.request.RequestListener // No longer needed here
+// import com.bumptech.glide.request.target.Target // No longer needed here
 import com.example.artify.R
 import com.example.artify.databinding.ActivitySetupUsernameBinding
 import com.example.artify.ui.base.BaseActivity
@@ -18,24 +25,10 @@ class SetupUsernameActivity : BaseActivity<ActivitySetupUsernameBinding>() {
 
     private val viewModel: SetupUsernameViewModel by viewModels()
     private var selectedAvatarUrl: String? = null
+    private var currentAvatarList: List<String> = emptyList() // To store the fetched avatar list
 
-    private val avatarUrls: List<String> = listOf(
-        "https://ia903406.us.archive.org/5/items/49_20210404/7.png",
-        "https://ia903406.us.archive.org/5/items/49_20210404/15.png",
-        "https://ia903406.us.archive.org/5/items/49_20210404/23.png",
-        "https://ia903406.us.archive.org/5/items/49_20210404/31.png",
-        "https://ia903406.us.archive.org/5/items/49_20210404/39.png",
-        "https://ia903406.us.archive.org/5/items/49_20210404/47.png",
-        "https://ia903406.us.archive.org/5/items/49_20210404/55.png",
-        "https://ia903406.us.archive.org/5/items/49_20210404/63.png",
-        "https://ia903406.us.archive.org/5/items/49_20210404/71.png",
-        "https://ia903406.us.archive.org/5/items/49_20210404/79.png",
-        "https://ia903406.us.archive.org/5/items/49_20210404/87.png",
-        "https://ia903406.us.archive.org/5/items/49_20210404/95.png",
-        "https://ia903406.us.archive.org/5/items/49_20210404/103.png",
-        "https://ia903406.us.archive.org/5/items/49_20210404/111.png",
-        "https://ia903406.us.archive.org/5/items/49_20210404/119.png"
-    )
+    // The hardcoded list is removed from here
+    // private val avatarUrls: List<String> = listOf(...)
 
     override fun inflateBinding(): ActivitySetupUsernameBinding {
         return ActivitySetupUsernameBinding.inflate(layoutInflater)
@@ -43,38 +36,54 @@ class SetupUsernameActivity : BaseActivity<ActivitySetupUsernameBinding>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setupDefaultAvatar()
+        // setupDefaultAvatar() is now called after avatar list is loaded
         setupViews()
         observeViewModel()
     }
 
-    private fun setupDefaultAvatar() {
-        // Set a default avatar if none is selected yet from the view model
-        if (viewModel.currentUser.value?.photoUrl == null && avatarUrls.isNotEmpty()) {
-            selectedAvatarUrl = avatarUrls[0]
+    private fun setupDefaultAvatar(avatars: List<String>) {
+        if (avatars.isEmpty()) return
+
+        // Current user's photoUrl from ViewModel is prioritized
+        val userPhotoUrl: String? = viewModel.currentUser.value?.photoUrl
+        
+        if (userPhotoUrl != null) {
+            selectedAvatarUrl = userPhotoUrl
+        } else if (selectedAvatarUrl == null) { // If no selected URL yet and no user photoUrl
+            selectedAvatarUrl = avatars[0] // Default to the first avatar from the fetched list
         }
-        updateSelectedAvatarDisplay(selectedAvatarUrl ?: avatarUrls.getOrNull(0))
+        // If selectedAvatarUrl is still null (e.g. empty list from server, though unlikely with current static list), use the first from list
+        updateSelectedAvatarDisplay(selectedAvatarUrl ?: avatars.getOrNull(0))
     }
 
     private fun setupViews() {
-        binding.btnOK.setOnClickListener {
+        binding.btncOK?.setOnClickListener {
             val username: String = binding.usernameEditText.text.toString().trim()
-            if (selectedAvatarUrl == null && avatarUrls.isNotEmpty()) { // Ensure a default is picked if somehow still null
-                selectedAvatarUrl = avatarUrls[0]
+            // Ensure a default is picked if somehow still null and list is not empty
+            if (selectedAvatarUrl == null && currentAvatarList.isNotEmpty()) { 
+                selectedAvatarUrl = currentAvatarList[0]
             }
             viewModel.saveUsernameAndAvatar(username, selectedAvatarUrl)
         }
 
-        binding.selectedAvatarImageView?.setOnClickListener {
-            showAvatarSelectionDialog()
+        // Ensure currentAvatarList is not empty before showing dialog
+        val avatarClickListener = { _: android.view.View ->
+            if (currentAvatarList.isNotEmpty()) {
+                showAvatarSelectionDialog(currentAvatarList)
+            } else {
+                Toast.makeText(this, "Avatars are loading, please wait...", Toast.LENGTH_SHORT).show()
+            }
         }
-        binding.btnChooseAvatar?.setOnClickListener {
-            showAvatarSelectionDialog()
-        }
+        binding.selectedAvatarImageView?.setOnClickListener(avatarClickListener)
+        binding.tvChooseAvatar?.setOnClickListener(avatarClickListener)
     }
 
-    private fun showAvatarSelectionDialog() {
-        val dialog = AvatarSelectionDialogFragment.newInstance(avatarUrls) { avatarUrl ->
+    private fun showAvatarSelectionDialog(avatars: List<String>) {
+        if (avatars.isEmpty()) {
+            Toast.makeText(this, "No avatars available to select.", Toast.LENGTH_SHORT).show()
+            return 
+        }
+        val dialog = AvatarSelectionDialogFragment.newInstance(avatars) { avatarUrl ->
             selectedAvatarUrl = avatarUrl
             updateSelectedAvatarDisplay(selectedAvatarUrl)
         }
@@ -82,20 +91,23 @@ class SetupUsernameActivity : BaseActivity<ActivitySetupUsernameBinding>() {
     }
 
     private fun updateSelectedAvatarDisplay(avatarUrl: String?) {
-        binding.selectedAvatarImageView?.let { imageView ->
+        binding.selectedAvatarImageView.let { imageView ->
             avatarUrl?.let {
-                Glide.with(this)
-                    .load(it)
-                    .placeholder(R.drawable.ic_launcher_background) // Default placeholder
-                    .error(R.drawable.ic_launcher_foreground) // Error placeholder
-                    .circleCrop()
-                    .into(imageView)
+                if (imageView != null) {
+                    Glide.with(this)
+                        .load(it)
+                        .placeholder(R.drawable.ic_launcher_background)
+                        .error(R.drawable.ic_launcher_foreground)
+                        .circleCrop()
+                        .into(imageView)
+                }
             } ?: run {
-                // Set a default image if URL is null
-                Glide.with(this)
-                    .load(R.drawable.ic_launcher_background) // Your default avatar drawable
-                    .circleCrop()
-                    .into(imageView)
+                if (imageView != null) {
+                    Glide.with(this)
+                        .load(R.drawable.ic_launcher_background)
+                        .circleCrop()
+                        .into(imageView)
+                }
             }
         }
     }
@@ -116,20 +128,32 @@ class SetupUsernameActivity : BaseActivity<ActivitySetupUsernameBinding>() {
                 }
                 is SetupUsernameState.UsernameAlreadySet -> {
                     hideLoading()
-                    navigateToMain() 
+                    navigateToMain()
                 }
                 is SetupUsernameState.Idle -> {
                     hideLoading()
-                    binding.btnOK.isEnabled = true
+                    binding.btncOK?.isEnabled = true
                 }
             }
         }
 
         viewModel.currentUser.observe(this) { user ->
             user?.username?.let { binding.usernameEditText.setText(it) }
-            // Update selected avatar based on user data, or default if not set
-            selectedAvatarUrl = user?.photoUrl ?: avatarUrls.getOrNull(0)
-            updateSelectedAvatarDisplay(selectedAvatarUrl)
+            // selectedAvatarUrl will be primarily set by user interaction or default from availableAvatars list
+            // If user object has photoUrl, it will be used to initialize selectedAvatarUrl via setupDefaultAvatar
+            // We need to ensure setupDefaultAvatar is called after currentAvatarList is populated.
+            if (currentAvatarList.isNotEmpty()) {
+                 // If user photoUrl exists, it takes precedence. Otherwise, selectedAvatarUrl might be from previous selection or default.
+                selectedAvatarUrl = user?.photoUrl ?: selectedAvatarUrl ?: currentAvatarList.getOrNull(0)
+                updateSelectedAvatarDisplay(selectedAvatarUrl)
+            }
+        }
+
+        viewModel.availableAvatars.observe(this) { avatars ->
+            currentAvatarList = avatars
+            // Now that we have the avatar list, setup the default avatar display
+            // This also handles the initial avatar display based on currentUser data
+            setupDefaultAvatar(avatars)
         }
     }
 
