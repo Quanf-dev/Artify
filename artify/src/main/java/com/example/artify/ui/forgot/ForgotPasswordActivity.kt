@@ -6,8 +6,6 @@ import androidx.lifecycle.Observer
 import com.example.artify.R
 import com.example.artify.databinding.ActivityForgotPasswordBinding
 import com.example.artify.ui.base.BaseActivity
-import com.example.artify.utils.FullGradientDrawable
-import com.example.artify.utils.dpToPx
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -23,7 +21,6 @@ class ForgotPasswordActivity : BaseActivity<ActivityForgotPasswordBinding>() {
         super.onCreate(savedInstanceState)
         setupObservers()
         setupClickListeners()
-        setupUI()
     }
 
     private fun setupObservers() {
@@ -55,11 +52,5 @@ class ForgotPasswordActivity : BaseActivity<ActivityForgotPasswordBinding>() {
             viewModel.sendPasswordResetEmail(email)
         }
     }
-    private fun setupUI(){
-        val gradientBackground = FullGradientDrawable(
-            cornerRadius = dpToPx(50).toFloat()
-        )
-        binding.btnSendResetEmail?.backgroundTintList = null
-        binding.btnSendResetEmail?.background = gradientBackground
-    }
+
 } 

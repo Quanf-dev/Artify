@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.artify.R
+import com.example.artify.data.source.DefaultAvatars
 import com.example.firebaseauth.FirebaseAuthManager
 import com.example.firebaseauth.FirebaseAuthResult
 import com.example.firebaseauth.model.User
@@ -26,8 +27,12 @@ class SetupUsernameViewModel @Inject constructor(
     private val _currentUser = MutableLiveData<User?>()
     val currentUser: LiveData<User?> = _currentUser
 
+    private val _availableAvatars = MutableLiveData<List<String>>()
+    val availableAvatars: LiveData<List<String>> = _availableAvatars
+
     init {
         fetchCurrentUser()
+        loadAvailableAvatars()
     }
 
     private fun fetchCurrentUser(){
@@ -39,6 +44,11 @@ class SetupUsernameViewModel @Inject constructor(
                  _setupState.value = SetupUsernameState.UsernameAlreadySet(user.username!!)
             }
         }
+    }
+
+    private fun loadAvailableAvatars() {
+        // For now, we load a static list. This could be an async call in the future.
+        _availableAvatars.value = DefaultAvatars.avatarUrls
     }
 
     // Old saveUsername function - can be removed or kept if there's a use case for saving only username
@@ -146,6 +156,9 @@ class SetupUsernameViewModel @Inject constructor(
         when (val saveResult = firebaseAuthManager.saveUsernameAndPhotoUrl(uid, username, avatarUrl)) {
             is FirebaseAuthResult.Success -> {
                 _setupState.value = SetupUsernameState.Success(username) // Username is the primary identifier here for success message
+                 // Fetch the updated user details to reflect new avatar in UI if needed immediately
+                val updatedUser = firebaseAuthManager.getCurrentUser()
+                _currentUser.value = updatedUser
             }
             is FirebaseAuthResult.Error -> {
                 _setupState.value = SetupUsernameState.Error(saveResult.exception.message ?: context.getString(R.string.user_details_save_error)) // Add this string

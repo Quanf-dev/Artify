@@ -1,15 +1,19 @@
 package com.example.artify.ui.profile
 
 import android.app.Dialog
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
+import android.view.Window
+import android.view.WindowManager
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.artify.R
+import androidx.core.graphics.drawable.toDrawable
 
 class AvatarSelectionDialogFragment(
     private val avatarUrls: List<String>,
@@ -19,20 +23,25 @@ class AvatarSelectionDialogFragment(
     private lateinit var avatarAdapter: AvatarAdapter
     private lateinit var recyclerView: RecyclerView
 
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val dialog = super.onCreateDialog(savedInstanceState)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.window?.apply {
+            setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
+            setLayout(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.WRAP_CONTENT
+            )
+        }
+        return dialog
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.avatar_selection_dialog, container, false)
-        recyclerView = view.findViewById(R.id.dialogAvatarsRecyclerView)
-        
-        // Add cancel button handler
-//        view.findViewById<Button>(R.id.btnCancel)?.setOnClickListener {
-//            dismiss()
-//        }
-        
-        return view
+        return inflater.inflate(R.layout.avatar_selection_dialog, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -42,17 +51,23 @@ class AvatarSelectionDialogFragment(
 
     override fun onStart() {
         super.onStart()
-        dialog?.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        // Prevent dialog from dismissing when clicking outside
+        dialog?.window?.apply {
+            setLayout(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.WRAP_CONTENT
+            )
+            setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
+        }
         dialog?.setCanceledOnTouchOutside(false)
     }
 
     private fun setupRecyclerView() {
         avatarAdapter = AvatarAdapter(requireContext(), avatarUrls) { selectedUrl ->
             onAvatarSelectedListener(selectedUrl)
-            dismiss() // Only dismiss when an avatar is selected
+            dismiss()
         }
-        recyclerView.layoutManager = GridLayoutManager(context, 3) // Changed from 4 to 3 columns
+        recyclerView = requireView().findViewById(R.id.dialogAvatarsRecyclerView)
+        recyclerView.layoutManager = GridLayoutManager(context, 3)
         recyclerView.adapter = avatarAdapter
     }
 

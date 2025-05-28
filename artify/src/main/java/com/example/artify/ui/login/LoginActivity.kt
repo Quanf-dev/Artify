@@ -12,7 +12,6 @@ import com.example.artify.R
 import com.example.artify.databinding.ActivityLoginBinding
 import com.example.artify.ui.base.BaseActivity
 import com.example.artify.ui.phone.PhoneLoginActivity
-import com.example.artify.utils.FullGradientDrawable
 import com.example.artify.utils.GradientDotDrawable
 import com.example.artify.utils.dpToPx
 import dagger.hilt.android.AndroidEntryPoint
@@ -147,13 +146,8 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
             height = dpToPx(2),
             cornerRadius = dpToPx(10).toFloat()
         )
-        val gradientBackground = FullGradientDrawable(
-            cornerRadius = dpToPx(50).toFloat()
-        )
-
         binding.edtInputEmail.background = gradientBorder
         binding.btnSignIn.backgroundTintList = null
-        binding.btnSignIn.background = gradientBackground
 
         edtPassword.background = gradientBorder
         var isPasswordVisible = false
