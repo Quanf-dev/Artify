@@ -8,13 +8,13 @@
 
     <com.example.imageeditor.views.PaintCanvasView
         android:id="@+id/paintCanvasViewTest"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_300sdp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/controlsLinearLayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_weight="1"/>
+        app:layout_constraintBottom_toTopOf="@+id/controlsLinearLayout"
+        />
 
     <LinearLayout
         android:id="@+id/controlsLinearLayout"
@@ -22,7 +22,8 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/paintCanvasViewTest" 
+        app:layout_constraintBottom_toBottomOf="parent" 
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -95,6 +96,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Clear Layer"/>
+            <Button
+                android:id="@+id/buttonLoadImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Load Image"/>
         </LinearLayout>
 
     </LinearLayout>

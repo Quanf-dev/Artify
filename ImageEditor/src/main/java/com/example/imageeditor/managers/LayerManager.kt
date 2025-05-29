@@ -10,9 +10,11 @@ import com.example.imageeditor.models.Layer
 import java.util.UUID
 
 class LayerManager(private var initialWidth: Int, private var initialHeight: Int) {
+
     private val layers = mutableListOf<Layer>()
     private var currentSelectedLayerIndex: Int = -1
     private var defaultBackgroundColor: Int = Color.WHITE
+
 
     val currentLayer: Layer?
         get() = layers.getOrNull(currentSelectedLayerIndex)
@@ -64,6 +66,32 @@ class LayerManager(private var initialWidth: Int, private var initialHeight: Int
             id = UUID.randomUUID().toString(),
             name = name,
             bitmap = newBitmap,
+            isVisible = true
+        )
+        layers.add(newLayer)
+        currentSelectedLayerIndex = layers.size - 1 // Select the new layer
+        return newLayer
+    }
+
+    /**
+     * Adds a new layer with a pre-existing bitmap.
+     * The new layer is selected after creation.
+     *
+     * @param name The name for the new layer.
+     * @param existingBitmap The bitmap to use for this layer. The LayerManager takes ownership of this bitmap.
+     *                       Ensure it has the correct dimensions (initialWidth, initialHeight) or handle scaling appropriately.
+     * @return The newly created and selected Layer.
+     */
+    fun addLayerWithBitmap(name: String, existingBitmap: Bitmap): Layer {
+        // Ensure the provided bitmap matches the LayerManager's dimensions, or handle scaling/cropping.
+        // For simplicity, this example assumes existingBitmap is already correctly sized.
+        // If not, you might want to create a new bitmap of initialWidth/initialHeight
+        // and draw existingBitmap onto it (e.g., scaled or centered).
+
+        val newLayer = Layer(
+            id = UUID.randomUUID().toString(),
+            name = name,
+            bitmap = existingBitmap, // Use the provided bitmap
             isVisible = true
         )
         layers.add(newLayer)

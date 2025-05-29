@@ -21,6 +21,8 @@ import com.example.imageeditor.managers.LayerManager
 import com.example.imageeditor.models.BrushStyle
 import com.example.imageeditor.tools.DrawingTool
 import com.example.imageeditor.tools.FreeBrushTool
+import com.example.imageeditor.tools.ShapeTool
+import com.example.imageeditor.tools.EraserTool
 import kotlin.math.max
 import kotlin.math.min
 
@@ -82,6 +84,42 @@ class PaintCanvasView @JvmOverloads constructor(
         currentDrawingTool.setBrushStyle(currentBrushStyle)
     }
 
+    private fun clampTranslations() {
+        val scaledWidth = width * scaleFactor
+        val scaledHeight = height * scaleFactor
+
+        // Clamp X
+        if (scaledWidth > width) {
+            val maxTx = (width / 2f) * (scaleFactor - 1)
+            val minTx = (width / 2f) * (1 - scaleFactor)
+            translationX = Math.max(minTx, Math.min(translationX, maxTx))
+        } else {
+            // val limitX = (width - scaledWidth) / 2f // This was for a different centering logic
+            if (scaledWidth < width) {
+                 // Allow to pan until its edge reaches the view edge, or a bit more to ensure it can be moved fully
+                translationX = Math.max(translationX, -(scaledWidth - width / 2f + (width - scaledWidth)/2f )) // Corrected limit logic
+                translationX = Math.min(translationX, width / 2f - (width-scaledWidth)/2f) // Corrected limit logic
+            } else { // If image is same width as view, or content is wider but scaled smaller than view
+                translationX = 0f
+            }
+        }
+
+        // Clamp Y
+        if (scaledHeight > height) {
+            val maxTy = (height / 2f) * (scaleFactor - 1)
+            val minTy = (height / 2f) * (1 - scaleFactor)
+            translationY = Math.max(minTy, Math.min(translationY, maxTy))
+        } else {
+            // val limitY = (height - scaledHeight) / 2f
+            if (scaledHeight < height) {
+                translationY = Math.max(translationY, -(scaledHeight - height/2f + (height - scaledHeight)/2f))
+                translationY = Math.min(translationY, height/2f - (height - scaledHeight)/2f)
+            } else {
+                translationY = 0f
+            }
+        }
+    }
+
     private fun updateTransformMatrix() {
         transformMatrix.reset()
         transformMatrix.postTranslate(-width / 2f, -height / 2f) // Center before scaling
@@ -136,85 +174,102 @@ class PaintCanvasView @JvmOverloads constructor(
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (!isViewReady) return false
 
-        scaleDetector.onTouchEvent(event) // Pass to scale detector first
-
-        val transformedEvent = getTransformedMotionEvent(event) // Transform event for tools
+        scaleDetector.onTouchEvent(event)
+        val transformedEvent = getTransformedMotionEvent(event)
 
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 lastTouchX = event.x
                 lastTouchY = event.y
                 activePointerId = event.getPointerId(0)
-                mode = Mode.DRAG
+                mode = Mode.DRAG // Default mode for a single touch down
 
-                // Pass transformed event to tool for drawing logic
                 layerManager.currentLayer?.let {
-                    if(!scaleDetector.isInProgress) historyManager.saveState(it.id, it.bitmap)
+                    if (!scaleDetector.isInProgress) historyManager.saveState(it.id, it.bitmap)
                 }
                 currentDrawingTool.onTouch(transformedEvent, this)
+                // canvasView.invalidate() in tool's onTouch if needed
             }
             MotionEvent.ACTION_MOVE -> {
-                if (scaleDetector.isInProgress) {
+                if (scaleDetector.isInProgress) { // Zooming
                     mode = Mode.ZOOM
-                } else if (mode == Mode.DRAG && event.getPointerId(0) == activePointerId) {
-                    val dx = event.x - lastTouchX
-                    val dy = event.y - lastTouchY
-                    translationX += dx
-                    translationY += dy
-                    updateTransformMatrix()
-                    lastTouchX = event.x
-                    lastTouchY = event.y
-                    invalidate()
-                }
-                // Pass transformed event to tool only if not zooming/panning by this view
-                if (mode != Mode.ZOOM ) { // Allow tool interaction during pan if desired, but for drawing usually not.
-                    // If we are panning the canvas, we might not want the tool to also process moves.
-                    // However, for drawing while panning (less common), this would be needed.
-                    // For now, let tool handle move only if not in ZOOM mode.
-                    // It's complex. If dragging the canvas, the tool's interpretation of move is on a moving surface.
-                    // Simplest for now: if we are zooming or panning canvas, tool does not get move event.
-                    // The tool will receive the ACTION_UP at the transformed location.
-                    if (mode != Mode.DRAG) currentDrawingTool.onTouch(transformedEvent, this)
-                } else {
-                     // If zooming, reset the current tool to avoid partial draws
-                     currentDrawingTool.reset()
+                    // Zoom transformations (scaleFactor, translationX/Y adjustments) are handled by
+                    // scaleListener.onScale, which calls updateTransformMatrix() and invalidate().
+                    currentDrawingTool.reset() // Reset tool as canvas is transforming
+                    // invalidate() is called by onScale
+                } else if (mode == Mode.DRAG && event.getPointerId(0) == activePointerId) { // Non-zooming drag with the primary pointer
+                    
+                    // Let the drawing tool process the move first
+                    currentDrawingTool.onTouch(transformedEvent, this)
+
+                    // Pan the canvas itself ONLY if a drawing-type tool is NOT active.
+                    // Drawing tools (FreeBrush, Shape, Eraser) handle their own path creation based on the gesture.
+                    val isDrawingToolCurrentlyActive = currentDrawingTool is FreeBrushTool ||
+                                                     currentDrawingTool is ShapeTool ||
+                                                     currentDrawingTool is EraserTool
+
+                    if (!isDrawingToolCurrentlyActive) {
+                        // This block is for panning the canvas itself if a non-drawing tool is active (e.g. a future PanTool)
+                        val dx = event.x - lastTouchX
+                        val dy = event.y - lastTouchY
+                        translationX += dx // Tentatively update
+                        translationY += dy // Tentatively update
+                        clampTranslations()    // Clamp the member variables translationX, translationY
+                        updateTransformMatrix()
+                        lastTouchX = event.x
+                        lastTouchY = event.y
+                        invalidate() // Panning the canvas requires redraw
+                    } else {
+                        // If a drawing tool IS active, it should have called invalidate() in its onTouch if it updated the path.
+                        // If not, an invalidate here ensures the view redraws the tool's preview.
+                         invalidate()
+                    }
                 }
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                currentDrawingTool.onTouch(transformedEvent, this) // Let tool finalize its action
+
                 activePointerId = MotionEvent.INVALID_POINTER_ID
                 mode = Mode.NONE
-                // Pass transformed event to tool
-                currentDrawingTool.onTouch(transformedEvent, this)
+                // Tool's onTouch (e.g., adding path to canvasView) should handle invalidation
             }
             MotionEvent.ACTION_POINTER_DOWN -> {
-                // If a second pointer goes down and scale isn't in progress, it might be start of zoom
-                // or just another pointer. ScaleDetector will handle it.
-                 currentDrawingTool.reset() // Reset tool on multi-touch start to prevent drawing issues
+                // This indicates a multi-touch gesture is starting (could be zoom).
+                // Reset the current drawing tool to avoid partial drawings if it's a zoom.
+                currentDrawingTool.reset()
+                // mode will be set to ZOOM by scaleDetector if it's a pinch-zoom.
+                // No need to explicitly set mode here, scaleDetector handles it.
             }
             MotionEvent.ACTION_POINTER_UP -> {
-                // If the up pointer was the active one for dragging, pick a new active pointer
                 val pointerIndex = event.actionIndex
-                val pointerId = event.getPointerId(pointerIndex)
-                if (pointerId == activePointerId) {
+                val pointerIdUp = event.getPointerId(pointerIndex)
+
+                if (pointerIdUp == activePointerId) {
+                    // The active pointer (used for dragging/panning) went up.
+                    // If there's another pointer down, make it the new active pointer.
                     val newPointerIndex = if (pointerIndex == 0) 1 else 0
-                    if (newPointerIndex < event.pointerCount) { // Check if new pointer exists
-                         lastTouchX = event.getX(newPointerIndex)
-                         lastTouchY = event.getY(newPointerIndex)
-                         activePointerId = event.getPointerId(newPointerIndex)
-                         mode = Mode.DRAG // Resume dragging with the remaining pointer if any
+                    if (newPointerIndex < event.pointerCount) {
+                        lastTouchX = event.getX(newPointerIndex)
+                        lastTouchY = event.getY(newPointerIndex)
+                        activePointerId = event.getPointerId(newPointerIndex)
+                        mode = Mode.DRAG // Continue in DRAG mode with the new active pointer
                     } else {
-                        mode = Mode.NONE
+                        // No other pointers, or the new pointer is not valid
                         activePointerId = MotionEvent.INVALID_POINTER_ID
+                        mode = Mode.NONE
                     }
-                } else {
-                     // If a non-active pointer went up, it doesn't change current drag/zoom mode determined by ScaleDetector
                 }
-                // Pass transformed event to tool. This could be an ACTION_UP for a path.
+                // Regardless of which pointer went up, pass the event to the current drawing tool.
+                // This might be an ACTION_UP for a multi-touch tool, or could be ignored by single-touch tools.
+                // For current tools, if this isn't the last pointer up, it might be best to do nothing or reset.
+                // However, the final ACTION_UP for the gesture will handle finalization.
+                // Resetting here might be too aggressive if one finger lifts during a multi-touch stroke (not current tools).
+                // For now, just pass it. The tool should be robust.
                 currentDrawingTool.onTouch(transformedEvent, this)
             }
         }
-        transformedEvent.recycle() // Recycle the cloned event
-        return true // Consume all touch events if view is ready
+        transformedEvent.recycle()
+        return true
     }
 
     fun addPath(path: Path, style: BrushStyle, isEraser: Boolean = false) {

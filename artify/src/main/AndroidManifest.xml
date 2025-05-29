@@ -62,7 +62,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.ImageEditorTestActivity"
+            android:name=".ui.paint.PaintActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
