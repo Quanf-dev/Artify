@@ -108,4 +108,15 @@ dependencies {
     // Image Editor Library
     implementation(project(":ImageEditor"))
 
+    //iconic
+    implementation ("com.mikepenz:material-design-iconic-typeface:2.2.0.9-kotlin@aar")
+    implementation ("com.mikepenz:iconics-core:5.3.4")
+    implementation ("com.mikepenz:iconics-views:5.3.4")
+    implementation ("androidx.appcompat:appcompat:1.6.1")
+
+
+
+
+
+
 }

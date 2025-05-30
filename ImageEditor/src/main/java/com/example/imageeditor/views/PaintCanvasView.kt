@@ -437,3 +437,4 @@ class PaintCanvasView @JvmOverloads constructor(
         invalidate() // In case background color change needs redraw
     }
 }
+ 

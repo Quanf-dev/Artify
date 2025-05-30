@@ -1,7 +1,7 @@
 package com.example.imageeditor.models
 
 import android.graphics.Color
-
+ 
 data class BrushStyle(
     val color: Int = Color.BLACK,
     val strokeWidth: Float = 5f,

@@ -12,19 +12,25 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
+// import androidx.appcompat.app.AppCompatActivity // No longer extending AppCompatActivity directly
 import com.example.artify.databinding.ActivityImageEditorTestBinding // Import ViewBinding class
+import com.example.artify.ui.editbase.BaseEditActivity // Import BaseEditActivity
 import com.example.imageeditor.models.BrushStyle
 import com.example.imageeditor.tools.EraserTool
 import com.example.imageeditor.tools.FreeBrushTool
 // import com.example.imageeditor.views.PaintCanvasView // Accessed via binding
 import java.io.IOException
 
-class PaintActivity : AppCompatActivity() {
+class PaintActivity : BaseEditActivity<ActivityImageEditorTestBinding>() { // Inherit from BaseEditActivity
 
-    private lateinit var binding: ActivityImageEditorTestBinding // Declare binding variable
+    // binding is now initialized by BaseEditActivity
+    // private lateinit var binding: ActivityImageEditorTestBinding // Declare binding variable
     // private lateinit var paintCanvasView: PaintCanvasView // Accessed via binding.paintCanvasViewTest
     private var currentStrokeWidth = 5f
+
+    override fun inflateBinding(): ActivityImageEditorTestBinding {
+        return ActivityImageEditorTestBinding.inflate(layoutInflater)
+    }
 
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
@@ -94,12 +100,14 @@ class PaintActivity : AppCompatActivity() {
     }
 
     @SuppressLint("ObsoleteSdkInt")
-    @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    // @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM) // API check moved to onUndo/onRedo
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityImageEditorTestBinding.inflate(layoutInflater) // Inflate binding
-        setContentView(binding.root) // Set content view to binding.root
-
+        super.onCreate(savedInstanceState) // Call super.onCreate for BaseEditActivity
+        // binding = ActivityImageEditorTestBinding.inflate(layoutInflater) // Done by BaseEditActivity via inflateBinding()
+        // setContentView(binding.root) // Done by BaseEditActivity
+        binding.ictest.setOnClickListener {
+            Toast.makeText(this,"test",Toast.LENGTH_SHORT).show()
+        }
         // paintCanvasView is now binding.paintCanvasViewTest
         binding.paintCanvasViewTest.setCurrentBrushStyle(BrushStyle(color = Color.BLACK, strokeWidth = currentStrokeWidth))
         binding.paintCanvasViewTest.setCurrentTool(FreeBrushTool())
@@ -110,24 +118,6 @@ class PaintActivity : AppCompatActivity() {
 
         binding.buttonSetBlue.setOnClickListener {
             binding.paintCanvasViewTest.setBrushColor(Color.BLUE)
-        }
-
-        binding.buttonUndo.setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-                 val success = binding.paintCanvasViewTest.undo()
-                 if (!success) Toast.makeText(this, "Cannot undo", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Undo requires API 35+", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        binding.buttonRedo.setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-                val success = binding.paintCanvasViewTest.redo()
-                if (!success) Toast.makeText(this, "Cannot redo", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Redo requires API 35+", Toast.LENGTH_SHORT).show()
-            }
         }
 
         binding.buttonBrushTool.setOnClickListener { // This button is "Free Brush" now in XML
@@ -168,5 +158,34 @@ class PaintActivity : AppCompatActivity() {
         binding.buttonLoadImage.setOnClickListener {
             pickImageLauncher.launch("image/*")
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    override fun onUndo() {
+        super.onUndo() // Optional: if BaseEditActivity has some base undo logic
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            val success = binding.paintCanvasViewTest.undo()
+            if (!success) Toast.makeText(this, "Cannot undo", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "Undo requires API 35+", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    override fun onRedo() {
+        super.onRedo() // Optional: if BaseEditActivity has some base redo logic
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            val success = binding.paintCanvasViewTest.redo()
+            if (!success) Toast.makeText(this, "Cannot redo", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "Redo requires API 35+", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    override fun onCheck() {
+        super.onCheck()
+        // TODO: Implement save or export functionality here, for example:
+        // exportDrawing()
+        Toast.makeText(this, "Check button clicked (implement save/export)", Toast.LENGTH_LONG).show()
     }
 } 

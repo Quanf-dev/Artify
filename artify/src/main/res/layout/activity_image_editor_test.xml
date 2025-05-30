@@ -4,9 +4,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.ImageEditorTestActivity">
+    xmlns:iconics="http://schemas.android.com/apk/res-auto"
+    tools:context=".ui.paint.PaintActivity">
+    
+    <com.mikepenz.iconics.view.IconicsImageView
+        android:id="@+id/ictest"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        iconics:iiv_icon="gmi-arrow-left"
+        iconics:iiv_color="@android:color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
 
     <com.example.imageeditor.views.PaintCanvasView
+        android:layout_marginTop="60dp"
         android:id="@+id/paintCanvasViewTest"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_300sdp"
