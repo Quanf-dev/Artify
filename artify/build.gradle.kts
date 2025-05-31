@@ -114,9 +114,8 @@ dependencies {
     implementation ("com.mikepenz:iconics-views:5.3.4")
     implementation ("androidx.appcompat:appcompat:1.6.1")
 
-
-
-
-
+    // Color Picker (remove QuadFlask, add skydoves)
+    // implementation("com.github.QuadFlask:colorpicker:0.0.15") // Remove this
+    implementation("com.github.skydoves:colorpickerview:2.3.0") // Add this
 
 }

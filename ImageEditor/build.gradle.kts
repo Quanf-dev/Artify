@@ -42,4 +42,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // Color Picker (remove QuadFlask, add skydoves)
+    // implementation("com.github.QuadFlask:colorpicker:0.0.15") // Remove this
+    implementation("com.github.skydoves:colorpickerview:2.3.0") // Add this
 }

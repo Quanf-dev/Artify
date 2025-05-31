@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.kotlin.android)
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
-    id("com.google.gms.google-services") apply false
 }
 
 android {

@@ -10,4 +10,10 @@
         <item name="android:textColorSecondary">@color/desc_text</item>
         <item name="android:fontFamily">@font/work_sans</item>
     </style>
+
+    <!-- Style for Color Picker Dialog -->
+    <style name="Theme.Artify.ColorPickerDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <!-- You can customize dialog properties here if needed -->
+        <!-- Example: <item name="android:background">@color/white</item> -->
+    </style>
 </resources>
