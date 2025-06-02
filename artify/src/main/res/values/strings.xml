@@ -100,4 +100,11 @@
     <string name="al_avatar_generator">Al Avatar Generator</string>
     <string name="al_scene_generator">Al Scene Generator</string>
     <string name="ai_cartoonizer">AI\nCartoonizer</string>
+    <string name="paint">Paint</string>
+    <string name="text">Text</string>
+    <string name="crop_rotate">Crop/ Rotate</string>
+    <string name="tune">Tune</string>
+    <string name="filter">Filter</string>
+    <string name="blur">Blur</string>
+    <string name="emoji">Emoji</string>
 </resources>

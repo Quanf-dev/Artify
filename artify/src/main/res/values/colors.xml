@@ -4,9 +4,12 @@
     <color name="title_text">#000000</color>
     <color name="desc_text">#555555</color>
     <color name="white">#FFFFFF</color>
-    <color name="icon_color">#000000</color> <!-- Đen cho light mode -->
+    <color name="icon_color">#000000</color> <!-- Đen cho light mode Icon cho cho login -->
     <color name="label_text">#222222</color> <!-- Đen đậm -->
     <color name="holder_text">#757575</color> <!-- Xám trung bình -->
     <color name="dialog_background_color">#F5F5F5</color> <!-- Or a specific dialog color e.g. #EFEFEF -->
+    <color name="toolbar_edit_color">#FFFFFF</color>
+    <color name="iconColor">#212121</color>  <!-- Icon cho các activity edit -->
+    <color name="imageSurroundBackground">#303030</color>
 
 </resources>

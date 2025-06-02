@@ -64,7 +64,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.editbase.ImageEditorTestActivity"
+            android:name=".ui.editMain.EditMainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

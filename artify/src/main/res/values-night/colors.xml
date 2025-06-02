@@ -7,6 +7,8 @@
     <color name="label_text">#F0E5E5</color>
     <color name="holder_text">#A9A9A9</color>
     <color name="dialog_background_color">#1D1D1D</color> <!-- Or a specific dialog color e.g. #EFEFEF -->
-
+    <color name="toolbar_edit_color">#000000</color>
+    <color name="iconColor">#FFFFFF</color>
+    <color name="imageSurroundBackground">#424242</color>
 
 </resources>

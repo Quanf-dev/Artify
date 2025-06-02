@@ -1,76 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:iconics="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context=".ui.editbase.BaseEditActivity">
 
-    <!-- Container for the child activity's main content -->
-    <!-- This is added first, so it's at the "bottom" of the Z-order -->
-    <FrameLayout
-        android:id="@+id/content_container_edit"
+
+    <!-- Container để layout con addView -->
+
+    <!-- ImageView dùng chung -->
+    <ImageView
+        android:id="@+id/sharedImageView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="500dp"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:src="@drawable/ic_launcher_foreground"
+        android:scaleType="centerCrop"
+        android:background="?android:selectableItemBackground"
+        android:padding="8dp" />
 
-    <!-- Custom Toolbar Area - sits on TOP of the content_container_edit -->
     <FrameLayout
-        android:id="@+id/custom_toolbar_overlay"
+        android:id="@+id/contentContainerEdit"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="#22000000"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp">
+        android:layout_height="match_parent"
+        />
 
-        <com.mikepenz.iconics.view.IconicsImageView
-            android:id="@+id/icon_back"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|start"
-            iconics:iiv_icon="gmi-arrow-left"
-            iconics:iiv_color="@android:color/black" 
-            iconics:iiv_size="24dp"
-            android:padding="8dp"
-            android:background="?attr/selectableItemBackgroundBorderless"/>
 
-        <!-- Container for action icons on the right -->
-        <LinearLayout
-            android:id="@+id/toolbar_action_icons_group"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="center_vertical|end"
-            android:orientation="horizontal">
-
-            <com.mikepenz.iconics.view.IconicsImageView
-                android:id="@+id/icon_undo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                iconics:iiv_icon="gmi-undo"
-                iconics:iiv_color="@android:color/black"
-                iconics:iiv_size="24dp"
-                android:padding="8dp"
-                android:background="?attr/selectableItemBackgroundBorderless"/>
-
-            <com.mikepenz.iconics.view.IconicsImageView
-                android:id="@+id/icon_redo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                iconics:iiv_icon="gmi-redo"
-                iconics:iiv_color="@android:color/black"
-                iconics:iiv_size="24dp"
-                android:padding="8dp"
-                android:background="?attr/selectableItemBackgroundBorderless"/>
-
-            <com.mikepenz.iconics.view.IconicsImageView
-                android:id="@+id/icon_check"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                iconics:iiv_icon="gmi-check"
-                iconics:iiv_color="@android:color/black"
-                iconics:iiv_size="24dp"
-                android:padding="8dp"
-                android:background="?attr/selectableItemBackgroundBorderless"/>
-        </LinearLayout>
-    </FrameLayout>
 </FrameLayout>

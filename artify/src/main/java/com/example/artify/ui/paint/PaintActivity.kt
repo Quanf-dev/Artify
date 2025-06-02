@@ -1,7 +1,6 @@
-package com.example.artify.ui.editbase
+package com.example.artify.ui.paint
 
 import android.R
-import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
@@ -15,30 +14,36 @@ import android.widget.SeekBar
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
-import com.example.artify.databinding.ActivityImageEditorTestBinding
+import com.example.artify.databinding.ActivityPaintBinding
+import com.example.artify.ui.editbase.BaseEditActivity
 import com.example.imageeditor.tools.base.BlurTool
 import com.example.imageeditor.tools.base.EraserTool
 import com.example.imageeditor.tools.base.SelectionTool
 import com.example.imageeditor.tools.freestyle.FreestyleTool
-import com.example.imageeditor.tools.shapes.*
+import com.example.imageeditor.tools.shapes.ArrowTool
+import com.example.imageeditor.tools.shapes.CircleTool
+import com.example.imageeditor.tools.shapes.DashLineTool
+import com.example.imageeditor.tools.shapes.LineTool
+import com.example.imageeditor.tools.shapes.RectangleTool
 import com.skydoves.colorpickerview.ColorEnvelope
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
+import android.graphics.drawable.BitmapDrawable
 
-class ImageEditorTestActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityImageEditorTestBinding
+class PaintActivity : BaseEditActivity<ActivityPaintBinding>() {
     private lateinit var imagePickerLauncher: ActivityResultLauncher<Intent>
     private var currentSelectedColor: Int = Color.BLACK
     private var currentBlurTool: BlurTool? = null
 
+    override fun inflateBinding(): ActivityPaintBinding {
+        return ActivityPaintBinding.inflate(layoutInflater)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityImageEditorTestBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         setupImagePicker()
         setupPaintEditorView()
@@ -49,6 +54,22 @@ class ImageEditorTestActivity : AppCompatActivity() {
         setupUtilityButtons()
         setupFillModeSwitch()
         setupRotationSeekBar()
+
+        // Ưu tiên nhận image_path từ Intent
+        val imagePath = intent.getStringExtra("image_path")
+        if (!imagePath.isNullOrEmpty()) {
+            val bitmap = BitmapFactory.decodeFile(imagePath)
+            if (bitmap != null) {
+                binding.paintEditorView.setBackgroundImage(bitmap)
+            }
+        } else {
+            // Fallback: lấy từ sharedImageView nếu không có image_path
+            val drawable = sharedImageView.drawable
+            if (drawable is android.graphics.drawable.BitmapDrawable) {
+                val bitmap = drawable.bitmap
+                binding.paintEditorView.setBackgroundImage(bitmap)
+            }
+        }
     }
 
     private fun setupImagePicker() {
@@ -82,13 +103,13 @@ class ImageEditorTestActivity : AppCompatActivity() {
             updateToolUI(isBlurTool = false)
             Toast.makeText(this, "Freestyle Tool Selected", Toast.LENGTH_SHORT).show()
         }
-        
+
         binding.btnLineTool.setOnClickListener {
             binding.paintEditorView.setTool(LineTool())
             updateToolUI(isBlurTool = false)
             Toast.makeText(this, "Line Tool Selected", Toast.LENGTH_SHORT).show()
         }
-        
+
         binding.btnEraserTool.setOnClickListener {
             binding.paintEditorView.setTool(EraserTool())
             updateToolUI(isBlurTool = false)
@@ -214,10 +235,7 @@ class ImageEditorTestActivity : AppCompatActivity() {
     }
 
     private fun setupActionButtons() {
-        binding.btnUndo.setOnClickListener { binding.paintEditorView.undo() }
-        binding.btnRedo.setOnClickListener { binding.paintEditorView.redo() }
         binding.btnClear.setOnClickListener { binding.paintEditorView.clear() }
-        binding.btnSave.setOnClickListener { saveDrawing() }
     }
 
     private fun setupUtilityButtons() {
@@ -263,4 +281,4 @@ class ImageEditorTestActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
     }
-} 
+}

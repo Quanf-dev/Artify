@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources >
     <style name="ConstraintTopStartParent">
         <item name="layout_constraintTop_toTopOf">parent</item>
         <item name="layout_constraintStart_toStartOf">parent</item>
@@ -59,7 +59,5 @@
         <item name="android:layout_height">@dimen/_170sdp</item>
         <item name="android:layout_marginTop">20dp</item>
     </style>
-
-
 
 </resources>
