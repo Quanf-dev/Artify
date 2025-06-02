@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.editbase.ImageEditorTestActivity">
+
+    <com.example.imageeditor.ui.views.PaintEditorView
+        android:id="@+id/paintEditorView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="8dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/controlsScrollView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <ScrollView
+        android:id="@+id/controlsScrollView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <!-- Tool Selection -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tools" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <Button android:id="@+id/btnFreestyleTool" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Freestyle" style="?attr/materialButtonOutlinedStyle"/>
+                <Button android:id="@+id/btnLineTool" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Line" style="?attr/materialButtonOutlinedStyle"/>
+                <Button android:id="@+id/btnEraserTool" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Eraser" style="?attr/materialButtonOutlinedStyle"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <Button android:id="@+id/btnRectangleTool" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Rectangle" style="?attr/materialButtonOutlinedStyle"/>
+                <Button android:id="@+id/btnCircleTool" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Circle" style="?attr/materialButtonOutlinedStyle"/>
+                <Button android:id="@+id/btnArrowTool" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Arrow" style="?attr/materialButtonOutlinedStyle"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <Button android:id="@+id/btnDashLineTool" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Dash Line" style="?attr/materialButtonOutlinedStyle"/>
+                <Button android:id="@+id/btnBlurTool" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Blur" style="?attr/materialButtonOutlinedStyle"/>
+                <Button android:id="@+id/btnSelectionTool" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Select" style="?attr/materialButtonOutlinedStyle"/>
+            </LinearLayout>
+
+            <!-- Fill Mode Toggle -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Fill Mode"
+                    android:layout_marginEnd="8dp"/>
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switchFillMode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <!-- Blur Radius (Only visible when Blur tool is selected) -->
+            <LinearLayout
+                android:id="@+id/blurRadiusLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Blur Radius" />
+                <SeekBar
+                    android:id="@+id/seekBarBlurRadius"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:max="50"
+                    android:progress="25" />
+            </LinearLayout>
+
+            <!-- Color Selection -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Color" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <Button
+                    android:id="@+id/btnChooseColor"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Choose Color" />
+                <View
+                    android:id="@+id/viewSelectedColorPreview"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:background="#000000" />
+            </LinearLayout>
+
+            <!-- Stroke Width -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Stroke Width" />
+            <SeekBar
+                android:id="@+id/seekBarStrokeWidth"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="100"
+                android:progress="5" />
+
+            <!-- Opacity -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Opacity" />
+            <SeekBar
+                android:id="@+id/seekBarOpacity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="255"
+                android:progress="255" />
+
+            <!-- Rotation -->
+            <LinearLayout
+                android:id="@+id/rotationLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Rotation" />
+                <SeekBar
+                    android:id="@+id/seekBarRotation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:max="360"
+                    android:progress="0" />
+            </LinearLayout>
+
+            <!-- Utilities -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Utilities" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <Button
+                    android:id="@+id/btnUploadImage"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Upload Image" />
+                <Button
+                    android:id="@+id/btnResetViewTransform"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Reset View" />
+            </LinearLayout>
+
+            <!-- Actions -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Actions" />
+            <LinearLayout
+                android:id="@+id/actionsLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <Button
+                    android:id="@+id/btnUndo"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Undo" />
+                <Button
+                    android:id="@+id/btnRedo"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Redo" />
+                <Button
+                    android:id="@+id/btnClear"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Clear" />
+                <Button
+                    android:id="@+id/btnSave"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Save" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout> 
