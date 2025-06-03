@@ -21,7 +21,36 @@
             android:layout_weight="1"
             android:padding="50dp"/>
 
-        <include layout="@layout/item_bottom_paint" />
+        <!-- Blur Radius Layout -->
+        <LinearLayout
+            android:id="@+id/blurRadiusLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:padding="8dp"
+            android:background="@color/white">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Blur Radius"
+                android:textColor="@color/label_text"
+                android:textSize="14sp"
+                android:layout_marginBottom="4dp"/>
+
+            <SeekBar
+                android:id="@+id/seekBarBlurRadius"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="50"
+                android:progress="25"/>
+
+        </LinearLayout>
+
+        <include 
+            android:id="@+id/bottomPaint"
+            layout="@layout/item_bottom_paint" />
 
     </LinearLayout>
 

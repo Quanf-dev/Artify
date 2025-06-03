@@ -11,8 +11,6 @@ abstract class BaseEditActivity<VB : ViewBinding> : AppCompatActivity() {
     protected lateinit var baseBinding: ActivityBaseEditBinding
     protected lateinit var binding: VB
 
-    protected lateinit var sharedImageView: ImageView
-
     abstract fun inflateBinding(): VB
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,7 +21,5 @@ abstract class BaseEditActivity<VB : ViewBinding> : AppCompatActivity() {
         binding = inflateBinding()
         baseBinding.contentContainerEdit.addView(binding.root)
 
-        // Gán ImageView dùng chung
-        sharedImageView = baseBinding.sharedImageView
     }
 }

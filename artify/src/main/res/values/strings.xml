@@ -107,4 +107,27 @@
     <string name="filter">Filter</string>
     <string name="blur">Blur</string>
     <string name="emoji">Emoji</string>
+    <string name="free_style">Free Style</string>
+    <string name="arrow">Arrow</string>
+    <string name="line">Line</string>
+    <string name="reactangle">Reactangle</string>
+    <string name="dash_line">Dash line</string>
+    <string name="eraser">Eraser</string>
+    <string name="color">Color</string>
+    <string name="circle">Circle</string>
+    <string name="cancel">Cancel</string>
+    <string name="clear">Clear</string>
+    <string name="rotate">Rotate</string>
+    <string name="flip">Flip</string>
+    <string name="ratio">Ratio</string>
+    <string name="reset">Reset</string>
+    <string name="brightness">Brightness</string>
+    <string name="contrast">Contrast</string>
+    <string name="saturation">Saturation</string>
+    <string name="exposure">Exposure</string>
+    <string name="hue">Hue</string>
+    <string name="temperture">Temperture</string>
+    <string name="sharpness">Sharpness</string>
+    <string name="luminance">Luminance</string>
+    <string name="fade">Fade</string>
 </resources>

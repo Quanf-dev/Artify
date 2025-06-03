@@ -101,23 +101,19 @@ class PaintEditorView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        
         canvas.save()
         canvas.concat(viewMatrix)
-        
-        // Draw background
-        if (backgroundImage == null) {
-            canvas.drawColor(Color.WHITE)
-        }
-        
+
+        // Luôn fill trắng trước
+        canvas.drawColor(Color.WHITE)
+
+        // Sau đó mới vẽ background (nếu có)
         backgroundImage?.let {
             canvas.drawBitmap(it, backgroundSrcRect, backgroundDstRectF, null)
         }
-        
+
         drawingCacheBitmap?.let { canvas.drawBitmap(it, 0f, 0f, null) }
-        
         currentTool.drawPreview(canvas)
-        
         canvas.restore()
     }
     

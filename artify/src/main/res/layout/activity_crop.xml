@@ -12,20 +12,20 @@
     <include
         android:id="@+id/include"
         layout="@layout/item_toolbar_edit_main"
-      />
+        />
 
-    <com.example.imageeditor.ui.views.PaintEditorView
-        android:id="@+id/editorView"
+    <ImageView
         android:background="@color/imageSurroundBackground"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:src="@drawable/img_scenegen"
         android:padding="50dp"
         />
 
     <!-- Bottom bar ở dưới -->
     <include
-        layout="@layout/item_bottom_bar_edt_main"
+        layout="@layout/item_bottom_crop"
         />
 
 </LinearLayout>
