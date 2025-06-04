@@ -123,5 +123,10 @@ dependencies {
     // drag delete crop rotate view
     implementation("com.github.miaoyongjun:StickerView:1.1")
 
+    // verticalseekbar
+    implementation ("com.h6ah4i.android.widget.verticalseekbar:verticalseekbar:1.0.0")
+
+    // crop
+    implementation ("com.github.yalantis:ucrop:2.2.10")
 
 }

@@ -9,45 +9,31 @@ import android.text.TextWatcher
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.EditText
-import android.widget.RadioGroup
+import android.view.ViewGroup
 import android.widget.SeekBar
-import android.widget.Spinner
 import androidx.fragment.app.Fragment
 import androidx.core.content.res.ResourcesCompat
 import com.example.artify.R
+import com.example.artify.databinding.FragmentEditTextBinding
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import android.graphics.drawable.GradientDrawable
+import android.widget.TextView
 import androidx.core.widget.doOnTextChanged
+import com.example.artify.model.TextProperties
+import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.utils.sizeDp
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import android.os.Handler
+import android.os.Looper
+import android.view.LayoutInflater
+import android.widget.FrameLayout
+import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 
-data class TextProperties(
-    var text: String = "",
-    var fontResId: Int = 0, // 0 for default
-    var textSizePx: Float = 60f, // Default pixel size
-    var alignment: Paint.Align = Paint.Align.CENTER,
-    var textColor: Int = Color.WHITE,
-    var backgroundColor: Int = Color.TRANSPARENT,
-    var backgroundAlpha: Int = 100, // Default 100 (0-255)
-    var viewWidth: Int = 0,
-    var viewHeight: Int = 0
-)
-
-class EditTextFragment : Fragment(R.layout.fragment_edit_text) {
-
-    private lateinit var editText: EditText
-    private lateinit var spinnerFontFamily: Spinner
-    private lateinit var seekBarTextSize: SeekBar
-    private lateinit var radioGroupAlign: RadioGroup
-    private lateinit var btnTextColor: Button
-    private lateinit var viewTextColorPreview: View
-    private lateinit var btnBgColor: Button
-    private lateinit var viewBgColorPreview: View
-    private lateinit var seekBarBgOpacity: SeekBar
-    private lateinit var btnDone: Button
+class EditTextFragment : Fragment() {
+    private var _binding: FragmentEditTextBinding? = null
+    private val binding get() = _binding!!
 
     private val currentTextProperties = TextProperties()
     
@@ -57,62 +43,70 @@ class EditTextFragment : Fragment(R.layout.fragment_edit_text) {
     // Callback to pass properties to Activity
     var onTextPropertiesChanged: ((TextProperties) -> Unit)? = null
 
-    // Map user-friendly names to actual font resource IDs
-    // Ensure these resource IDs match the font files in your res/font folder
+    // Font list and map
+    private val fontList = listOf(
+        "Default",
+        "Bebas Neue",
+        "Bungee Spice",
+        "Unifraktur Cook",
+        "Work Sans",
+        "Playwrite IT Moderna Guides",
+        "Kapakana",
+        "Noto Serif Dives Akuru",
+        "WDXL Lubrifont TC"
+    )
     private val fontMap = mapOf(
         "Default" to 0,
-//        "Roboto" to R.font.roboto_regular, // Example: replace with your actual font file
-//        "Open Sans" to R.font.opensans_regular, // Example
-//        "Lato" to R.font.lato_regular, // Example
-//        "Montserrat" to R.font.montserrat_regular, // Example
-//        "Slabo 27px" to R.font.slabo_27px, // Example
-//        "Raleway" to R.font.raleway_regular, // Example
-//        "Merriweather" to R.font.merriweather_regular, // Example
-//        "PT Sans" to R.font.ptsans_regular, // Example
-//        "Lobster" to R.font.lobster_regular, // Example
-//        "Pacifico" to R.font.pacifico_regular, // Example
-//        "Caveat" to R.font.caveat_regular, // Example
-//        "Dancing Script" to R.font.dancingscript_regular // Example
+        "Bebas Neue" to R.font.bebas_neue_regular,
+        "Bungee Spice" to R.font.bungee_spice_regular,
+        "Unifraktur Cook" to R.font.unifraktur_cook_bold,
+        "Work Sans" to R.font.work_sans,
+        "Playwrite IT Moderna Guides" to R.font.playwrite_it_moderna_guides_regular,
+        "Kapakana" to R.font.kapakana_variablefont_wght,
+        "Noto Serif Dives Akuru" to R.font.noto_serif_dives_akuru_regular,
+        "WDXL Lubrifont TC" to R.font.wdxl_lubrifont_tc_regular
     )
+    private var selectedFontIndex = 0
+    private lateinit var fontAdapter: FontAdapter
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentEditTextBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        editText = view.findViewById(R.id.editText)
-        spinnerFontFamily = view.findViewById(R.id.spinnerFontFamily)
-        seekBarTextSize = view.findViewById(R.id.seekBarTextSize)
-        radioGroupAlign = view.findViewById(R.id.radioGroupAlign)
-        btnTextColor = view.findViewById(R.id.btnTextColor)
-        viewTextColorPreview = view.findViewById(R.id.viewTextColorPreview)
-        btnBgColor = view.findViewById(R.id.btnBgColor)
-        viewBgColorPreview = view.findViewById(R.id.viewBgColorPreview)
-        seekBarBgOpacity = view.findViewById(R.id.seekBarBgOpacity)
-        btnDone = view.findViewById(R.id.btnDone)
-
-        editText.doOnTextChanged { text, _, _, _ ->
+        setupFontRecycler()
+        binding.editText.doOnTextChanged { text, _, _, _ ->
             // fix bug preview background ko bo vao text
             if (text.isNullOrEmpty()) {
-                editText.hint = "Enter Text..."
+                binding.editText.hint = "Enter Text..."
             } else {
-                editText.hint = null
+                binding.editText.hint = null
             }
         }
-        setupFontSpinner()
         setupControls()
         loadInitialProperties()
         setupTextWatcher()
 
-        btnDone.setOnClickListener {
-            currentTextProperties.text = editText.text.toString()
-            currentTextProperties.viewWidth = editText.width
-            currentTextProperties.viewHeight = editText.height
+        binding.btnDone.setOnClickListener {
+            currentTextProperties.text = binding.editText.text.toString()
+            currentTextProperties.viewWidth = binding.editText.width
+            currentTextProperties.viewHeight = binding.editText.height
             onTextPropertiesChanged?.invoke(currentTextProperties)
             parentFragmentManager.beginTransaction().remove(this@EditTextFragment).commit()
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     private fun setupTextWatcher() {
-        editText.addTextChangedListener(object : TextWatcher {
+        binding.editText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
@@ -122,16 +116,16 @@ class EditTextFragment : Fragment(R.layout.fragment_edit_text) {
     }
 
     private fun autoAdjustTextSize() {
-        val text = editText.text.toString()
+        val text = binding.editText.text.toString()
         if (text.isEmpty()) return
 
-        val maxWidth = editText.width - editText.paddingLeft - editText.paddingRight
-        val maxHeight = editText.height - editText.paddingTop - editText.paddingBottom
+        val maxWidth = binding.editText.width - binding.editText.paddingLeft - binding.editText.paddingRight
+        val maxHeight = binding.editText.height - binding.editText.paddingTop - binding.editText.paddingBottom
 
         if (maxWidth <= 0 || maxHeight <= 0) return
 
         var size = MAX_TEXT_SIZE
-        val paint = editText.paint
+        val paint = binding.editText.paint
         val bounds = android.graphics.Rect()
         
         while (size > MIN_TEXT_SIZE) {
@@ -146,30 +140,56 @@ class EditTextFragment : Fragment(R.layout.fragment_edit_text) {
 
         // Update the seekbar to reflect the auto-adjusted size
         val progress = ((size - MIN_TEXT_SIZE) / (MAX_TEXT_SIZE - MIN_TEXT_SIZE) * 100).toInt()
-        seekBarTextSize.progress = progress
+        binding.seekBarTextSize.progress = progress
         currentTextProperties.textSizePx = size
         updateEditTextPreview()
     }
 
-    private fun setupFontSpinner() {
-        val fontDisplayNames = resources.getStringArray(R.array.font_names)
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, fontDisplayNames)
-        spinnerFontFamily.adapter = adapter
-
-        spinnerFontFamily.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val selectedFontName = fontDisplayNames[position]
-                currentTextProperties.fontResId = fontMap[selectedFontName] ?: 0
-                updateEditTextPreview()
-                autoAdjustTextSize()
+    private fun setupFontRecycler() {
+        fontAdapter = FontAdapter(fontList, selectedFontIndex, fontMap) { index ->
+            val oldIndex = selectedFontIndex
+            selectedFontIndex = index
+            fontAdapter.selectedIndex = index
+            fontAdapter.notifyItemChanged(oldIndex)
+            fontAdapter.notifyItemChanged(index)
+            val fontName = fontList[index]
+            currentTextProperties.fontResId = fontMap[fontName] ?: 0
+            updateEditTextPreview()
+            Handler(Looper.getMainLooper()).post {
+                binding.fontRecycler.smoothScrollToPosition(index)
             }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
+        binding.fontRecycler.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        binding.fontRecycler.adapter = fontAdapter
+        binding.fontRecycler.scrollToPosition(selectedFontIndex)
+        // Auto-select center item when scroll stops
+        binding.fontRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                    val center = recyclerView.width / 2
+                    var minDistance = Int.MAX_VALUE
+                    var centerPos = selectedFontIndex
+                    for (i in layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()) {
+                        val v = layoutManager.findViewByPosition(i) ?: continue
+                        val viewCenter = (v.left + v.right) / 2
+                        val distance = kotlin.math.abs(viewCenter - center)
+                        if (distance < minDistance) {
+                            minDistance = distance
+                            centerPos = i
+                        }
+                    }
+                    if (centerPos != selectedFontIndex) {
+                        fontAdapter.onFontSelected(centerPos)
+                    }
+                }
+            }
+        })
     }
 
     private fun setupControls() {
         // Text Size
-        seekBarTextSize.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        binding.seekBarTextSize.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
                     val size = MIN_TEXT_SIZE + (progress / 100f) * (MAX_TEXT_SIZE - MIN_TEXT_SIZE)
@@ -182,26 +202,38 @@ class EditTextFragment : Fragment(R.layout.fragment_edit_text) {
         })
 
         // Alignment
-        radioGroupAlign.setOnCheckedChangeListener { _, checkedId ->
-            currentTextProperties.alignment = when (checkedId) {
-                R.id.rbLeft -> Paint.Align.LEFT
-                R.id.rbRight -> Paint.Align.RIGHT
+        binding.btnAlign.setOnClickListener {
+            // Đổi alignment theo vòng tròn: CENTER -> LEFT -> RIGHT -> CENTER...
+            currentTextProperties.alignment = when (currentTextProperties.alignment) {
+                Paint.Align.CENTER -> Paint.Align.LEFT
+                Paint.Align.LEFT -> Paint.Align.RIGHT
                 else -> Paint.Align.CENTER
+            }
+
+            // Cập nhật icon tương ứng
+            val newIcon = when (currentTextProperties.alignment) {
+                Paint.Align.LEFT -> "gmi-format-align-left"
+                Paint.Align.RIGHT -> "gmi-format-align-right"
+                else -> "gmi-format-align-center"
+            }
+            binding.btnAlign.icon = IconicsDrawable(requireContext(), newIcon).apply {
+                sizeDp = 22
             }
             updateEditTextPreview()
         }
 
+
         // Text Color
-        btnTextColor.setOnClickListener {
+        binding.btnTextColor.setOnClickListener {
             showColorPicker("Text Color", currentTextProperties.textColor) { color ->
                 currentTextProperties.textColor = color
-                viewTextColorPreview.setBackgroundColor(color)
+//                binding.viewTextColorPreview.setBackgroundColor(color)
                 updateEditTextPreview()
             }
         }
 
         // Background Color
-        btnBgColor.setOnClickListener {
+        binding.btnBgColor.setOnClickListener {
             showColorPicker("Background Color", currentTextProperties.backgroundColor) { color ->
                 currentTextProperties.backgroundColor = color
                 updateBackgroundPreview()
@@ -209,7 +241,7 @@ class EditTextFragment : Fragment(R.layout.fragment_edit_text) {
         }
 
         // Background Opacity
-        seekBarBgOpacity.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        binding.seekBarBgOpacity.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 currentTextProperties.backgroundAlpha = progress
                 updateBackgroundPreview()
@@ -228,43 +260,39 @@ class EditTextFragment : Fragment(R.layout.fragment_edit_text) {
         )
         val radiusPx = 15f * resources.displayMetrics.density
         // Tạo 2 drawable riêng biệt cho preview và editText
-        val bgDrawablePreview = GradientDrawable().apply {
-            cornerRadius = radiusPx
-            setColor(bgColorWithAlpha)
-        }
         val bgDrawableEditText = GradientDrawable().apply {
             cornerRadius = radiusPx
             setColor(bgColorWithAlpha)
         }
-        viewBgColorPreview.background = bgDrawablePreview
-        editText.background = bgDrawableEditText
+//        binding.viewBgColorPreview.background = bgDrawablePreview
+        binding.editText.background = bgDrawableEditText
         // Thêm padding nhỏ để background bo góc ôm sát chữ
         val paddingPx = (8 * resources.displayMetrics.density).toInt()
-        editText.setPadding(paddingPx, paddingPx, paddingPx, paddingPx)
+        binding.editText.setPadding(paddingPx, paddingPx, paddingPx, paddingPx)
     }
 
     private fun loadInitialProperties() {
-        editText.setText(currentTextProperties.text)
+        binding.editText.setText(currentTextProperties.text)
         
         val fontDisplayNames = resources.getStringArray(R.array.font_names)
         val initialFontName = fontMap.entries.firstOrNull { it.value == currentTextProperties.fontResId }?.key ?: "Default"
         val initialFontPosition = fontDisplayNames.indexOf(initialFontName).coerceAtLeast(0)
-        spinnerFontFamily.setSelection(initialFontPosition)
+//        binding.spinnerFontFamily.setSelection(initialFontPosition)
         
         // Convert textSizePx to progress
         val progress = ((currentTextProperties.textSizePx - MIN_TEXT_SIZE) / (MAX_TEXT_SIZE - MIN_TEXT_SIZE) * 100).toInt()
-        seekBarTextSize.progress = progress.coerceIn(0, 100)
+        binding.seekBarTextSize.progress = progress.coerceIn(0, 100)
 
-        val initialAlignId = when (currentTextProperties.alignment) {
-            Paint.Align.LEFT -> R.id.rbLeft
-            Paint.Align.RIGHT -> R.id.rbRight
-            else -> R.id.rbCenter
-        }
-        radioGroupAlign.check(initialAlignId)
+//        val initialAlignId = when (currentTextProperties.alignment) {
+//            Paint.Align.LEFT -> R.id.rbLeft
+//            Paint.Align.RIGHT -> R.id.rbRight
+//            else -> R.id.rbCenter
+//        }
+//        binding.radioGroupAlign.check(initialAlignId)
 
-        viewTextColorPreview.setBackgroundColor(currentTextProperties.textColor)
+//        binding.viewTextColorPreview.setBackgroundColor(currentTextProperties.textColor)
         updateBackgroundPreview()
-        seekBarBgOpacity.progress = currentTextProperties.backgroundAlpha
+        binding.seekBarBgOpacity.progress = currentTextProperties.backgroundAlpha
     }
 
     private fun showColorPicker(title: String, initialColor: Int, onColorSelected: (Int) -> Unit) {
@@ -284,28 +312,67 @@ class EditTextFragment : Fragment(R.layout.fragment_edit_text) {
         // Font
         if (currentTextProperties.fontResId != 0) {
             try {
-                editText.typeface = ResourcesCompat.getFont(requireContext(), currentTextProperties.fontResId)
+                binding.editText.typeface = ResourcesCompat.getFont(requireContext(), currentTextProperties.fontResId)
             } catch (e: Exception) {
-                editText.typeface = Typeface.DEFAULT
+                binding.editText.typeface = Typeface.DEFAULT
             }
         } else {
-            editText.typeface = Typeface.DEFAULT
+            binding.editText.typeface = Typeface.DEFAULT
         }
 
         // Size - Convert to SP for preview
-        editText.setTextSize(TypedValue.COMPLEX_UNIT_PX, currentTextProperties.textSizePx)
+        binding.editText.setTextSize(TypedValue.COMPLEX_UNIT_PX, currentTextProperties.textSizePx)
         
         // Align
-        editText.gravity = when (currentTextProperties.alignment) {
+        binding.editText.gravity = when (currentTextProperties.alignment) {
             Paint.Align.LEFT -> Gravity.START or Gravity.CENTER_VERTICAL
             Paint.Align.RIGHT -> Gravity.END or Gravity.CENTER_VERTICAL
             else -> Gravity.CENTER
         }
         
         // Text color
-        editText.setTextColor(currentTextProperties.textColor)
+        binding.editText.setTextColor(currentTextProperties.textColor)
 
         // Cập nhật lại background bo góc
         updateBackgroundPreview()
+    }
+}
+
+class FontAdapter(
+    private val fonts: List<String>,
+    var selectedIndex: Int,
+    private val fontMap: Map<String, Int>,
+    val onFontSelected: (Int) -> Unit
+) : RecyclerView.Adapter<FontAdapter.FontViewHolder>() {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FontViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_font_picker, parent, false)
+        return FontViewHolder(view as FrameLayout)
+    }
+    override fun getItemCount() = fonts.size
+    override fun onBindViewHolder(holder: FontViewHolder, position: Int) {
+        val fontName = fonts[position]
+        val tv = holder.fontName
+        tv.text = fontName
+        val fontResId = fontMap[fontName] ?: 0
+        if (fontResId != 0) {
+            try {
+                tv.typeface = ResourcesCompat.getFont(tv.context, fontResId)
+            } catch (e: Exception) {
+                tv.typeface = Typeface.DEFAULT
+            }
+        } else {
+            tv.typeface = Typeface.DEFAULT
+        }
+        // Set background
+        tv.setBackgroundResource(if (position == selectedIndex) R.drawable.bg_font_picker_item_selected else R.drawable.bg_font_picker_item_default)
+        tv.setTextColor(if (position == selectedIndex) Color.BLACK else Color.DKGRAY)
+        tv.setOnClickListener {
+            if (position != selectedIndex) {
+                onFontSelected(position)
+            }
+        }
+    }
+    class FontViewHolder(view: FrameLayout) : RecyclerView.ViewHolder(view) {
+        val fontName: TextView = view.findViewById(R.id.tvFontName)
     }
 } 

@@ -11,5 +11,6 @@
     <color name="toolbar_edit_color">#FFFFFF</color>
     <color name="iconColor">#212121</color>  <!-- Icon cho các activity edit -->
     <color name="imageSurroundBackground">#303030</color>
-
+    <color name="black">#000000</color>
+    <color name="colorPrimary">#1976D2</color>
 </resources>

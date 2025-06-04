@@ -1,31 +1,40 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.editMain.EditMainActivity">
+
+    >
+
+    <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context=".ui.editMain.EditMainActivity"
+        tools:ignore="ExtraText">
+        >
 
     <!-- Toolbar ở trên -->
     <include
-        android:id="@+id/include"
+        android:id="@+id/tbEdtMain"
         layout="@layout/item_toolbar_edit_main" />
 
-    <ImageView
-        android:id="@+id/editorView"
-        android:background="@color/imageSurroundBackground"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:src="@drawable/img_animegen"
-        android:scaleType="fitCenter" />
+
 
     <!-- Fragment text sẽ nằm trên ảnh -->
     <FrameLayout
-        android:id="@+id/textFragmentContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:layout_gravity="center">
+
+        <ImageView
+            android:id="@+id/editorView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/imageSurroundBackground"
+            android:scaleType="fitCenter"
+            android:src="@drawable/img_animegen" />
 
         <miaoyongjun.stickerview.StickerView
             android:id="@+id/sticker_view"
@@ -37,4 +46,12 @@
     <include
         layout="@layout/item_bottom_bar_edt_main" />
 
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/textFragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center" />
 </FrameLayout>
+

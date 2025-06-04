@@ -4,32 +4,19 @@ import android.app.Dialog
 import com.example.artify.R
 import android.content.DialogInterface
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Typeface
-import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
-import android.os.SystemClock
-import android.provider.MediaStore
 import android.view.Gravity
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.EditText
-import android.widget.RadioButton
-import android.widget.RadioGroup
 import android.widget.SeekBar
-import android.widget.Spinner
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import com.example.artify.databinding.ActivityPaintzBinding
+import com.example.artify.databinding.ActivityPaintBinding
 import com.example.artify.databinding.DialogPaintSettingsBinding
 import com.example.artify.databinding.ItemToolbarPaintBinding
 import com.example.artify.databinding.ItemBottomPaintBinding
@@ -47,11 +34,9 @@ import com.skydoves.colorpickerview.ColorEnvelope
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import eightbitlab.com.blurview.RenderScriptBlur
-import java.io.File
-import java.io.FileOutputStream
 import java.io.InputStream
 
-class PaintActivity : BaseEditActivity<ActivityPaintzBinding>() {
+class PaintActivity : BaseEditActivity<ActivityPaintBinding>() {
     private lateinit var toolbarBinding: ItemToolbarPaintBinding
     private lateinit var bottomBinding: ItemBottomPaintBinding
     private lateinit var imagePickerLauncher: ActivityResultLauncher<Intent>
@@ -61,8 +46,8 @@ class PaintActivity : BaseEditActivity<ActivityPaintzBinding>() {
     private var dialogBinding: DialogPaintSettingsBinding? = null
     private var currentEraserTool: EraserTool? = null
 
-    override fun inflateBinding(): ActivityPaintzBinding {
-        return ActivityPaintzBinding.inflate(layoutInflater)
+    override fun inflateBinding(): ActivityPaintBinding {
+        return ActivityPaintBinding.inflate(layoutInflater)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,6 +62,7 @@ class PaintActivity : BaseEditActivity<ActivityPaintzBinding>() {
         setupToolSelectionButtons()
         setupBlurView()
         setupPaintSettingsDialog()
+        setupClickListeners()
 
         // Set default tool to Freestyle
         binding.paintEditorView.setTool(FreestyleTool())

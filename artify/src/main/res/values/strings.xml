@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources >
+<resources>
     <string name="app_name">Artify</string>
     <string name="artify_photo_editing">Artify -Photo Editing</string>
     <string name="easy_one_click_photo_editing">Easy one-click photo editing!</string>
@@ -130,4 +130,6 @@
     <string name="sharpness">Sharpness</string>
     <string name="luminance">Luminance</string>
     <string name="fade">Fade</string>
+    <string name="done">Done</string>
+    <string name="enter_text">Enter text</string>
 </resources>

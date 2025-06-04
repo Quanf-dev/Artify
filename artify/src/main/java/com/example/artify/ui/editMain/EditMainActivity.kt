@@ -17,9 +17,8 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.commit
 import com.example.artify.R
 import miaoyongjun.stickerview.StickerView
-import java.io.File
-import java.io.FileOutputStream
 import android.graphics.drawable.GradientDrawable
+import com.example.artify.model.TextProperties
 
 class EditMainActivity : AppCompatActivity() {
     private var imageUri: Uri? = null
@@ -56,7 +55,7 @@ class EditMainActivity : AppCompatActivity() {
 //            pickImage()
 //        }
 
-        findViewById<View>(R.id.llText)?.setOnClickListener { // Assuming llText is your button to add text
+        findViewById<View>(R.id.llText)?.setOnClickListener {
             showEditTextFragment()
         }
     }
@@ -67,8 +66,8 @@ class EditMainActivity : AppCompatActivity() {
 
     private fun showEditTextFragment() {
         val fragment = EditTextFragment()
-        fragment.onTextPropertiesChanged = { properties ->
-            addTextOverlay(properties)
+        fragment.onTextPropertiesChanged = {
+            addTextOverlay(it)
         }
         supportFragmentManager.commit {
             replace(R.id.textFragmentContainer, fragment)
@@ -97,7 +96,7 @@ class EditMainActivity : AppCompatActivity() {
                 Paint.Align.RIGHT -> Gravity.END or Gravity.CENTER_VERTICAL
                 else -> Gravity.CENTER
             }
-            
+
             val bgColorWithAlpha = Color.argb(
                 properties.backgroundAlpha,
                 Color.red(properties.backgroundColor),
@@ -105,16 +104,12 @@ class EditMainActivity : AppCompatActivity() {
                 Color.blue(properties.backgroundColor)
             )
             // Tạo drawable bo góc cho background
-            val radiusPx = 24f * resources.displayMetrics.density
+            val radiusPx = 15f * resources.displayMetrics.density
             val bgDrawable = GradientDrawable().apply {
                 cornerRadius = radiusPx
                 setColor(bgColorWithAlpha)
             }
             background = bgDrawable
-
-            // Thêm padding nhỏ để background bo góc ôm sát chữ
-            val paddingPx = (8 * resources.displayMetrics.density).toInt()
-            setPadding(paddingPx, paddingPx, paddingPx, paddingPx)
 
             // Set width/height giống preview
             layoutParams = android.widget.FrameLayout.LayoutParams(properties.viewWidth, properties.viewHeight)
@@ -138,10 +133,4 @@ class EditMainActivity : AppCompatActivity() {
         stickerView.addSticker(drawable)
     }
 
-    // Remove onDestroy if not doing anything specific for EditMainActivity itself
-    // StickerView's cleanup is handled by its own lifecycle if it implements it,
-    // or typically Android handles View cleanup.
-    // override fun onDestroy() {
-    //     super.onDestroy()
-    // }
 }

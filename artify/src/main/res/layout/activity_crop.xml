@@ -1,31 +1,10 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".ui.editMain.EditMainActivity">
+    android:background="@color/black">
 
-    <!-- Toolbar ở trên -->
-    <include
-        android:id="@+id/include"
-        layout="@layout/item_toolbar_edit_main"
-        />
 
-    <ImageView
-        android:background="@color/imageSurroundBackground"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:src="@drawable/img_scenegen"
-        android:padding="50dp"
-        />
 
-    <!-- Bottom bar ở dưới -->
-    <include
-        layout="@layout/item_bottom_crop"
-        />
-
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
