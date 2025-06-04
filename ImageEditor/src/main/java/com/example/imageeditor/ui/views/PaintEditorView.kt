@@ -8,6 +8,7 @@ import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.PointF
+import android.graphics.PorterDuff
 import android.graphics.Rect
 import android.graphics.RectF
 import android.util.AttributeSet
@@ -40,8 +41,10 @@ class PaintEditorView @JvmOverloads constructor(
     private val historyManager = HistoryManager()
     
     // Drawing properties
-    var currentTool: BaseTool = SelectionTool(layerManager, this)
-        private set
+    private var currentTool: BaseTool = SelectionTool(
+        layerManager,
+        view = this
+    )
     private var currentColor: Int = Color.BLACK
     private var currentStrokeWidth: Float = 5f
     private var currentOpacity: Int = 255
@@ -101,19 +104,23 @@ class PaintEditorView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        
         canvas.save()
         canvas.concat(viewMatrix)
-
-        // Luôn fill trắng trước
-        canvas.drawColor(Color.WHITE)
-
-        // Sau đó mới vẽ background (nếu có)
+        
+        // Draw background
+        if (backgroundImage == null) {
+            canvas.drawColor(Color.WHITE)
+        }
+        
         backgroundImage?.let {
             canvas.drawBitmap(it, backgroundSrcRect, backgroundDstRectF, null)
         }
-
+        
         drawingCacheBitmap?.let { canvas.drawBitmap(it, 0f, 0f, null) }
+        
         currentTool.drawPreview(canvas)
+        
         canvas.restore()
     }
     
@@ -173,10 +180,9 @@ class PaintEditorView @JvmOverloads constructor(
     
     fun redrawAllLayers() {
         drawingCacheCanvas?.let { canvas ->
-            canvas.drawColor(Color.TRANSPARENT, android.graphics.PorterDuff.Mode.CLEAR)
+            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
             layerManager.draw(canvas)
         }
-        invalidate()
     }
     
     private inner class ScaleListener : ScaleGestureDetector.SimpleOnScaleGestureListener() {
@@ -374,10 +380,6 @@ class PaintEditorView @JvmOverloads constructor(
     }
 
     fun getLayerManager(): LayerManager = layerManager
-
-    fun getSelectedItem(): DrawableItem? {
-        return (currentTool as? SelectionTool)?.getSelectedItem()
-    }
 
     private fun saveDrawing() {
         // Implementation of saveDrawing method

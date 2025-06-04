@@ -1,8 +1,5 @@
 package com.example.artify.ui.editMain
 
-import android.app.Activity
-import android.app.Dialog
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -10,33 +7,24 @@ import android.graphics.Paint
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
+import android.view.Gravity
 import android.view.View
-import android.view.WindowManager
-import android.widget.EditText
-import android.widget.RadioButton
-import android.widget.RadioGroup
-import android.widget.SeekBar
-import android.widget.Spinner
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.core.content.res.ResourcesCompat
+import androidx.fragment.app.commit
 import com.example.artify.R
-import com.example.imageeditor.tools.text.TextTool
-import com.example.imageeditor.tools.text.TextSelectionTool
-import com.example.imageeditor.ui.views.PaintEditorView
+import miaoyongjun.stickerview.StickerView
 import java.io.File
 import java.io.FileOutputStream
+import android.graphics.drawable.GradientDrawable
 
 class EditMainActivity : AppCompatActivity() {
     private var imageUri: Uri? = null
-    private lateinit var editorView: PaintEditorView
-    private var currentTextTool: TextTool? = null
-    private var currentTextSelectionTool: TextSelectionTool? = null
-    private var textEditDialog: Dialog? = null
-    private var currentTextColor = Color.BLACK
-    private var currentTextBgColor = Color.WHITE
-    private var currentTextBgAlpha = 128 // 50% opacity
+    private lateinit var imageView: ImageView
+    private lateinit var stickerView: StickerView
 
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
@@ -45,13 +33,13 @@ class EditMainActivity : AppCompatActivity() {
             val bitmap = BitmapFactory.decodeStream(inputStream)
             inputStream?.close()
             if (bitmap != null) {
-                // Lưu bitmap vào file tạm
-                val file = File(cacheDir, "editing_image.png")
-                FileOutputStream(file).use { fos ->
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
-                }
-                imageUri = Uri.fromFile(file)
-                editorView.setBackgroundImage(bitmap)
+                imageView.setImageBitmap(bitmap) // Display picked image
+                // Optionally save to a temporary file if needed for other purposes
+                // val file = File(cacheDir, "editing_image.png")
+                // FileOutputStream(file).use { fos ->
+                //     bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
+                // }
+                // imageUri = Uri.fromFile(file)
             }
         }
     }
@@ -59,128 +47,101 @@ class EditMainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
-        editorView = findViewById(R.id.editorView)
-        setupTextEditDialog()
-        setupTextSelectionTool()
 
-        // Gắn sự kiện cho nút lltext để mở TextOnImage
-        findViewById<View>(R.id.llText)?.setOnClickListener {
-            imageUri?.let { uri ->
-                // Create a new TextTool instance
-                currentTextTool = TextTool()
-                currentTextTool?.setText("Nhập văn bản") // Default text
-                currentTextTool?.setTextSize(50f) // Default text size
-                currentTextTool?.setColor(currentTextColor) // Default text color
-                currentTextTool?.setBackgroundColor(currentTextBgColor)
-                currentTextTool?.setBackgroundAlpha(currentTextBgAlpha)
-                
-                // Set the text tool as the current tool
-                currentTextTool?.let { tool ->
-                    editorView.setTool(tool)
-                }
-            }
+        imageView = findViewById(R.id.editorView) // Assuming your ImageView in activity_edit_main is editorView
+        stickerView = findViewById(R.id.sticker_view)
+
+        // Button to pick image (assuming you have one in your main layout)
+//        findViewById<View>(R.id.btnPickImage)?.setOnClickListener { // Replace R.id.btnPickImage with your actual button ID
+//            pickImage()
+//        }
+
+        findViewById<View>(R.id.llText)?.setOnClickListener { // Assuming llText is your button to add text
+            showEditTextFragment()
         }
     }
 
-    private fun setupTextEditDialog() {
-        textEditDialog = Dialog(this).apply {
-            setContentView(R.layout.dialog_text_edit)
-            window?.setLayout(
-                WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.WRAP_CONTENT
-            )
-            window?.setBackgroundDrawableResource(android.R.color.transparent)
-
-            // Setup dialog views
-            val etText = findViewById<EditText>(R.id.etText)
-            val spinnerFont = findViewById<Spinner>(R.id.spinnerFont)
-            val seekBarTextSize = findViewById<SeekBar>(R.id.seekBarTextSize)
-            val radioGroupAlign = findViewById<RadioGroup>(R.id.radioGroupAlign)
-            val viewTextColor = findViewById<View>(R.id.viewTextColor)
-            val viewBgColor = findViewById<View>(R.id.viewBgColor)
-            val seekBarBgOpacity = findViewById<SeekBar>(R.id.seekBarBgOpacity)
-
-            // Set initial values
-            etText.setText("Nhập văn bản")
-            seekBarTextSize.progress = 50 // Default text size
-            radioGroupAlign.check(R.id.rbCenter) // Default alignment
-            viewTextColor.setBackgroundColor(currentTextColor)
-            viewBgColor.setBackgroundColor(currentTextBgColor)
-            seekBarBgOpacity.progress = currentTextBgAlpha
-
-            // Setup listeners
-            etText.setOnEditorActionListener { _, _, _ ->
-                currentTextTool?.setText(etText.text.toString())
-                editorView.redrawAllLayers()
-                true
-            }
-
-            seekBarTextSize.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    val textSize = 20f + (progress * 2f) // Scale from 20 to 220
-                    currentTextTool?.setTextSize(textSize)
-                    editorView.redrawAllLayers()
-                }
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-            })
-
-            radioGroupAlign.setOnCheckedChangeListener { _, checkedId ->
-                val align = when (checkedId) {
-                    R.id.rbLeft -> Paint.Align.LEFT
-                    R.id.rbCenter -> Paint.Align.CENTER
-                    R.id.rbRight -> Paint.Align.RIGHT
-                    else -> Paint.Align.LEFT
-                }
-                currentTextTool?.setTextAlign(align)
-                editorView.redrawAllLayers()
-            }
-        }
-    }
-
-    private fun setupTextSelectionTool() {
-        currentTextSelectionTool = TextSelectionTool(
-            editorView.getLayerManager(),
-            view = editorView
-        )
-        
-        currentTextSelectionTool?.setOnTextSelectedListener { textDrawable ->
-            // Update UI when text is selected
-        }
-        
-        currentTextSelectionTool?.setOnTextEditRequestListener { textDrawable ->
-            // Show edit dialog with current text properties
-            textEditDialog?.show()
-        }
-        
-        currentTextSelectionTool?.setOnTextDeleteRequestListener { textDrawable ->
-            // Remove text from layer
-            editorView.getLayerManager().getActiveLayer()?.removeDrawable(textDrawable)
-            editorView.redrawAllLayers()
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 1001 && resultCode == 1 && data != null) {
-            val resultImageUri = Uri.parse(data.getStringExtra("imageOutURI"))
-            // Convert URI to Bitmap and set as background
-            val inputStream = contentResolver.openInputStream(resultImageUri)
-            val bitmap = BitmapFactory.decodeStream(inputStream)
-            inputStream?.close()
-            bitmap?.let {
-                editorView.setBackgroundImage(it)
-            }
-        }
-    }
-
-    // Hàm này có thể gọi từ nút chọn ảnh
     private fun pickImage() {
         pickImageLauncher.launch("image/*")
     }
+
+    private fun showEditTextFragment() {
+        val fragment = EditTextFragment()
+        fragment.onTextPropertiesChanged = { properties ->
+            addTextOverlay(properties)
+        }
+        supportFragmentManager.commit {
+            replace(R.id.textFragmentContainer, fragment)
+            addToBackStack(null) // Optional: allows user to press back to close fragment
+        }
+    }
+
+    private fun addTextOverlay(properties: TextProperties) {
+        val textView = TextView(this).apply {
+            text = properties.text
+            setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, properties.textSizePx)
+            setTextColor(properties.textColor)
+
+            if (properties.fontResId != 0) {
+                try {
+                    typeface = ResourcesCompat.getFont(this@EditMainActivity, properties.fontResId)
+                } catch (e: Exception) {
+                    typeface = Typeface.DEFAULT
+                }
+            } else {
+                typeface = Typeface.DEFAULT
+            }
+
+            gravity = when (properties.alignment) {
+                Paint.Align.LEFT -> Gravity.START or Gravity.CENTER_VERTICAL
+                Paint.Align.RIGHT -> Gravity.END or Gravity.CENTER_VERTICAL
+                else -> Gravity.CENTER
+            }
+            
+            val bgColorWithAlpha = Color.argb(
+                properties.backgroundAlpha,
+                Color.red(properties.backgroundColor),
+                Color.green(properties.backgroundColor),
+                Color.blue(properties.backgroundColor)
+            )
+            // Tạo drawable bo góc cho background
+            val radiusPx = 24f * resources.displayMetrics.density
+            val bgDrawable = GradientDrawable().apply {
+                cornerRadius = radiusPx
+                setColor(bgColorWithAlpha)
+            }
+            background = bgDrawable
+
+            // Thêm padding nhỏ để background bo góc ôm sát chữ
+            val paddingPx = (8 * resources.displayMetrics.density).toInt()
+            setPadding(paddingPx, paddingPx, paddingPx, paddingPx)
+
+            // Set width/height giống preview
+            layoutParams = android.widget.FrameLayout.LayoutParams(properties.viewWidth, properties.viewHeight)
+
+            // Measure and layout the TextView to get its dimensions for the bitmap
+            measure(
+                View.MeasureSpec.makeMeasureSpec(properties.viewWidth, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(properties.viewHeight, View.MeasureSpec.EXACTLY)
+            )
+            layout(0, 0, properties.viewWidth, properties.viewHeight)
+        }
+        
+        if (textView.width == 0 || textView.height == 0) {
+            return
+        }
+
+        val bitmap = Bitmap.createBitmap(textView.width, textView.height, Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(bitmap)
+        textView.draw(canvas)
+        val drawable = android.graphics.drawable.BitmapDrawable(resources, bitmap)
+        stickerView.addSticker(drawable)
+    }
+
+    // Remove onDestroy if not doing anything specific for EditMainActivity itself
+    // StickerView's cleanup is handled by its own lifecycle if it implements it,
+    // or typically Android handles View cleanup.
+    // override fun onDestroy() {
+    //     super.onDestroy()
+    // }
 }
