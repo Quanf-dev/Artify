@@ -126,10 +126,26 @@
     <string name="saturation">Saturation</string>
     <string name="exposure">Exposure</string>
     <string name="hue">Hue</string>
-    <string name="temperture">Temperture</string>
+    <string name="temperature">Temperature</string>
     <string name="sharpness">Sharpness</string>
     <string name="luminance">Luminance</string>
     <string name="fade">Fade</string>
     <string name="done">Done</string>
     <string name="enter_text">Enter text</string>
+    
+    <!-- Filter Test Activity -->
+    <string name="filter_gallery">Filter Gallery</string>
+    <string name="filter_preview">Filter Preview</string>
+    <string name="save_image">Save Image</string>
+    <string name="reset_filters">Reset Filters</string>
+    <string name="load_image">Load Image</string>
+    <string name="camera">Camera</string>
+    <string name="image_saved">Image saved successfully</string>
+    <string name="error_saving_image">Error saving image</string>
+    <string name="error_loading_image">Error loading image</string>
+    <string name="permission_required">Storage permission required</string>
+    
+    <!-- Frame Test Activity -->
+    <string name="frame_gallery">Frame Gallery</string>
+    <string name="reset_frames">Reset Frames</string>
 </resources>

@@ -67,6 +67,9 @@ dependencies {
 
     // Firebase Auth Module
     implementation(project(":FirebaseAuth"))
+    
+    // Image Editor Module
+    implementation(project(":ImageEditor"))
 
     // Hilt
     implementation("com.google.dagger:hilt-android:2.50")
@@ -105,9 +108,6 @@ dependencies {
 
     //shimmer
     implementation ("com.facebook.shimmer:shimmer:0.5.0")
-
-    // Image Editor Library
-    implementation(project(":ImageEditor"))
 
     //iconic
     implementation ("com.mikepenz:material-design-iconic-typeface:2.2.0.9-kotlin@aar")

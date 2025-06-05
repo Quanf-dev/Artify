@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="300dp"
+    android:height="300dp"
+    android:viewportWidth="300"
+    android:viewportHeight="300">
+    
+    <!-- Background -->
+    <path
+        android:fillColor="#87CEEB"
+        android:pathData="M0,0h300v300h-300z"/>
+    
+    <!-- Sun -->
+    <path
+        android:fillColor="#FFFF00"
+        android:pathData="M50,50m-30,0a30,30 0,1 1,60 0a30,30 0,1 1,-60 0"/>
+    
+    <!-- Mountain 1 -->
+    <path
+        android:fillColor="#8B4513"
+        android:pathData="M0,300l100,-150l100,150z"/>
+    
+    <!-- Mountain 2 -->
+    <path
+        android:fillColor="#A0522D"
+        android:pathData="M150,300l100,-120l50,120z"/>
+    
+    <!-- Trees -->
+    <path
+        android:fillColor="#006400"
+        android:pathData="M80,220l-15,-25l30,0z"/>
+    <path
+        android:fillColor="#006400"
+        android:pathData="M80,195l-10,-20l20,0z"/>
+    <path
+        android:fillColor="#006400"
+        android:pathData="M80,175l-5,-15l10,0z"/>
+    
+    <path
+        android:fillColor="#006400"
+        android:pathData="M120,230l-20,-30l40,0z"/>
+    <path
+        android:fillColor="#006400"
+        android:pathData="M120,200l-15,-25l30,0z"/>
+    <path
+        android:fillColor="#006400"
+        android:pathData="M120,175l-10,-20l20,0z"/>
+    
+    <!-- House -->
+    <path
+        android:fillColor="#CD853F"
+        android:pathData="M200,220h40v30h-40z"/>
+    
+    <!-- Roof -->
+    <path
+        android:fillColor="#8B0000"
+        android:pathData="M190,220l30,-20l30,20z"/>
+    
+    <!-- Door -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M210,230h10v20h-10z"/>
+    
+    <!-- Window -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M225,230h10v10h-10z"/>
+</vector> 

@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
     android:orientation="horizontal"
+    android:id="@+id/tbMain"
     android:gravity="center_vertical"
     android:paddingHorizontal="16dp">
 
@@ -22,6 +23,7 @@
 
     <!-- Hai icon nằm sát nhau ở cuối -->
     <com.mikepenz.iconics.view.IconicsImageView
+        android:id="@+id/ivUndo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="15dp"
@@ -31,6 +33,7 @@
         iconics:iiv_size="22dp" />
 
     <com.mikepenz.iconics.view.IconicsImageView
+        android:id="@+id/ivRedo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         iconics:iiv_color="@color/iconColor"
@@ -41,6 +44,7 @@
         iconics:iiv_size="22dp" />
 
     <com.mikepenz.iconics.view.IconicsImageView
+        android:id="@+id/ivDone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         iconics:iiv_color="@color/iconColor"

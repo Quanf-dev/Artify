@@ -27,7 +27,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 iconics:iiv_color="@color/iconColor"
-                iconics:iiv_icon="gmi-brightness-6brightness-6"
+                iconics:iiv_icon="gmi-brightness-6"
                 iconics:iiv_size="22dp" />
 
             <TextView
@@ -155,7 +155,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/temperture"
+                android:text="@string/temperature"
                 android:textColor="@color/iconColor"
                 android:textSize="12sp" />
         </LinearLayout>

@@ -9,21 +9,22 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.commit
 import com.example.artify.R
-import miaoyongjun.stickerview.StickerView
+import com.example.artify.databinding.ActivityEditMainBinding
+import com.example.artify.databinding.ItemBottomBarEdtMainBinding
+import com.example.artify.databinding.ItemToolbarEditMainBinding
+import com.example.artify.ui.editbase.BaseEditActivity
 import android.graphics.drawable.GradientDrawable
 import com.example.artify.model.TextProperties
 
-class EditMainActivity : AppCompatActivity() {
+class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
     private var imageUri: Uri? = null
-    private lateinit var imageView: ImageView
-    private lateinit var stickerView: StickerView
+    private lateinit var bottomBarBinding: ItemBottomBarEdtMainBinding
+    private lateinit var toolbarBinding: ItemToolbarEditMainBinding
 
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
@@ -32,31 +33,54 @@ class EditMainActivity : AppCompatActivity() {
             val bitmap = BitmapFactory.decodeStream(inputStream)
             inputStream?.close()
             if (bitmap != null) {
-                imageView.setImageBitmap(bitmap) // Display picked image
-                // Optionally save to a temporary file if needed for other purposes
-                // val file = File(cacheDir, "editing_image.png")
-                // FileOutputStream(file).use { fos ->
-                //     bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
-                // }
-                // imageUri = Uri.fromFile(file)
+                binding.editorView.setImageBitmap(bitmap)
             }
         }
     }
 
+    override fun inflateBinding(): ActivityEditMainBinding {
+        return ActivityEditMainBinding.inflate(layoutInflater)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_edit_main)
+        bottomBarBinding = ItemBottomBarEdtMainBinding.bind(binding.root)
+        toolbarBinding = ItemToolbarEditMainBinding.bind(binding.root)
 
-        imageView = findViewById(R.id.editorView) // Assuming your ImageView in activity_edit_main is editorView
-        stickerView = findViewById(R.id.sticker_view)
+        setupClickListeners()
+    }
 
-        // Button to pick image (assuming you have one in your main layout)
-//        findViewById<View>(R.id.btnPickImage)?.setOnClickListener { // Replace R.id.btnPickImage with your actual button ID
-//            pickImage()
-//        }
-
-        findViewById<View>(R.id.llText)?.setOnClickListener {
+    private fun setupClickListeners() {
+        bottomBarBinding.llText.setOnClickListener {
             showEditTextFragment()
+        }
+
+        bottomBarBinding.llPaint.setOnClickListener {
+            navigateToPaint()
+        }
+
+        bottomBarBinding.llCrop.setOnClickListener {
+            navigateToCrop()
+        }
+
+        bottomBarBinding.llTune.setOnClickListener {
+            navigateToTune()
+        }
+
+        bottomBarBinding.llFilter.setOnClickListener {
+            navigateToFilter()
+        }
+
+        bottomBarBinding.llBlur.setOnClickListener {
+            navigateToBlur()
+        }
+
+        bottomBarBinding.llEmoji.setOnClickListener {
+            navigateToEmoji()
+        }
+
+        toolbarBinding.root.findViewById<View>(R.id.tbEdtMain)?.setOnClickListener {
+            onBackPressed()
         }
     }
 
@@ -71,7 +95,7 @@ class EditMainActivity : AppCompatActivity() {
         }
         supportFragmentManager.commit {
             replace(R.id.textFragmentContainer, fragment)
-            addToBackStack(null) // Optional: allows user to press back to close fragment
+            addToBackStack(null)
         }
     }
 
@@ -103,7 +127,6 @@ class EditMainActivity : AppCompatActivity() {
                 Color.green(properties.backgroundColor),
                 Color.blue(properties.backgroundColor)
             )
-            // Tạo drawable bo góc cho background
             val radiusPx = 15f * resources.displayMetrics.density
             val bgDrawable = GradientDrawable().apply {
                 cornerRadius = radiusPx
@@ -111,10 +134,8 @@ class EditMainActivity : AppCompatActivity() {
             }
             background = bgDrawable
 
-            // Set width/height giống preview
             layoutParams = android.widget.FrameLayout.LayoutParams(properties.viewWidth, properties.viewHeight)
 
-            // Measure and layout the TextView to get its dimensions for the bitmap
             measure(
                 View.MeasureSpec.makeMeasureSpec(properties.viewWidth, View.MeasureSpec.EXACTLY),
                 View.MeasureSpec.makeMeasureSpec(properties.viewHeight, View.MeasureSpec.EXACTLY)
@@ -130,7 +151,6 @@ class EditMainActivity : AppCompatActivity() {
         val canvas = android.graphics.Canvas(bitmap)
         textView.draw(canvas)
         val drawable = android.graphics.drawable.BitmapDrawable(resources, bitmap)
-        stickerView.addSticker(drawable)
+        binding.stickerView.addSticker(drawable)
     }
-
 }
