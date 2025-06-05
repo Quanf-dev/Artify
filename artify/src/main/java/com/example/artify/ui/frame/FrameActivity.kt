@@ -126,7 +126,7 @@ class FrameActivity : BaseEditActivity<ActivityFrameBinding>() {
         loadSampleImage()
     }
 
-    private fun loadImageFromUri(uri: Uri) {
+    override fun loadImageFromUri(uri: Uri) {
         try {
             val inputStream = contentResolver.openInputStream(uri)
             val bitmap = BitmapFactory.decodeStream(inputStream)
@@ -141,20 +141,20 @@ class FrameActivity : BaseEditActivity<ActivityFrameBinding>() {
         }
     }
 
-    private fun loadSampleImage() {
-        try {
-            // Load a sample image from resources
-            val bitmap = BitmapFactory.decodeResource(resources, R.drawable.img_animegen)
-            if (bitmap != null) {
-                imageFrameView.setImageBitmap(bitmap)
-            } else {
-                Toast.makeText(this, R.string.error_loading_image, Toast.LENGTH_SHORT).show()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, R.string.error_loading_image, Toast.LENGTH_SHORT).show()
-        }
-    }
+//    private fun loadSampleImage() {
+//        try {
+//            // Load a sample image from resources
+//            val bitmap = BitmapFactory.decodeResource(resources, R.drawable.img_animegen)
+//            if (bitmap != null) {
+//                imageFrameView.setImageBitmap(bitmap)
+//            } else {
+//                Toast.makeText(this, R.string.error_loading_image, Toast.LENGTH_SHORT).show()
+//            }
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//            Toast.makeText(this, R.string.error_loading_image, Toast.LENGTH_SHORT).show()
+//        }
+//    }
 
     private fun openGallery() {
         val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)

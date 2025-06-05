@@ -5,7 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.sticker.StickerActivity">
+    tools:context=".ui.sticker.StickerActivity"
+    tools:ignore="ExtraText">'
+
+    <include
+        android:id="@+id/tbSticker"
+        layout="@layout/item_toolbar_edit_main" />
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"

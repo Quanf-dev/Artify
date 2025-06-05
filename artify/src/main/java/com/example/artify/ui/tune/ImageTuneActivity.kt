@@ -1,5 +1,6 @@
 package com.example.artify.ui.tune
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import com.example.artify.R
@@ -8,6 +9,7 @@ import com.example.artify.databinding.ItemBottomTuneBinding
 import com.example.artify.databinding.ItemToolbarEditMainBinding
 import com.example.artify.ui.editbase.BaseEditActivity
 import com.example.imageeditor.ui.views.ImageAdjustmentView
+import java.io.File
 
 class ImageTuneActivity : BaseEditActivity<ActivityImageTuneBinding>() {
 
@@ -24,8 +26,26 @@ class ImageTuneActivity : BaseEditActivity<ActivityImageTuneBinding>() {
         super.onCreate(savedInstanceState)
         // Initialize views
         initViews()
-        // Load sample image
-        loadSampleImage()
+        
+        // Load image from intent
+        val imagePath = intent.getStringExtra("image_path")
+        if (imagePath != null) {
+            val file = File(imagePath)
+            if (file.exists()) {
+                val bitmap = BitmapFactory.decodeFile(imagePath)
+                if (bitmap != null) {
+                    currentImageBitmap = bitmap
+                    imageAdjustmentView.setImageBitmap(bitmap)
+                } else {
+                    loadSampleImage()
+                }
+            } else {
+                loadSampleImage()
+            }
+        } else {
+            loadSampleImage()
+        }
+        
         // Setup click listeners
         setupClickListeners()
     }
@@ -39,6 +59,7 @@ class ImageTuneActivity : BaseEditActivity<ActivityImageTuneBinding>() {
     private fun loadSampleImage() {
         // Load img_animegen.png from resources
         val bitmap = BitmapFactory.decodeResource(resources, R.drawable.img_animegen)
+        currentImageBitmap = bitmap
         imageAdjustmentView.setImageBitmap(bitmap)
     }
 
@@ -76,6 +97,14 @@ class ImageTuneActivity : BaseEditActivity<ActivityImageTuneBinding>() {
         }
         toolbarBinding.ivRedo.setOnClickListener {
             imageAdjustmentView.redo()
+        }
+        
+        // Add done button handler
+        toolbarBinding.ivDone.setOnClickListener {
+            // Get the edited image bitmap
+            val editedBitmap = imageAdjustmentView.getEditedBitmap()
+            // Return it to the EditMainActivity
+            returnEditedImage(editedBitmap)
         }
     }
 }

@@ -63,6 +63,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:max="25"
+            android:thumb="@drawable/thumb_blur_seekbar"
+            android:progressDrawable="@drawable/track_blur_seekbar"
             android:progress="0"
             android:progressTint="@color/colorPrimary"
             android:thumbTint="@color/colorPrimary" />
