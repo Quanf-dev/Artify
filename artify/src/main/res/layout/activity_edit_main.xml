@@ -16,7 +16,7 @@
 
     <!-- Toolbar ở trên -->
     <include
-        android:id="@+id/tbEdtMain"
+        android:id="@+id/toolbar"
         layout="@layout/item_toolbar_edit_main" />
 
 
@@ -44,6 +44,7 @@
 
     <!-- Bottom bar ở dưới -->
     <include
+        android:id="@+id/bottomBar"
         layout="@layout/item_bottom_bar_edt_main" />
 
     </LinearLayout>

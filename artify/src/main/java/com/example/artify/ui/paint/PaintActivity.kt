@@ -309,6 +309,11 @@ class PaintActivity : BaseEditActivity<ActivityPaintBinding>() {
 
             binding.paintEditorView.setFillMode(isChecked)
         }
+
+        toolbarBinding.btnCheck.setOnClickListener {
+            val editedBitmap = binding.paintEditorView.getBitmap()
+            returnEditedImage(editedBitmap)
+        }
     }
 
     private fun showLineWidthDialog() {

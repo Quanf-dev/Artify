@@ -125,36 +125,23 @@ class FrameActivity : BaseEditActivity<ActivityFrameBinding>() {
         // If no shared image, load a sample image
         loadSampleImage()
     }
-
-    override fun loadImageFromUri(uri: Uri) {
-        try {
-            val inputStream = contentResolver.openInputStream(uri)
-            val bitmap = BitmapFactory.decodeStream(inputStream)
-            if (bitmap != null) {
-                imageFrameView.setImageBitmap(bitmap)
-            } else {
-                Toast.makeText(this, R.string.error_loading_image, Toast.LENGTH_SHORT).show()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, R.string.error_loading_image, Toast.LENGTH_SHORT).show()
-        }
+ 
+    private fun loadSampleImage() {
+        setImageToViewFromFilePath(null, {
+            imageFrameView.setImageBitmap(it)
+        }, {
+            val bitmap = BitmapFactory.decodeResource(resources, R.drawable.img_animegen)
+            imageFrameView.setImageBitmap(bitmap)
+        })
     }
 
-//    private fun loadSampleImage() {
-//        try {
-//            // Load a sample image from resources
-//            val bitmap = BitmapFactory.decodeResource(resources, R.drawable.img_animegen)
-//            if (bitmap != null) {
-//                imageFrameView.setImageBitmap(bitmap)
-//            } else {
-//                Toast.makeText(this, R.string.error_loading_image, Toast.LENGTH_SHORT).show()
-//            }
-//        } catch (e: Exception) {
-//            e.printStackTrace()
-//            Toast.makeText(this, R.string.error_loading_image, Toast.LENGTH_SHORT).show()
-//        }
-//    }
+    fun loadImageFromUri(uri: Uri) {
+        setImageToViewFromUri(uri, {
+            imageFrameView.setImageBitmap(it)
+        }, {
+            Toast.makeText(this, R.string.error_loading_image, Toast.LENGTH_SHORT).show()
+        })
+    }
 
     private fun openGallery() {
         val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)

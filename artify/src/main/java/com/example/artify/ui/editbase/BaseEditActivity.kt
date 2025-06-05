@@ -3,6 +3,8 @@ package com.example.artify.ui.editbase
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -120,6 +122,48 @@ abstract class BaseEditActivity<VB : ViewBinding> : AppCompatActivity() {
         } catch (e: Exception) {
             e.printStackTrace()
             return null
+        }
+    }
+
+    protected fun loadBitmapFromUri(uri: Uri?): Bitmap? {
+        if (uri == null) return null
+        return try {
+            val inputStream = contentResolver.openInputStream(uri)
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream?.close()
+            bitmap
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    protected fun loadBitmapFromFilePath(path: String?): Bitmap? {
+        if (path.isNullOrEmpty()) return null
+        return try {
+            val file = java.io.File(path)
+            if (file.exists()) BitmapFactory.decodeFile(path) else null
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    protected fun setImageToViewFromFilePath(path: String?, setBitmap: (Bitmap) -> Unit, onError: (() -> Unit)? = null) {
+        val bitmap = loadBitmapFromFilePath(path)
+        if (bitmap != null) {
+            setBitmap(bitmap)
+        } else {
+            onError?.invoke()
+        }
+    }
+
+    protected fun setImageToViewFromUri(uri: Uri?, setBitmap: (Bitmap) -> Unit, onError: (() -> Unit)? = null) {
+        val bitmap = loadBitmapFromUri(uri)
+        if (bitmap != null) {
+            setBitmap(bitmap)
+        } else {
+            onError?.invoke()
         }
     }
 

@@ -36,18 +36,13 @@
         <!-- </intent-filter> -->
         <!-- </activity> -->
         <activity
-            android:name=".ui.sticker.StickerActivity"
+            android:name=".ui.home.HomeActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- Intent filter for receiving shared images -->
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="image/*" />
-            </intent-filter>
+
         </activity>
         
         <activity
@@ -59,17 +54,24 @@
                 <data android:mimeType="image/*" />
             </intent-filter>
         </activity>
-        
-<!--        <activity-->
-<!--            android:name=".ui.activities.FilterTestActivity"-->
-<!--            android:exported="true">-->
-<!--            &lt;!&ndash; Intent filter for receiving shared images &ndash;&gt;-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.SEND" />-->
-<!--                <category android:name="android.intent.category.DEFAULT" />-->
-<!--                <data android:mimeType="image/*" />-->
-<!--            </intent-filter>-->
-<!--        </activity>-->
+        <activity
+            android:name=".ui.sticker.StickerActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.blur.BlurActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.filter.FilterActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.tune.ImageTuneActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.paint.PaintActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.editMain.EditMainActivity"
+            android:exported="false" />
             
         <activity
             android:name=".ui.phone.PhoneLoginActivity"
@@ -108,20 +110,11 @@
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
-<!--        <activity-->
-<!--            android:name=".ui.ImageTuneTestActivity"-->
-<!--            android:exported="true"-->
-<!--       >-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
 
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
-<!--        </activity>-->
-<!--        <activity-->
-<!--            android:name=".ui.crop.CropActivity"-->
-<!--            android:exported="false"-->
-<!--            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>-->
+        <activity
+            android:name=".ui.crop.CropActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"

@@ -1,7 +1,6 @@
 package com.example.artify.ui.blur
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.renderscript.Allocation
 import android.renderscript.Element
@@ -34,18 +33,11 @@ class BlurActivity : BaseEditActivity<ActivityBlurBinding>() {
         // Load image from intent
         val imagePath = intent.getStringExtra("image_path")
         if (imagePath != null) {
-            val file = File(imagePath)
-            if (file.exists()) {
-                originalBitmap = BitmapFactory.decodeFile(imagePath)
-                currentImageBitmap = originalBitmap
-                binding.imageView.setImageBitmap(originalBitmap)
-            } else {
-                // Fallback to sample image if file doesn't exist
-                loadSampleImage()
-            }
-        } else {
-            // No image path provided, load sample
-            loadSampleImage()
+            setImageToViewFromFilePath(imagePath, {
+                originalBitmap = it
+                currentImageBitmap = it
+                binding.imageView.setImageBitmap(it)
+            })
         }
 
         // Setup click listeners
@@ -53,17 +45,11 @@ class BlurActivity : BaseEditActivity<ActivityBlurBinding>() {
     }
 
     private fun initViews() {
-        toolbarBinding = ItemToolbarEditMainBinding.bind(binding.root.findViewById(R.id.toolbar))
+        toolbarBinding = ItemToolbarEditMainBinding.bind(binding.root.findViewById<android.widget.LinearLayout>(R.id.tbBlur))
 
         // Setup SeekBar
         binding.seekBarBlur.max = 25
         binding.seekBarBlur.progress = 0
-    }
-
-    private fun loadSampleImage() {
-        originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.img_animegen)
-        currentImageBitmap = originalBitmap
-        binding.imageView.setImageBitmap(originalBitmap)
     }
 
     private fun setupClickListeners() {

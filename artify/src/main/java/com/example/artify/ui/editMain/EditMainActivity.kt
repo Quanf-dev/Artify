@@ -59,8 +59,10 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        bottomBarBinding = ItemBottomBarEdtMainBinding.bind(binding.root)
-        toolbarBinding = ItemToolbarEditMainBinding.bind(binding.root)
+        val bottomBarView = findViewById<android.widget.HorizontalScrollView>(R.id.bottomBar)
+        bottomBarBinding = ItemBottomBarEdtMainBinding.bind(bottomBarView)
+        val toolbarView = findViewById<android.widget.LinearLayout>(R.id.toolbar)
+        toolbarBinding = ItemToolbarEditMainBinding.bind(toolbarView)
 
         // Get image URI from intent
         val uriString = intent.getStringExtra("image_uri")
@@ -87,20 +89,12 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
     }
 
     private fun loadImageFromUri(uri: Uri?) {
-        uri?.let {
-            try {
-                val inputStream = contentResolver.openInputStream(it)
-                val bitmap = BitmapFactory.decodeStream(inputStream)
-                inputStream?.close()
-                if (bitmap != null) {
-                    currentImageBitmap = bitmap
-                    binding.editorView.setImageBitmap(bitmap)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show()
-            }
-        }
+        setImageToViewFromUri(uri, {
+            currentImageBitmap = it
+            binding.editorView.setImageBitmap(it)
+        }, {
+            Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show()
+        })
     }
 
     private fun setupClickListeners() {
@@ -294,5 +288,15 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
         textView.draw(canvas)
         val drawable = android.graphics.drawable.BitmapDrawable(resources, bitmap)
         binding.stickerView.addSticker(drawable)
+
+        // Draw the text directly onto the currentImageBitmap so it is preserved when switching activities
+        currentImageBitmap = currentImageBitmap?.copy(Bitmap.Config.ARGB_8888, true)
+        currentImageBitmap?.let { baseBitmap ->
+            val baseCanvas = android.graphics.Canvas(baseBitmap)
+            // Draw the text bitmap at the center of the image
+            val left = (baseBitmap.width - bitmap.width) / 2f
+            val top = (baseBitmap.height - bitmap.height) / 2f
+            baseCanvas.drawBitmap(bitmap, left, top, null)
+        }
     }
 }

@@ -17,8 +17,6 @@ class FilterActivity : BaseEditActivity<ActivityFilterBinding>() {
     private lateinit var imageFilterView: ImageFilterView
     private lateinit var toolbarBinding: ItemToolbarEditMainBinding
 
-    private var tempCameraUri: Uri? = null
-
     override fun inflateBinding(): ActivityFilterBinding {
         return ActivityFilterBinding.inflate(layoutInflater)
     }
@@ -48,11 +46,7 @@ class FilterActivity : BaseEditActivity<ActivityFilterBinding>() {
                 if (bitmap != null) {
                     currentImageBitmap = bitmap
                     imageFilterView.setImageBitmap(bitmap)
-                } else {
-                    loadSampleImage()
                 }
-            } else {
-                loadSampleImage()
             }
         } else {
             // If no image path, try shared intent or load sample
@@ -75,8 +69,6 @@ class FilterActivity : BaseEditActivity<ActivityFilterBinding>() {
             }
         }
 
-        // If no shared image, load a sample image
-        loadSampleImage()
     }
 
     private fun loadImageFromUri(uri: Uri) {
@@ -95,19 +87,5 @@ class FilterActivity : BaseEditActivity<ActivityFilterBinding>() {
         }
     }
 
-    private fun loadSampleImage() {
-        try {
-            // Load a sample image from resources
-            val bitmap = BitmapFactory.decodeResource(resources, R.drawable.img_animegen)
-            if (bitmap != null) {
-                currentImageBitmap = bitmap
-                imageFilterView.setImageBitmap(bitmap)
-            } else {
-                Toast.makeText(this, R.string.error_loading_image, Toast.LENGTH_SHORT).show()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, R.string.error_loading_image, Toast.LENGTH_SHORT).show()
-        }
-    }
+
 }

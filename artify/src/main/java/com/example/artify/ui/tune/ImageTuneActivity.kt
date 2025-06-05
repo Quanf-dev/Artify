@@ -30,18 +30,12 @@ class ImageTuneActivity : BaseEditActivity<ActivityImageTuneBinding>() {
         // Load image from intent
         val imagePath = intent.getStringExtra("image_path")
         if (imagePath != null) {
-            val file = File(imagePath)
-            if (file.exists()) {
-                val bitmap = BitmapFactory.decodeFile(imagePath)
-                if (bitmap != null) {
-                    currentImageBitmap = bitmap
-                    imageAdjustmentView.setImageBitmap(bitmap)
-                } else {
-                    loadSampleImage()
-                }
-            } else {
+            setImageToViewFromFilePath(imagePath, {
+                currentImageBitmap = it
+                imageAdjustmentView.setImageBitmap(it)
+            }, {
                 loadSampleImage()
-            }
+            })
         } else {
             loadSampleImage()
         }
@@ -102,7 +96,7 @@ class ImageTuneActivity : BaseEditActivity<ActivityImageTuneBinding>() {
         // Add done button handler
         toolbarBinding.ivDone.setOnClickListener {
             // Get the edited image bitmap
-            val editedBitmap = imageAdjustmentView.getEditedBitmap()
+            val editedBitmap = imageAdjustmentView.getCurrentBitmap()
             // Return it to the EditMainActivity
             returnEditedImage(editedBitmap)
         }
