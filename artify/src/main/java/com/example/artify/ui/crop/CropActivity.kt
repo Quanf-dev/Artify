@@ -7,11 +7,14 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.artify.R
+import com.example.artify.databinding.ActivityBlurBinding
+import com.example.artify.databinding.ActivityCropBinding
 import com.yalantis.ucrop.UCrop
 import java.io.File
 import java.util.UUID
+import com.example.artify.ui.editbase.BaseEditActivity
 
-class CropActivity : AppCompatActivity() {
+class CropActivity : BaseEditActivity<ActivityCropBinding>() {
 
     private var sourceUri: Uri? = null
 
@@ -24,12 +27,30 @@ class CropActivity : AppCompatActivity() {
         return Uri.fromFile(file)
     }
 
+    override fun inflateBinding(): ActivityCropBinding {
+        return ActivityCropBinding.inflate(layoutInflater)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        // Get source image URI from intent or use sample image
-        sourceUri = intent.getParcelableExtra("image_uri") ?: copyDrawableToCache(R.drawable.img_animegen)
 
+        // Nhận ảnh đầu vào đồng bộ
+        getInputBitmap(
+            onBitmapReady = { bitmap ->
+                // Lưu bitmap ra file tạm, lấy Uri rồi truyền cho UCrop
+                val file = File(cacheDir, "temp_crop_image.jpg")
+                file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.JPEG, 90, it) }
+                sourceUri = Uri.fromFile(file)
+                startUCrop()
+            },
+            onError = {
+                sourceUri = copyDrawableToCache(R.drawable.img_animegen)
+                startUCrop()
+            }
+        )
+        finish()
+    }
+
+    private fun startUCrop() {
         // Create destination URI
         val destinationUri = Uri.fromFile(File(cacheDir, "${UUID.randomUUID()}.jpg"))
 
@@ -52,9 +73,6 @@ class CropActivity : AppCompatActivity() {
         UCrop.of(sourceUri!!, destinationUri)
             .withOptions(options)
             .start(this)
-
-        // Close this activity since UCrop will handle everything
-        finish()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -63,12 +81,13 @@ class CropActivity : AppCompatActivity() {
         if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
             val resultUri = UCrop.getOutput(data!!)
             setResult(RESULT_OK, Intent().apply {
-                putExtra("cropped_image_uri", resultUri.toString())
+                putExtra("edited_image_path", resultUri?.path)
             })
             finish()
         } else if (resultCode == UCrop.RESULT_ERROR) {
             val cropError = UCrop.getError(data!!)
             Toast.makeText(this, "Crop error: ${cropError?.message}", Toast.LENGTH_SHORT).show()
+            setResult(RESULT_CANCELED)
             finish()
         }
     }

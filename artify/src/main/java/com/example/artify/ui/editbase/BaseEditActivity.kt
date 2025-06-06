@@ -50,10 +50,10 @@ abstract class BaseEditActivity<VB : ViewBinding> : AppCompatActivity() {
         startActivityForResult(intent, REQUEST_EDIT_IMAGE)
     }
 
-    protected fun navigateToText() {
+    protected fun navigateToFrame() {
         updateCurrentImageBitmapFromContainer()
         val tempFile = saveBitmapToTempFile(currentImageBitmap)
-        val intent = Intent(this, StickerActivity::class.java)
+        val intent = Intent(this, FrameActivity::class.java)
         intent.putExtra("image_path", tempFile?.absolutePath)
         startActivityForResult(intent, REQUEST_EDIT_IMAGE)
     }
@@ -133,46 +133,35 @@ abstract class BaseEditActivity<VB : ViewBinding> : AppCompatActivity() {
         }
     }
 
-    protected fun loadBitmapFromUri(uri: Uri?): Bitmap? {
-        if (uri == null) return null
-        return try {
-            val inputStream = contentResolver.openInputStream(uri)
-            val bitmap = BitmapFactory.decodeStream(inputStream)
-            inputStream?.close()
-            bitmap
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
+    /**
+     * Nhận bitmap đầu vào từ intent (ưu tiên image_path, sau đó share intent, fallback ảnh mẫu nếu cần)
+     */
+    protected fun getInputBitmap(onBitmapReady: (Bitmap) -> Unit, onError: (() -> Unit)? = null) {
+        val imagePath = intent.getStringExtra("image_path")
+        if (!imagePath.isNullOrEmpty()) {
+            val bitmap = BitmapFactory.decodeFile(imagePath)
+            if (bitmap != null) {
+                onBitmapReady(bitmap)
+                return
+            }
         }
-    }
-
-    protected fun loadBitmapFromFilePath(path: String?): Bitmap? {
-        if (path.isNullOrEmpty()) return null
-        return try {
-            val file = java.io.File(path)
-            if (file.exists()) BitmapFactory.decodeFile(path) else null
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
+        // Nếu không có image_path, thử lấy từ share intent
+        if (intent.action == Intent.ACTION_SEND && intent.type?.startsWith("image/") == true) {
+            val imageUri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
+            if (imageUri != null) {
+                try {
+                    val inputStream = contentResolver.openInputStream(imageUri)
+                    val bitmap = BitmapFactory.decodeStream(inputStream)
+                    inputStream?.close()
+                    if (bitmap != null) {
+                        onBitmapReady(bitmap)
+                        return
+                    }
+                } catch (_: Exception) {}
+            }
         }
-    }
-
-    protected fun setImageToViewFromFilePath(path: String?, setBitmap: (Bitmap) -> Unit, onError: (() -> Unit)? = null) {
-        val bitmap = loadBitmapFromFilePath(path)
-        if (bitmap != null) {
-            setBitmap(bitmap)
-        } else {
-            onError?.invoke()
-        }
-    }
-
-    protected fun setImageToViewFromUri(uri: Uri?, setBitmap: (Bitmap) -> Unit, onError: (() -> Unit)? = null) {
-        val bitmap = loadBitmapFromUri(uri)
-        if (bitmap != null) {
-            setBitmap(bitmap)
-        } else {
-            onError?.invoke()
-        }
+        // Nếu vẫn không có, gọi onError hoặc load ảnh mẫu
+        onError?.invoke()
     }
 
     companion object {

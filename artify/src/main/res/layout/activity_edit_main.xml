@@ -30,11 +30,12 @@
         android:layout_gravity="center">
 
         <ImageView
+            android:layout_gravity="center"
             android:id="@+id/editorView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/imageSurroundBackground"
-            android:scaleType="fitCenter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scaleType="centerCrop"
+            android:adjustViewBounds="true"
             android:src="@drawable/img_animegen" />
 
         <miaoyongjun.stickerview.StickerView

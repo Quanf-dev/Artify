@@ -27,18 +27,15 @@ class ImageTuneActivity : BaseEditActivity<ActivityImageTuneBinding>() {
         // Initialize views
         initViews()
         
-        // Load image from intent
-        val imagePath = intent.getStringExtra("image_path")
-        if (imagePath != null) {
-            setImageToViewFromFilePath(imagePath, {
-                currentImageBitmap = it
-                imageAdjustmentView.setImageBitmap(it)
-            }, {
-                loadSampleImage()
-            })
-        } else {
-            loadSampleImage()
-        }
+        // Nhận ảnh đầu vào đồng bộ
+        getInputBitmap(
+            onBitmapReady = { bitmap ->
+                currentImageBitmap = bitmap
+                imageAdjustmentView.setImageBitmap(bitmap)
+            },
+            onError = {
+            }
+        )
         
         // Setup click listeners
         setupClickListeners()
@@ -50,12 +47,6 @@ class ImageTuneActivity : BaseEditActivity<ActivityImageTuneBinding>() {
         toolbarBinding = ItemToolbarEditMainBinding.bind(binding.root.findViewById(R.id.tbMain))
     }
 
-    private fun loadSampleImage() {
-        // Load img_animegen.png from resources
-        val bitmap = BitmapFactory.decodeResource(resources, R.drawable.img_animegen)
-        currentImageBitmap = bitmap
-        imageAdjustmentView.setImageBitmap(bitmap)
-    }
 
     private fun setupClickListeners() {
         bottomTuneBinding.llBrightness.setOnClickListener {

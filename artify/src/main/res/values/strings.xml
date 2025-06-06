@@ -148,4 +148,5 @@
     <!-- Frame Test Activity -->
     <string name="frame_gallery">Frame Gallery</string>
     <string name="reset_frames">Reset Frames</string>
+    <string name="frame">Frame</string>
 </resources>

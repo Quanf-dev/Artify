@@ -30,15 +30,17 @@ class BlurActivity : BaseEditActivity<ActivityBlurBinding>() {
         // Initialize views
         initViews()
 
-        // Load image from intent
-        val imagePath = intent.getStringExtra("image_path")
-        if (imagePath != null) {
-            setImageToViewFromFilePath(imagePath, {
-                originalBitmap = it
-                currentImageBitmap = it
-                binding.imageView.setImageBitmap(it)
-            })
-        }
+        // Nhận ảnh đầu vào đồng bộ
+        getInputBitmap(
+            onBitmapReady = { bitmap ->
+                originalBitmap = bitmap
+                currentImageBitmap = bitmap
+                binding.imageView.setImageBitmap(bitmap)
+            },
+            onError = {
+                // Có thể load ảnh mẫu nếu muốn
+            }
+        )
 
         // Setup click listeners
         setupClickListeners()

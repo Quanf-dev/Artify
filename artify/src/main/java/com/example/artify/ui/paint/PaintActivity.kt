@@ -69,13 +69,15 @@ class PaintActivity : BaseEditActivity<ActivityPaintBinding>() {
         updateToolSelection(bottomBinding.llFreeStyle)
 
         // Ưu tiên nhận image_path từ Intent
-        val imagePath = intent.getStringExtra("image_path")
-        if (!imagePath.isNullOrEmpty()) {
-            val bitmap = BitmapFactory.decodeFile(imagePath)
-            if (bitmap != null) {
+        getInputBitmap(
+            onBitmapReady = { bitmap ->
                 binding.paintEditorView.setBackgroundImage(bitmap)
+                currentImageBitmap = bitmap
+            },
+            onError = {
+                // Có thể load ảnh mẫu nếu muốn
             }
-        }
+        )
     }
 
     private fun setupImagePicker() {

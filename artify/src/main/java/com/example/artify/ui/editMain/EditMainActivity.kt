@@ -1,13 +1,17 @@
 package com.example.artify.ui.editMain
 
+import android.Manifest
 import android.app.Activity
 import android.content.ContentValues
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -25,11 +29,8 @@ import com.example.artify.R
 import com.example.artify.databinding.ActivityEditMainBinding
 import com.example.artify.databinding.ItemBottomBarEdtMainBinding
 import com.example.artify.databinding.ItemToolbarEditMainBinding
-import com.example.artify.ui.editbase.BaseEditActivity
-import android.graphics.drawable.GradientDrawable
-import android.Manifest
-import android.content.pm.PackageManager
 import com.example.artify.model.TextProperties
+import com.example.artify.ui.editbase.BaseEditActivity
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
@@ -49,7 +50,11 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
         if (granted) {
             saveImage()
         } else {
-            Toast.makeText(this, "Storage permission is required to save images", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                "Storage permission is required to save images",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
@@ -64,12 +69,32 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
         val toolbarView = findViewById<android.widget.LinearLayout>(R.id.toolbar)
         toolbarBinding = ItemToolbarEditMainBinding.bind(toolbarView)
 
-        // Get image URI from intent
-        val uriString = intent.getStringExtra("image_uri")
-        if (uriString != null) {
-            imageUri = Uri.parse(uriString)
-            loadImageFromUri(imageUri)
-        }
+        // Nhận ảnh đầu vào đồng bộ
+        getInputBitmap(
+            onBitmapReady = { bitmap ->
+                currentImageBitmap = bitmap
+                binding.editorView.setImageBitmap(bitmap)
+            },
+            onError = {
+                // Nếu có image_uri (từ HomeActivity), load vào
+                val uriString = intent.getStringExtra("image_uri")
+                if (uriString != null) {
+                    val uri = Uri.parse(uriString)
+                    try {
+                        val inputStream = contentResolver.openInputStream(uri)
+                        val bitmap = BitmapFactory.decodeStream(inputStream)
+                        inputStream?.close()
+                        if (bitmap != null) {
+                            currentImageBitmap = bitmap
+                            binding.editorView.setImageBitmap(bitmap)
+                            return@getInputBitmap
+                        }
+                    } catch (_: Exception) {}
+                }
+                // Nếu vẫn không có, có thể load ảnh mẫu hoặc báo lỗi
+                Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show()
+            }
+        )
 
         setupClickListeners()
     }
@@ -88,15 +113,6 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
         }
     }
 
-    private fun loadImageFromUri(uri: Uri?) {
-        setImageToViewFromUri(uri, {
-            currentImageBitmap = it
-            binding.editorView.setImageBitmap(it)
-        }, {
-            Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show()
-        })
-    }
-
     private fun setupClickListeners() {
         bottomBarBinding.llText.setOnClickListener {
             showEditTextFragment()
@@ -105,6 +121,11 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
         bottomBarBinding.llPaint.setOnClickListener {
             updateCurrentImageBitmapFromContainer()
             navigateToPaint()
+        }
+
+        bottomBarBinding.llFrame.setOnClickListener {
+            updateCurrentImageBitmapFromContainer()
+            navigateToFrame()
         }
 
         bottomBarBinding.llCrop.setOnClickListener {
@@ -164,9 +185,6 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
     }
 
     private fun saveImage() {
-        updateCurrentImageBitmapFromContainer()
-        val bitmap = currentImageBitmap ?: return
-
         try {
             var fos: OutputStream? = null
             val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
@@ -177,14 +195,21 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
                 val contentValues = ContentValues().apply {
                     put(MediaStore.MediaColumns.DISPLAY_NAME, "$imageFileName.jpg")
                     put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Artify")
+                    put(
+                        MediaStore.MediaColumns.RELATIVE_PATH,
+                        Environment.DIRECTORY_PICTURES + "/Artify"
+                    )
                 }
 
-                val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+                val uri = contentResolver.insert(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    contentValues
+                )
                 uri?.let { fos = contentResolver.openOutputStream(it) }
             } else {
                 // For Android 9 and below
-                val imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES + "/Artify")
+                val imagesDir =
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES + "/Artify")
                 if (!imagesDir.exists()) {
                     imagesDir.mkdirs()
                 }
@@ -193,7 +218,7 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
             }
 
             fos?.use {
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
+                currentImageBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, it)
                 Toast.makeText(this, "Image saved successfully", Toast.LENGTH_SHORT).show()
                 // Return to home activity
                 finish()
@@ -207,16 +232,15 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
     fun getEditedBitmap(): Bitmap? {
         if (currentImageBitmap == null) return null
 
-        // Create a new bitmap for the result
-        val resultBitmap = currentImageBitmap!!.copy(Bitmap.Config.ARGB_8888, true)
+        // Tạo một bitmap mới để giữ kết quả
+        val result = currentImageBitmap!!.copy(Bitmap.Config.ARGB_8888, true)
+        val canvas = Canvas(result)
 
-        // Create a canvas to draw on the bitmap
-        val canvas = android.graphics.Canvas(resultBitmap)
+        // Dán sticker (đã loại control) lên canvas
+        val stickerOnlyBitmap = binding.stickerView.saveSticker()
+        canvas.drawBitmap(stickerOnlyBitmap, 0f, 0f, null)
 
-        // Draw the sticker view onto the canvas
-        binding.stickerView.draw(canvas)
-
-        return resultBitmap
+        return result
     }
 
     private fun showEditTextFragment() {
@@ -259,20 +283,11 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
                 else -> Gravity.CENTER
             }
 
-            val bgColorWithAlpha = Color.argb(
-                properties.backgroundAlpha,
-                Color.red(properties.backgroundColor),
-                Color.green(properties.backgroundColor),
-                Color.blue(properties.backgroundColor)
-            )
-            val radiusPx = 15f * resources.displayMetrics.density
-            val bgDrawable = GradientDrawable().apply {
-                cornerRadius = radiusPx
-                setColor(bgColorWithAlpha)
-            }
-            background = bgDrawable
+            background = properties.backgroundMain
 
-            layoutParams = android.widget.FrameLayout.LayoutParams(properties.viewWidth, properties.viewHeight)
+
+            layoutParams =
+                android.widget.FrameLayout.LayoutParams(properties.viewWidth, properties.viewHeight)
 
             measure(
                 View.MeasureSpec.makeMeasureSpec(properties.viewWidth, View.MeasureSpec.EXACTLY),
@@ -280,42 +295,35 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
             )
             layout(0, 0, properties.viewWidth, properties.viewHeight)
         }
-        
+
         if (textView.width == 0 || textView.height == 0) {
             return
         }
 
         val bitmap = Bitmap.createBitmap(textView.width, textView.height, Bitmap.Config.ARGB_8888)
-        val canvas = android.graphics.Canvas(bitmap)
+        val canvas = Canvas(bitmap)
         textView.draw(canvas)
         val drawable = android.graphics.drawable.BitmapDrawable(resources, bitmap)
         binding.stickerView.addSticker(drawable)
         binding.stickerView.minStickerSizeScale = 0.2f
 
-        // Draw the text directly onto the currentImageBitmap so it is preserved when switching activities
-        currentImageBitmap = currentImageBitmap?.copy(Bitmap.Config.ARGB_8888, true)
-        currentImageBitmap?.let { baseBitmap ->
-            val baseCanvas = android.graphics.Canvas(baseBitmap)
-            // Draw the text bitmap at the center of the image
-            val left = (baseBitmap.width - bitmap.width) / 2f
-            val top = (baseBitmap.height - bitmap.height) / 2f
-            baseCanvas.drawBitmap(bitmap, left, top, null)
-        }
     }
 
     // Thêm hàm tiện ích lấy bitmap từ view
     private fun getBitmapFromView(view: View): Bitmap {
         val returnedBitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
-        val canvas = android.graphics.Canvas(returnedBitmap)
+        val canvas = Canvas(returnedBitmap)
         view.draw(canvas)
         return returnedBitmap
     }
 
     // Thêm hàm cập nhật currentImageBitmap từ containImage
     override fun updateCurrentImageBitmapFromContainer() {
-        val container = findViewById<android.widget.FrameLayout>(R.id.containImage)
+        val container = findViewById<android.widget.ImageView>(R.id.editorView)
         if (container.width > 0 && container.height > 0) {
             currentImageBitmap = getBitmapFromView(container)
+            currentImageBitmap = getEditedBitmap()
+
         }
     }
 }

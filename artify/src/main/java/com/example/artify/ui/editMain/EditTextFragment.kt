@@ -268,6 +268,7 @@ class EditTextFragment : Fragment() {
             setColor(bgColorWithAlpha)
         }
         binding.editText.background = bgDrawableEditText
+        currentTextProperties.backgroundMain = bgDrawableEditText
         // Thêm padding nhỏ để background bo góc ôm sát chữ
         val paddingPx = (8 * resources.displayMetrics.density).toInt()
         binding.editText.setPadding(paddingPx, paddingPx, paddingPx, paddingPx)

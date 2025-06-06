@@ -42,37 +42,22 @@ class StickerActivity : BaseEditActivity<ActivityStickerBinding>() {
         // Initialize views
         toolbarBinding = ItemToolbarEditMainBinding.bind(binding.root.findViewById(R.id.tbSticker))
         imageStickerView = binding.imageStickerView
-//        binding.buttonClearStickers.setOnClickListener { imageStickerView.removeAllStickers() }
         toolbarBinding.ivDone.setOnClickListener {
             val editedBitmap = imageStickerView.getEditedBitmap()
             returnEditedImage(editedBitmap)
         }
 
-        // Load image from intent if available
-        val imagePath = intent.getStringExtra("image_path")
-        if (!imagePath.isNullOrEmpty()) {
-            setImageToViewFromFilePath(imagePath, {
-                imageStickerView.setImageBitmap(it)
-            })
-        } else {
-        // Check if the activity was launched from a share intent
-        handleSharedImage(intent)
-        }
-    }
-
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        handleSharedImage(intent)
-    }
-
-    private fun handleSharedImage(intent: Intent) {
-        // Check if this is from a share intent
-        if (intent.action == Intent.ACTION_SEND && intent.type?.startsWith("image/") == true) {
-            val imageUri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
-            imageUri?.let {
-                loadBitmapFromUri(it)
-                return
+        // Nhận ảnh đầu vào đồng bộ
+        getInputBitmap(
+            onBitmapReady = { bitmap ->
+                imageStickerView.setImageBitmap(bitmap)
+                currentImageBitmap = bitmap
+            },
+            onError = {
+                // Có thể load ảnh mẫu nếu muốn
             }
-        }
+        )
     }
+
+
 }

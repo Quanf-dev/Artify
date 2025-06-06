@@ -9,13 +9,12 @@
 <LinearLayout
     android:layout_width="0dp"
     android:baselineAligned="true"
-    android:minWidth="400dp"
+    android:minWidth="500dp"
     android:layout_height="?attr/actionBarSize"
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:paddingHorizontal="8dp">
 
-    <!-- Close -->
     <LinearLayout
         android:id="@+id/llPaint"
         android:layout_width="0dp"
@@ -36,6 +35,30 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/paint"
+            android:textSize="12sp"
+            android:textColor="@color/iconColor" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/llFrame"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="?android:selectableItemBackground">
+
+        <com.mikepenz.iconics.view.IconicsImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            iconics:iiv_color="@color/iconColor"
+            iconics:iiv_icon="gmi-filter-frames"
+            iconics:iiv_size="22dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/frame"
             android:textSize="12sp"
             android:textColor="@color/iconColor" />
     </LinearLayout>
@@ -64,7 +87,6 @@
             android:textColor="@color/iconColor" />
     </LinearLayout>
 
-    <!-- Redo -->
     <LinearLayout
         android:id="@+id/llCrop"
         android:layout_width="0dp"
@@ -89,7 +111,6 @@
             android:textColor="@color/iconColor" />
     </LinearLayout>
 
-    <!-- Save -->
     <LinearLayout
         android:id="@+id/llTune"
         android:layout_width="0dp"
@@ -114,7 +135,6 @@
             android:textColor="@color/iconColor" />
     </LinearLayout>
 
-    <!-- Reset -->
     <LinearLayout
         android:id="@+id/llFilter"
         android:layout_width="0dp"
@@ -139,7 +159,6 @@
             android:textColor="@color/iconColor" />
     </LinearLayout>
 
-    <!-- Hủy -->
     <LinearLayout
         android:id="@+id/llBlur"
         android:layout_width="0dp"
@@ -164,7 +183,6 @@
             android:textColor="@color/iconColor" />
     </LinearLayout>
 
-    <!-- Thoát -->
     <LinearLayout
         android:id="@+id/llEmoji"
         android:layout_width="0dp"
