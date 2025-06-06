@@ -12,50 +12,6 @@
         android:id="@+id/tbSticker"
         layout="@layout/item_toolbar_edit_main" />
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
-        
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-            
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/sticker_gallery"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-                
-            <ImageButton
-                android:id="@+id/buttonSave"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:padding="12dp"
-                android:src="@android:drawable/ic_menu_save"
-                android:contentDescription="@string/save_image" />
-                
-            <ImageButton
-                android:id="@+id/buttonClearStickers"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:padding="12dp"
-                android:src="@android:drawable/ic_menu_close_clear_cancel"
-                android:contentDescription="@string/clear_stickers" />
-        </LinearLayout>
-        
-    </androidx.appcompat.widget.Toolbar>
 
     <com.example.imageeditor.ui.views.ImageStickerView
         android:id="@+id/imageStickerView"
@@ -63,28 +19,5 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp">
-
-        <Button
-            android:id="@+id/buttonLoadImage"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/load_image"
-            android:layout_marginEnd="8dp" />
-
-        <Button
-            android:id="@+id/buttonCameraImage"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/camera"
-            android:layout_marginStart="8dp" />
-
-    </LinearLayout>
 
 </LinearLayout> 

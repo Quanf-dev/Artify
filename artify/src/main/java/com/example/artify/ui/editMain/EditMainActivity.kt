@@ -103,26 +103,32 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
         }
 
         bottomBarBinding.llPaint.setOnClickListener {
+            updateCurrentImageBitmapFromContainer()
             navigateToPaint()
         }
 
         bottomBarBinding.llCrop.setOnClickListener {
+            updateCurrentImageBitmapFromContainer()
             navigateToCrop()
         }
 
         bottomBarBinding.llTune.setOnClickListener {
+            updateCurrentImageBitmapFromContainer()
             navigateToTune()
         }
 
         bottomBarBinding.llFilter.setOnClickListener {
+            updateCurrentImageBitmapFromContainer()
             navigateToFilter()
         }
 
         bottomBarBinding.llBlur.setOnClickListener {
+            updateCurrentImageBitmapFromContainer()
             navigateToBlur()
         }
 
         bottomBarBinding.llEmoji.setOnClickListener {
+            updateCurrentImageBitmapFromContainer()
             navigateToEmoji()
         }
 
@@ -158,8 +164,8 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
     }
 
     private fun saveImage() {
-        // Create bitmap from the image view and stickers
-        val bitmap = createFinalBitmap() ?: return
+        updateCurrentImageBitmapFromContainer()
+        val bitmap = currentImageBitmap ?: return
 
         try {
             var fos: OutputStream? = null
@@ -198,30 +204,19 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
         }
     }
 
-    private fun createFinalBitmap(): Bitmap? {
-        try {
-            // Get the base image from ImageView
-            val baseBitmap = currentImageBitmap ?: return null
-            
-            // Create a new bitmap with the same dimensions
-            val resultBitmap = Bitmap.createBitmap(
-                baseBitmap.width,
-                baseBitmap.height,
-                Bitmap.Config.ARGB_8888
-            )
-            
-            // Draw the base image
-            val canvas = android.graphics.Canvas(resultBitmap)
-            canvas.drawBitmap(baseBitmap, 0f, 0f, null)
-            
-            // Draw any stickers
-            binding.stickerView.draw(canvas)
-            
-            return resultBitmap
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return null
-        }
+    fun getEditedBitmap(): Bitmap? {
+        if (currentImageBitmap == null) return null
+
+        // Create a new bitmap for the result
+        val resultBitmap = currentImageBitmap!!.copy(Bitmap.Config.ARGB_8888, true)
+
+        // Create a canvas to draw on the bitmap
+        val canvas = android.graphics.Canvas(resultBitmap)
+
+        // Draw the sticker view onto the canvas
+        binding.stickerView.draw(canvas)
+
+        return resultBitmap
     }
 
     private fun showEditTextFragment() {
@@ -229,10 +224,17 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
         fragment.onTextPropertiesChanged = {
             addTextOverlay(it)
         }
+        fragment.onShowHideToolbar = { show ->
+            val toolbarView = findViewById<android.widget.LinearLayout>(R.id.toolbar)
+            toolbarView.visibility = if (show) View.VISIBLE else View.GONE
+        }
         supportFragmentManager.commit {
             replace(R.id.textFragmentContainer, fragment)
             addToBackStack(null)
         }
+        // Hide toolbar when fragment is shown
+        val toolbarView = findViewById<android.widget.LinearLayout>(R.id.toolbar)
+        toolbarView.visibility = View.GONE
     }
 
     private fun addTextOverlay(properties: TextProperties) {
@@ -288,6 +290,7 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
         textView.draw(canvas)
         val drawable = android.graphics.drawable.BitmapDrawable(resources, bitmap)
         binding.stickerView.addSticker(drawable)
+        binding.stickerView.minStickerSizeScale = 0.2f
 
         // Draw the text directly onto the currentImageBitmap so it is preserved when switching activities
         currentImageBitmap = currentImageBitmap?.copy(Bitmap.Config.ARGB_8888, true)
@@ -297,6 +300,22 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
             val left = (baseBitmap.width - bitmap.width) / 2f
             val top = (baseBitmap.height - bitmap.height) / 2f
             baseCanvas.drawBitmap(bitmap, left, top, null)
+        }
+    }
+
+    // Thêm hàm tiện ích lấy bitmap từ view
+    private fun getBitmapFromView(view: View): Bitmap {
+        val returnedBitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(returnedBitmap)
+        view.draw(canvas)
+        return returnedBitmap
+    }
+
+    // Thêm hàm cập nhật currentImageBitmap từ containImage
+    override fun updateCurrentImageBitmapFromContainer() {
+        val container = findViewById<android.widget.FrameLayout>(R.id.containImage)
+        if (container.width > 0 && container.height > 0) {
+            currentImageBitmap = getBitmapFromView(container)
         }
     }
 }

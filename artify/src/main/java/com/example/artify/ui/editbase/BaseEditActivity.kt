@@ -40,7 +40,10 @@ abstract class BaseEditActivity<VB : ViewBinding> : AppCompatActivity() {
         baseBinding.contentContainerEdit.addView(binding.root)
     }
 
+    protected open fun updateCurrentImageBitmapFromContainer() {}
+
     protected fun navigateToPaint() {
+        updateCurrentImageBitmapFromContainer()
         val tempFile = saveBitmapToTempFile(currentImageBitmap)
         val intent = Intent(this, PaintActivity::class.java)
         intent.putExtra("image_path", tempFile?.absolutePath)
@@ -48,7 +51,7 @@ abstract class BaseEditActivity<VB : ViewBinding> : AppCompatActivity() {
     }
 
     protected fun navigateToText() {
-        // Navigate to text screen with current image bitmap
+        updateCurrentImageBitmapFromContainer()
         val tempFile = saveBitmapToTempFile(currentImageBitmap)
         val intent = Intent(this, StickerActivity::class.java)
         intent.putExtra("image_path", tempFile?.absolutePath)
@@ -56,6 +59,7 @@ abstract class BaseEditActivity<VB : ViewBinding> : AppCompatActivity() {
     }
 
     protected fun navigateToCrop() {
+        updateCurrentImageBitmapFromContainer()
         val tempFile = saveBitmapToTempFile(currentImageBitmap)
         val intent = Intent(this, CropActivity::class.java)
         intent.putExtra("image_path", tempFile?.absolutePath)
@@ -63,6 +67,7 @@ abstract class BaseEditActivity<VB : ViewBinding> : AppCompatActivity() {
     }
 
     protected fun navigateToTune() {
+        updateCurrentImageBitmapFromContainer()
         val tempFile = saveBitmapToTempFile(currentImageBitmap)
         val intent = Intent(this, ImageTuneActivity::class.java)
         intent.putExtra("image_path", tempFile?.absolutePath)
@@ -70,6 +75,7 @@ abstract class BaseEditActivity<VB : ViewBinding> : AppCompatActivity() {
     }
 
     protected fun navigateToFilter() {
+        updateCurrentImageBitmapFromContainer()
         val tempFile = saveBitmapToTempFile(currentImageBitmap)
         val intent = Intent(this, FilterActivity::class.java)
         intent.putExtra("image_path", tempFile?.absolutePath)
@@ -77,6 +83,7 @@ abstract class BaseEditActivity<VB : ViewBinding> : AppCompatActivity() {
     }
 
     protected fun navigateToBlur() {
+        updateCurrentImageBitmapFromContainer()
         val tempFile = saveBitmapToTempFile(currentImageBitmap)
         val intent = Intent(this, BlurActivity::class.java)
         intent.putExtra("image_path", tempFile?.absolutePath)
@@ -84,6 +91,7 @@ abstract class BaseEditActivity<VB : ViewBinding> : AppCompatActivity() {
     }
 
     protected fun navigateToEmoji() {
+        updateCurrentImageBitmapFromContainer()
         val tempFile = saveBitmapToTempFile(currentImageBitmap)
         val intent = Intent(this, StickerActivity::class.java)
         intent.putExtra("image_path", tempFile?.absolutePath)

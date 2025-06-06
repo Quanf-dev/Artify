@@ -1,5 +1,6 @@
 package com.example.artify.ui.editMain
 
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
@@ -18,7 +19,6 @@ import com.example.artify.databinding.FragmentEditTextBinding
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import android.graphics.drawable.GradientDrawable
-import android.widget.TextView
 import androidx.core.widget.doOnTextChanged
 import com.example.artify.model.TextProperties
 import com.mikepenz.iconics.IconicsDrawable
@@ -28,8 +28,6 @@ import androidx.recyclerview.widget.RecyclerView
 import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
-import android.widget.FrameLayout
-import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 
 class EditTextFragment : Fragment() {
     private var _binding: FragmentEditTextBinding? = null
@@ -42,6 +40,9 @@ class EditTextFragment : Fragment() {
 
     // Callback to pass properties to Activity
     var onTextPropertiesChanged: ((TextProperties) -> Unit)? = null
+
+    // Callback to show/hide toolbar in activity
+    var onShowHideToolbar: ((Boolean) -> Unit)? = null
 
     // Font list and map
     private val fontList = listOf(
@@ -78,6 +79,7 @@ class EditTextFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        onShowHideToolbar?.invoke(false)
         setupFontRecycler()
         binding.editText.doOnTextChanged { text, _, _, _ ->
             // fix bug preview background ko bo vao text
@@ -102,6 +104,7 @@ class EditTextFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        onShowHideToolbar?.invoke(true)
         _binding = null
     }
 
@@ -264,7 +267,6 @@ class EditTextFragment : Fragment() {
             cornerRadius = radiusPx
             setColor(bgColorWithAlpha)
         }
-//        binding.viewBgColorPreview.background = bgDrawablePreview
         binding.editText.background = bgDrawableEditText
         // Thêm padding nhỏ để background bo góc ôm sát chữ
         val paddingPx = (8 * resources.displayMetrics.density).toInt()
@@ -274,23 +276,10 @@ class EditTextFragment : Fragment() {
     private fun loadInitialProperties() {
         binding.editText.setText(currentTextProperties.text)
         
-        val fontDisplayNames = resources.getStringArray(R.array.font_names)
-        val initialFontName = fontMap.entries.firstOrNull { it.value == currentTextProperties.fontResId }?.key ?: "Default"
-        val initialFontPosition = fontDisplayNames.indexOf(initialFontName).coerceAtLeast(0)
-//        binding.spinnerFontFamily.setSelection(initialFontPosition)
-        
         // Convert textSizePx to progress
         val progress = ((currentTextProperties.textSizePx - MIN_TEXT_SIZE) / (MAX_TEXT_SIZE - MIN_TEXT_SIZE) * 100).toInt()
         binding.seekBarTextSize.progress = progress.coerceIn(0, 100)
 
-//        val initialAlignId = when (currentTextProperties.alignment) {
-//            Paint.Align.LEFT -> R.id.rbLeft
-//            Paint.Align.RIGHT -> R.id.rbRight
-//            else -> R.id.rbCenter
-//        }
-//        binding.radioGroupAlign.check(initialAlignId)
-
-//        binding.viewTextColorPreview.setBackgroundColor(currentTextProperties.textColor)
         updateBackgroundPreview()
         binding.seekBarBgOpacity.progress = currentTextProperties.backgroundAlpha
     }
@@ -304,7 +293,7 @@ class EditTextFragment : Fragment() {
             .setNegativeButton(getString(android.R.string.cancel)) { dialogInterface, _ -> dialogInterface.dismiss() }
             .attachAlphaSlideBar(true)
             .attachBrightnessSlideBar(true)
-            .setBottomSpace(12)
+            .setBottomSpace(12) 
             .show()
     }
 
@@ -336,43 +325,6 @@ class EditTextFragment : Fragment() {
         // Cập nhật lại background bo góc
         updateBackgroundPreview()
     }
+
 }
 
-class FontAdapter(
-    private val fonts: List<String>,
-    var selectedIndex: Int,
-    private val fontMap: Map<String, Int>,
-    val onFontSelected: (Int) -> Unit
-) : RecyclerView.Adapter<FontAdapter.FontViewHolder>() {
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FontViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_font_picker, parent, false)
-        return FontViewHolder(view as FrameLayout)
-    }
-    override fun getItemCount() = fonts.size
-    override fun onBindViewHolder(holder: FontViewHolder, position: Int) {
-        val fontName = fonts[position]
-        val tv = holder.fontName
-        tv.text = fontName
-        val fontResId = fontMap[fontName] ?: 0
-        if (fontResId != 0) {
-            try {
-                tv.typeface = ResourcesCompat.getFont(tv.context, fontResId)
-            } catch (e: Exception) {
-                tv.typeface = Typeface.DEFAULT
-            }
-        } else {
-            tv.typeface = Typeface.DEFAULT
-        }
-        // Set background
-        tv.setBackgroundResource(if (position == selectedIndex) R.drawable.bg_font_picker_item_selected else R.drawable.bg_font_picker_item_default)
-        tv.setTextColor(if (position == selectedIndex) Color.BLACK else Color.DKGRAY)
-        tv.setOnClickListener {
-            if (position != selectedIndex) {
-                onFontSelected(position)
-            }
-        }
-    }
-    class FontViewHolder(view: FrameLayout) : RecyclerView.ViewHolder(view) {
-        val fontName: TextView = view.findViewById(R.id.tvFontName)
-    }
-} 

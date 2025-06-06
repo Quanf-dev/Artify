@@ -23,6 +23,7 @@
 
     <!-- Fragment text sẽ nằm trên ảnh -->
     <FrameLayout
+        android:id="@+id/containImage"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"

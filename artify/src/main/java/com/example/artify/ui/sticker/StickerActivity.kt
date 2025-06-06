@@ -42,7 +42,7 @@ class StickerActivity : BaseEditActivity<ActivityStickerBinding>() {
         // Initialize views
         toolbarBinding = ItemToolbarEditMainBinding.bind(binding.root.findViewById(R.id.tbSticker))
         imageStickerView = binding.imageStickerView
-        binding.buttonClearStickers.setOnClickListener { imageStickerView.removeAllStickers() }
+//        binding.buttonClearStickers.setOnClickListener { imageStickerView.removeAllStickers() }
         toolbarBinding.ivDone.setOnClickListener {
             val editedBitmap = imageStickerView.getEditedBitmap()
             returnEditedImage(editedBitmap)
@@ -55,8 +55,8 @@ class StickerActivity : BaseEditActivity<ActivityStickerBinding>() {
                 imageStickerView.setImageBitmap(it)
             })
         } else {
-            // Check if the activity was launched from a share intent
-            handleSharedImage(intent)
+        // Check if the activity was launched from a share intent
+        handleSharedImage(intent)
         }
     }
 
@@ -70,27 +70,9 @@ class StickerActivity : BaseEditActivity<ActivityStickerBinding>() {
         if (intent.action == Intent.ACTION_SEND && intent.type?.startsWith("image/") == true) {
             val imageUri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
             imageUri?.let {
-                loadImageFromUri(it)
+                loadBitmapFromUri(it)
                 return
             }
         }
     }
-
-    private fun loadImageFromUri(uri: Uri) {
-        try {
-            val inputStream = contentResolver.openInputStream(uri)
-            val bitmap = BitmapFactory.decodeStream(inputStream)
-            if (bitmap != null) {
-                imageStickerView.setImageBitmap(bitmap)
-            } else {
-                Toast.makeText(this, R.string.error_loading_image, Toast.LENGTH_SHORT).show()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, R.string.error_loading_image, Toast.LENGTH_SHORT).show()
-        }
-    }
-
-
-
 }
