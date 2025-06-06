@@ -2,6 +2,7 @@
     xmlns:iconics="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
+    android:id="@+id/filterBottomMenu"
     android:fillViewport="true"
     android:scrollbars="none">
 
@@ -284,31 +285,6 @@
                 android:textColor="@color/iconColor"
                 android:textSize="12sp" />
         </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/llText"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="?android:selectableItemBackground"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <com.mikepenz.iconics.view.IconicsImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                iconics:iiv_color="@color/iconColor"
-                iconics:iiv_icon="gmi-text-fields"
-                iconics:iiv_size="22dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Text"
-                android:textColor="@color/iconColor"
-                android:textSize="12sp" />
-        </LinearLayout>
-        
 
     </LinearLayout>
 

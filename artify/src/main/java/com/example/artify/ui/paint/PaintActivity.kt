@@ -21,6 +21,8 @@ import com.example.artify.databinding.DialogPaintSettingsBinding
 import com.example.artify.databinding.ItemToolbarPaintBinding
 import com.example.artify.databinding.ItemBottomPaintBinding
 import com.example.artify.ui.editbase.BaseEditActivity
+import com.example.artify.ui.editbase.animateImageIn
+import com.example.artify.ui.editbase.scaleIn
 import com.example.imageeditor.tools.base.BlurTool
 import com.example.imageeditor.tools.base.EraserTool
 import com.example.imageeditor.tools.base.SelectionTool
@@ -57,6 +59,9 @@ class PaintActivity : BaseEditActivity<ActivityPaintBinding>() {
         toolbarBinding = ItemToolbarPaintBinding.bind(binding.root.findViewById(R.id.toolbarPaint))
         bottomBinding = ItemBottomPaintBinding.bind(binding.root.findViewById(R.id.bottomPaint))
 
+        // Ẩn bottom menu để chuẩn bị cho animation
+        binding.root.findViewById<View>(R.id.bottomPaint).visibility = View.INVISIBLE
+
         setupImagePicker()
         setupPaintEditorView()
         setupToolSelectionButtons()
@@ -72,10 +77,13 @@ class PaintActivity : BaseEditActivity<ActivityPaintBinding>() {
         getInputBitmap(
             onBitmapReady = { bitmap ->
                 binding.paintEditorView.setBackgroundImage(bitmap)
+                binding.paintEditorView.animateImageIn()
                 currentImageBitmap = bitmap
+                animateBottomBar(binding.root.findViewById(R.id.bottomPaint))
             },
             onError = {
                 // Có thể load ảnh mẫu nếu muốn
+                animateBottomBar(binding.root.findViewById(R.id.bottomPaint))
             }
         )
     }
@@ -183,67 +191,68 @@ class PaintActivity : BaseEditActivity<ActivityPaintBinding>() {
     private fun setupToolSelectionButtons() {
         // Basic tools
         bottomBinding.llFreeStyle.setOnClickListener {
+            it.scaleIn()
             binding.paintEditorView.setTool(FreestyleTool())
             updateToolUI(isBlurTool = false)
             updateToolSelection(it)
-            Toast.makeText(this, "Freestyle Tool Selected", Toast.LENGTH_SHORT).show()
         }
 
         bottomBinding.llLine.setOnClickListener {
+            it.scaleIn()
             binding.paintEditorView.setTool(LineTool())
             updateToolUI(isBlurTool = false)
             updateToolSelection(it)
-            Toast.makeText(this, "Line Tool Selected", Toast.LENGTH_SHORT).show()
         }
 
         bottomBinding.llEraser.setOnClickListener {
+            it.scaleIn()
             currentEraserTool = EraserTool()
             currentEraserTool?.setStrokeWidth(30f)  // Set default eraser size
             binding.paintEditorView.setTool(currentEraserTool!!)
             updateToolUI(isBlurTool = false)
             updateToolSelection(it)
-            Toast.makeText(this, "Eraser Tool Selected", Toast.LENGTH_SHORT).show()
         }
 
         // Shape tools
         bottomBinding.llRectangle.setOnClickListener {
+            it.scaleIn()
             binding.paintEditorView.setTool(RectangleTool())
             updateToolUI(isBlurTool = false)
             updateToolSelection(it)
-            Toast.makeText(this, "Rectangle Tool Selected", Toast.LENGTH_SHORT).show()
         }
 
         bottomBinding.llCircle.setOnClickListener {
+            it.scaleIn()
             binding.paintEditorView.setTool(CircleTool())
             updateToolUI(isBlurTool = false)
             updateToolSelection(it)
-            Toast.makeText(this, "Circle Tool Selected", Toast.LENGTH_SHORT).show()
         }
 
         bottomBinding.llArrow.setOnClickListener {
+            it.scaleIn()
             binding.paintEditorView.setTool(ArrowTool())
             updateToolUI(isBlurTool = false)
             updateToolSelection(it)
-            Toast.makeText(this, "Arrow Tool Selected", Toast.LENGTH_SHORT).show()
         }
 
         bottomBinding.llDashLine.setOnClickListener {
+            it.scaleIn()
             binding.paintEditorView.setTool(DashLineTool())
             updateToolUI(isBlurTool = false)
             updateToolSelection(it)
-            Toast.makeText(this, "Dash Line Tool Selected", Toast.LENGTH_SHORT).show()
         }
 
         // Special tools
         bottomBinding.llBlur.setOnClickListener {
+            it.scaleIn()
             currentBlurTool = BlurTool()
             binding.paintEditorView.setTool(currentBlurTool!!)
             updateToolUI(isBlurTool = true)
             updateToolSelection(it)
-            Toast.makeText(this, "Blur Tool Selected", Toast.LENGTH_SHORT).show()
         }
 
         bottomBinding.llColor.setOnClickListener {
+            it.scaleIn()
             updateToolSelection(it)
             ColorPickerDialog.Builder(this)
                 .setTitle("Choose Color")
@@ -265,7 +274,10 @@ class PaintActivity : BaseEditActivity<ActivityPaintBinding>() {
                 .show()
         }
 
-        bottomBinding.llClear.setOnClickListener { binding.paintEditorView.clear() }
+        bottomBinding.llClear.setOnClickListener { 
+            it.scaleIn()
+            binding.paintEditorView.clear() 
+        }
 
         // Setup blur radius seekbar
         binding.seekBarBlurRadius.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -277,6 +289,7 @@ class PaintActivity : BaseEditActivity<ActivityPaintBinding>() {
         })
 
         bottomBinding.llSelect.setOnClickListener {
+            it.scaleIn()
             // Chọn công cụ Selection cho các đối tượng thông thường
             val selectionTool = SelectionTool(
                 binding.paintEditorView.getLayerManager(),
@@ -295,14 +308,17 @@ class PaintActivity : BaseEditActivity<ActivityPaintBinding>() {
 
     private fun setupClickListeners() {
         toolbarBinding.btnFilterList.setOnClickListener {
+            it.scaleIn()
             showLineWidthDialog()
         }
 
         toolbarBinding.btnBlurLinear.setOnClickListener {
+            it.scaleIn()
             showOpacityDialog()
         }
 
         toolbarBinding.btnFormatColorReset.setOnClickListener {
+            it.scaleIn()
             val isChecked = !it.isSelected
             it.isSelected = isChecked // Cập nhật lại trạng thái
 
@@ -312,7 +328,18 @@ class PaintActivity : BaseEditActivity<ActivityPaintBinding>() {
             binding.paintEditorView.setFillMode(isChecked)
         }
 
+        toolbarBinding.btnUndo.setOnClickListener {
+            it.scaleIn()
+            binding.paintEditorView.undo()
+        }
+
+        toolbarBinding.btnRedo.setOnClickListener {
+            it.scaleIn()
+            binding.paintEditorView.redo()
+        }
+
         toolbarBinding.btnCheck.setOnClickListener {
+            it.scaleIn()
             val editedBitmap = binding.paintEditorView.getBitmap()
             returnEditedImage(editedBitmap)
         }

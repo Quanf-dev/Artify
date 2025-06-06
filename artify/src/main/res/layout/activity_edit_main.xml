@@ -13,20 +13,21 @@
         tools:context=".ui.editMain.EditMainActivity"
         tools:ignore="ExtraText">
         >
-
     <!-- Toolbar ở trên -->
     <include
         android:id="@+id/toolbar"
         layout="@layout/item_toolbar_edit_main" />
 
-
-
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/imageSurroundBackground">
     <!-- Fragment text sẽ nằm trên ảnh -->
     <FrameLayout
         android:id="@+id/containImage"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="match_parent"
         android:layout_gravity="center">
 
         <ImageView
@@ -43,6 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </FrameLayout>
+        </FrameLayout>
 
     <!-- Bottom bar ở dưới -->
     <include

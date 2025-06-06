@@ -3,13 +3,14 @@ package com.example.artify.ui.tune
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.view.View
 import com.example.artify.R
 import com.example.artify.databinding.ActivityImageTuneBinding
 import com.example.artify.databinding.ItemBottomTuneBinding
 import com.example.artify.databinding.ItemToolbarEditMainBinding
 import com.example.artify.ui.editbase.BaseEditActivity
+import com.example.artify.ui.editbase.animateImageIn
 import com.example.imageeditor.ui.views.ImageAdjustmentView
-import java.io.File
 
 class ImageTuneActivity : BaseEditActivity<ActivityImageTuneBinding>() {
 
@@ -27,13 +28,22 @@ class ImageTuneActivity : BaseEditActivity<ActivityImageTuneBinding>() {
         // Initialize views
         initViews()
         
+        // Ẩn bottom menu để chuẩn bị cho animation
+        binding.bottomTuneMenu.root.visibility = View.INVISIBLE
+        
         // Nhận ảnh đầu vào đồng bộ
         getInputBitmap(
             onBitmapReady = { bitmap ->
                 currentImageBitmap = bitmap
                 imageAdjustmentView.setImageBitmap(bitmap)
+                imageAdjustmentView.animateImageIn()
+                
+                // Hiển thị bottom menu với animation sau khi ảnh đã load
+                animateBottomBar(binding.bottomTuneMenu.root)
             },
             onError = {
+                // Vẫn hiển thị bottom menu với animation
+                animateBottomBar(binding.bottomTuneMenu.root)
             }
         )
         

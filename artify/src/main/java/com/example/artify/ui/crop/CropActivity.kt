@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.artify.R
 import com.example.artify.databinding.ActivityBlurBinding
 import com.example.artify.databinding.ActivityCropBinding
+import com.example.artify.ui.editMain.EditMainActivity
 import com.yalantis.ucrop.UCrop
 import java.io.File
 import java.util.UUID
@@ -43,11 +44,10 @@ class CropActivity : BaseEditActivity<ActivityCropBinding>() {
                 startUCrop()
             },
             onError = {
-                sourceUri = copyDrawableToCache(R.drawable.img_animegen)
-                startUCrop()
+//                sourceUri = copyDrawableToCache(R.drawable.img_animegen)
+//                startUCrop()
             }
         )
-        finish()
     }
 
     private fun startUCrop() {
@@ -77,18 +77,17 @@ class CropActivity : BaseEditActivity<ActivityCropBinding>() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        
-        if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
-            val resultUri = UCrop.getOutput(data!!)
-            setResult(RESULT_OK, Intent().apply {
-                putExtra("edited_image_path", resultUri?.path)
-            })
-            finish()
-        } else if (resultCode == UCrop.RESULT_ERROR) {
-            val cropError = UCrop.getError(data!!)
-            Toast.makeText(this, "Crop error: ${cropError?.message}", Toast.LENGTH_SHORT).show()
-            setResult(RESULT_CANCELED)
-            finish()
+        if (requestCode == UCrop.REQUEST_CROP) {
+            if (resultCode == RESULT_OK) {
+                val resultUri = UCrop.getOutput(data!!)
+                setResult(RESULT_OK, Intent().apply {
+                    putExtra("edited_image_path", resultUri?.path)
+                })
+                finish()
+            } else { // Bao gồm cả RESULT_CANCELED và UCrop.RESULT_ERROR
+                setResult(RESULT_CANCELED)
+                finish()
+            }
         }
     }
 } 

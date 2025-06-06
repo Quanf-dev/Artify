@@ -9,6 +9,9 @@
         <!-- Màu chữ phụ -->
         <item name="android:textColorSecondary">@color/desc_text</item>
         <item name="android:fontFamily">@font/work_sans</item>
+        
+        <!-- Activity transition animations -->
+        <item name="android:windowAnimationStyle">@style/ActivityAnimation.SlideFromRight</item>
     </style>
 
     <!-- Style for Color Picker Dialog -->

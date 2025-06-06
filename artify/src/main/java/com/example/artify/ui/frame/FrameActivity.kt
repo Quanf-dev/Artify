@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.Toast
@@ -21,6 +22,7 @@ import com.example.artify.R
 import com.example.artify.databinding.ActivityFrameBinding
 import com.example.artify.databinding.ItemToolbarEditMainBinding
 import com.example.artify.ui.editbase.BaseEditActivity
+import com.example.artify.ui.editbase.animateImageIn
 import com.example.imageeditor.ui.views.ImageFrameView
 import java.io.File
 import java.io.FileOutputStream
@@ -44,7 +46,6 @@ class FrameActivity : BaseEditActivity<ActivityFrameBinding>() {
         toolbarBinding = ItemToolbarEditMainBinding.bind(binding.root.findViewById<android.widget.LinearLayout>(R.id.tbFrame))
 
         // Initialize views
-
         toolbarBinding.ivDone.setOnClickListener {
             val editedBitmap = binding.imageFrameView.getCurrentBitmap()
             returnEditedImage(editedBitmap)
@@ -54,12 +55,16 @@ class FrameActivity : BaseEditActivity<ActivityFrameBinding>() {
         getInputBitmap(
             onBitmapReady = { bitmap ->
                 binding.imageFrameView.setImageBitmap(bitmap)
+                binding.imageFrameView.animateImageIn()
                 currentImageBitmap = bitmap
             },
             onError = {
-                // Có thể load ảnh mẫu nếu muốn
             }
         )
+        with(toolbarBinding) {
+            ivRedo.visibility = View.GONE
+            ivUndo.visibility = View.GONE
+        }
     }
 
 }

@@ -2,6 +2,8 @@
     xmlns:iconics="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
+    android:id="@+id/filterBottomMenu"
+
     android:fillViewport="true"
     android:scrollbars="none">
 

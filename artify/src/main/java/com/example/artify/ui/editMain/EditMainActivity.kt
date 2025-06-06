@@ -31,6 +31,8 @@ import com.example.artify.databinding.ItemBottomBarEdtMainBinding
 import com.example.artify.databinding.ItemToolbarEditMainBinding
 import com.example.artify.model.TextProperties
 import com.example.artify.ui.editbase.BaseEditActivity
+import com.example.artify.ui.editbase.animateImageIn
+import com.example.artify.ui.editbase.scaleIn
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
@@ -42,6 +44,7 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
     private var imageUri: Uri? = null
     private lateinit var bottomBarBinding: ItemBottomBarEdtMainBinding
     private lateinit var toolbarBinding: ItemToolbarEditMainBinding
+    private var originalBitmap: Bitmap? = null
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -68,12 +71,18 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
         bottomBarBinding = ItemBottomBarEdtMainBinding.bind(bottomBarView)
         val toolbarView = findViewById<android.widget.LinearLayout>(R.id.toolbar)
         toolbarBinding = ItemToolbarEditMainBinding.bind(toolbarView)
+        
+        // Ẩn bottom menu để chuẩn bị cho animation
+        bottomBarView.visibility = View.INVISIBLE
 
         // Nhận ảnh đầu vào đồng bộ
         getInputBitmap(
             onBitmapReady = { bitmap ->
                 currentImageBitmap = bitmap
+                originalBitmap = bitmap.copy(bitmap.config!!, true)
                 binding.editorView.setImageBitmap(bitmap)
+                binding.editorView.animateImageIn()
+                animateBottomBar(bottomBarView)
             },
             onError = {
                 // Nếu có image_uri (từ HomeActivity), load vào
@@ -86,15 +95,25 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
                         inputStream?.close()
                         if (bitmap != null) {
                             currentImageBitmap = bitmap
+                            originalBitmap = bitmap.copy(bitmap.config!!, true)
                             binding.editorView.setImageBitmap(bitmap)
+                            binding.editorView.animateImageIn()
+                            animateBottomBar(bottomBarView)
                             return@getInputBitmap
                         }
                     } catch (_: Exception) {}
                 }
                 // Nếu vẫn không có, có thể load ảnh mẫu hoặc báo lỗi
                 Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show()
+                
+                // Vẫn hiển thị bottom menu với animation
+                animateBottomBar(bottomBarView)
             }
         )
+
+        with(toolbarBinding) {
+            ivRedo.visibility = View.GONE
+        }
 
         setupClickListeners()
     }
@@ -115,46 +134,63 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
 
     private fun setupClickListeners() {
         bottomBarBinding.llText.setOnClickListener {
+            it.scaleIn()
             showEditTextFragment()
         }
 
         bottomBarBinding.llPaint.setOnClickListener {
+            it.scaleIn()
             updateCurrentImageBitmapFromContainer()
             navigateToPaint()
         }
 
         bottomBarBinding.llFrame.setOnClickListener {
+            it.scaleIn()
             updateCurrentImageBitmapFromContainer()
             navigateToFrame()
         }
 
         bottomBarBinding.llCrop.setOnClickListener {
+            it.scaleIn()
             updateCurrentImageBitmapFromContainer()
             navigateToCrop()
         }
 
         bottomBarBinding.llTune.setOnClickListener {
+            it.scaleIn()
             updateCurrentImageBitmapFromContainer()
             navigateToTune()
         }
 
         bottomBarBinding.llFilter.setOnClickListener {
+            it.scaleIn()
             updateCurrentImageBitmapFromContainer()
             navigateToFilter()
         }
 
         bottomBarBinding.llBlur.setOnClickListener {
+            it.scaleIn()
             updateCurrentImageBitmapFromContainer()
             navigateToBlur()
         }
 
         bottomBarBinding.llEmoji.setOnClickListener {
+            it.scaleIn()
             updateCurrentImageBitmapFromContainer()
             navigateToEmoji()
         }
 
         toolbarBinding.ivDone.setOnClickListener {
+            it.scaleIn()
             checkPermissionsAndSave()
+        }
+
+        toolbarBinding.ivUndo.setOnClickListener {
+            it.scaleIn()
+            originalBitmap?.let {
+                currentImageBitmap = it.copy(it.config!!, true)
+                binding.editorView.setImageBitmap(currentImageBitmap)
+            }
         }
 
         toolbarBinding.root.setOnClickListener {

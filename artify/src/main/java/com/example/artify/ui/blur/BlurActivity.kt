@@ -6,11 +6,13 @@ import android.renderscript.Allocation
 import android.renderscript.Element
 import android.renderscript.RenderScript
 import android.renderscript.ScriptIntrinsicBlur
+import android.view.View
 import android.widget.SeekBar
 import com.example.artify.R
 import com.example.artify.databinding.ActivityBlurBinding
 import com.example.artify.databinding.ItemToolbarEditMainBinding
 import com.example.artify.ui.editbase.BaseEditActivity
+import com.example.artify.ui.editbase.animateImageIn
 import java.io.File
 
 class BlurActivity : BaseEditActivity<ActivityBlurBinding>() {
@@ -29,16 +31,16 @@ class BlurActivity : BaseEditActivity<ActivityBlurBinding>() {
 
         // Initialize views
         initViews()
-
+        
         // Nhận ảnh đầu vào đồng bộ
         getInputBitmap(
             onBitmapReady = { bitmap ->
                 originalBitmap = bitmap
                 currentImageBitmap = bitmap
                 binding.imageView.setImageBitmap(bitmap)
+                binding.imageView.animateImageIn()
             },
             onError = {
-                // Có thể load ảnh mẫu nếu muốn
             }
         )
 

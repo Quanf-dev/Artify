@@ -3,6 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
     android:gravity="center_vertical"
+    android:id="@+id/filterBottomMenu"
+
     android:orientation="horizontal"
     android:paddingHorizontal="8dp">
 
