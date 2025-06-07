@@ -11,6 +11,7 @@ import com.example.artify.R
 import com.example.artify.databinding.ActivityHomeBinding
 import com.example.artify.ui.editMain.EditMainActivity
 import android.content.Intent
+import com.example.imageaigen.MainActivity
 
 class HomeActivity : AppCompatActivity() {
     private lateinit var binding: ActivityHomeBinding
@@ -38,6 +39,10 @@ class HomeActivity : AppCompatActivity() {
         // Set up click listener for select photo button
         binding.btnSelectPhoto.setOnClickListener {
             pickImageLauncher.launch("image/*")
+        }
+        binding.frmAvatarGen.setOnClickListener{
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
         }
     }
 }
