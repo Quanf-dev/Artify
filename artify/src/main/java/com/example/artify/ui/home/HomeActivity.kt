@@ -11,7 +11,9 @@ import com.example.artify.R
 import com.example.artify.databinding.ActivityHomeBinding
 import com.example.artify.ui.editMain.EditMainActivity
 import android.content.Intent
-import com.example.imageaigen.MainActivity
+import com.example.imageaigen.ui.AnimeGenActivity
+import com.example.imageaigen.ui.CartoonifyActivity
+import com.example.imageaigen.ui.RemoveBackgroundActivity
 
 class HomeActivity : AppCompatActivity() {
     private lateinit var binding: ActivityHomeBinding
@@ -41,7 +43,11 @@ class HomeActivity : AppCompatActivity() {
             pickImageLauncher.launch("image/*")
         }
         binding.frmAvatarGen.setOnClickListener{
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, AnimeGenActivity::class.java)
+            startActivity(intent)
+        }
+        binding.frmBgRemove.setOnClickListener{
+            val intent = Intent(this, RemoveBackgroundActivity::class.java)
             startActivity(intent)
         }
     }

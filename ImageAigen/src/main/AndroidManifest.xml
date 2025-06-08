@@ -6,21 +6,24 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
 
-    <application>
+    <application
+        >
         <activity
-            android:name=".MainActivity"
-            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
+            android:name=".ui.AnimeGenActivity"
             android:exported="false" />
-            
         <activity
-            android:name=".ui.GeminiImageActivity"
-            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
+            android:name=".ui.CartoonifyActivity"
             android:exported="false" />
-            
-        <!-- Add your actual Gemini API key here for production -->
-        <meta-data
-            android:name="com.google.ai.gemini.api.key"
-            android:value="AIzaSyDummyKeyForSample12345" />
+        <activity
+            android:name=".ui.EditImageActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.GenerateImageActivity"
+            android:exported="false" />
+        <activity android:name=".ui.RemoveBackgroundActivity" />
+
+
+
     </application>
 
 </manifest>
