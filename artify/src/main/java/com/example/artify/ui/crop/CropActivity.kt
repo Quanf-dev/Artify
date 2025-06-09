@@ -4,12 +4,9 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import com.example.artify.R
-import com.example.artify.databinding.ActivityBlurBinding
+import com.example.artify.constants.Constants
+import com.example.common.R
 import com.example.artify.databinding.ActivityCropBinding
-import com.example.artify.ui.editMain.EditMainActivity
 import com.yalantis.ucrop.UCrop
 import java.io.File
 import java.util.UUID
@@ -18,15 +15,6 @@ import com.example.artify.ui.editbase.BaseEditActivity
 class CropActivity : BaseEditActivity<ActivityCropBinding>() {
 
     private var sourceUri: Uri? = null
-
-    private fun copyDrawableToCache(drawableResId: Int): Uri {
-        val inputStream = resources.openRawResource(drawableResId)
-        val file = File(cacheDir, "temp_crop_image.jpg")
-        file.outputStream().use { output ->
-            inputStream.copyTo(output)
-        }
-        return Uri.fromFile(file)
-    }
 
     override fun inflateBinding(): ActivityCropBinding {
         return ActivityCropBinding.inflate(layoutInflater)
@@ -81,7 +69,7 @@ class CropActivity : BaseEditActivity<ActivityCropBinding>() {
             if (resultCode == RESULT_OK) {
                 val resultUri = UCrop.getOutput(data!!)
                 setResult(RESULT_OK, Intent().apply {
-                    putExtra("edited_image_path", resultUri?.path)
+                    putExtra(Constants.EXTRA_EDITED_IMAGE_PATH, resultUri?.path)
                 })
                 finish()
             } else { // Bao gồm cả RESULT_CANCELED và UCrop.RESULT_ERROR

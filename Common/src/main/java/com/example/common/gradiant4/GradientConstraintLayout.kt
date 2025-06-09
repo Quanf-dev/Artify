@@ -1,11 +1,13 @@
-package com.example.artify.utils
+package com.example.common.gradiant4
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
 import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.example.artify.R
+import com.example.common.R
 
 class GradientConstraintLayout @JvmOverloads constructor(
     context: Context,
@@ -38,8 +40,8 @@ class GradientConstraintLayout @JvmOverloads constructor(
         cornerRadius: Float,
         rippleColorHex: String = "#33000000"
     ): RippleDrawable {
-        val gradientDrawable = android.graphics.drawable.GradientDrawable(
-            android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT,
+        val gradientDrawable = GradientDrawable(
+            GradientDrawable.Orientation.LEFT_RIGHT,
             colors
         ).apply {
             this.cornerRadius = cornerRadius
@@ -47,7 +49,7 @@ class GradientConstraintLayout @JvmOverloads constructor(
 
         val rippleColor = Color.parseColor(rippleColorHex)
         return RippleDrawable(
-            android.content.res.ColorStateList.valueOf(rippleColor),
+            ColorStateList.valueOf(rippleColor),
             gradientDrawable,
             null
         )

@@ -1,0 +1,11 @@
+<resources>
+    <attr name="cornerRadius" format="dimension" />
+
+    <declare-styleable name="GradientButton">
+        <attr name="cornerRadius" />
+    </declare-styleable>
+
+    <declare-styleable name="GradientConstraintLayout">
+        <attr name="cornerRadius" />
+    </declare-styleable>
+</resources>

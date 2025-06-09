@@ -7,7 +7,7 @@ import androidx.core.content.ContextCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.example.artify.R
 import com.example.artify.databinding.ActivityOnboardingBinding
-import com.example.artify.utils.GradientDotDrawable
+import com.example.common.gradiant4.GradientDotDrawable
 
 class OnboardingActivity : AppCompatActivity() {
 

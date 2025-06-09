@@ -19,13 +19,19 @@ import kotlinx.coroutines.withContext
 class GeminiRepository(context: Context) {
 
     // Sử dụng Firebase AI với backend là Google AI Gemini
-    val model = Firebase.ai(backend = GenerativeBackend.vertexAI()).generativeModel(
+    val model = Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel(
         modelName = "gemini-2.0-flash-preview-image-generation",
         // Configure the model to respond with text and images
         generationConfig = generationConfig {
             responseModalities = listOf(ResponseModality.TEXT, ResponseModality.IMAGE)
         }
 
+    )
+
+    @OptIn(PublicPreviewAPI::class)
+    val GenImageModel = Firebase.ai(backend = GenerativeBackend.googleAI()).imagenModel(
+        modelName = "imagen-3.0-generate-002",
+        generationConfig = ImagenGenerationConfig(numberOfImages = 5)
     )
 
     @OptIn(PublicPreviewAPI::class)
@@ -38,33 +44,20 @@ class GeminiRepository(context: Context) {
     /**
      * Generate image from text prompt
      */
-    suspend fun generateImageFromText(prompt: String): GeminiResponse = withContext(Dispatchers.IO) {
+    @OptIn(PublicPreviewAPI::class)
+    suspend fun generateImageFromText(prompt: String): List<Bitmap> = withContext(Dispatchers.IO) {
         try {
-            val response = model.generateContent(prompt)
-            val generatedText = response.text
-
-            val generatedImage = response.candidates.firstOrNull()
-                ?.content?.parts?.firstNotNullOfOrNull { it.asImageOrNull() }
-
-            GeminiResponse(
-                bitmap = generatedImage,
-                text = generatedText,
-                isError = false
-            )
+            val imageResponse = AnimeModel.generateImages(prompt)
+            imageResponse.images.mapNotNull { it.asBitmap() }
         } catch (e: Exception) {
-            GeminiResponse(
-                bitmap = null,
-                text = null,
-                isError = true,
-                errorMessage = e.message
-            )
+            emptyList()
         }
     }
 
     /**
      * Edit image with text instructions
      */
-    suspend fun editImage(bitmap: Bitmap): GeminiResponse {
+    suspend fun removeBackgroundImage(bitmap: Bitmap): GeminiResponse {
         return try {
             val content = content {
                 image(bitmap)
@@ -118,35 +111,37 @@ class GeminiRepository(context: Context) {
     /**
      * Start a chat session for iterative image editing
      */
-    suspend fun startChatAndEditImage(image: Bitmap, prompt: String): GeminiResponse = withContext(Dispatchers.IO) {
+    suspend fun startChatAndEditImage(
+        image: Bitmap,
+        promptText: String
+    ): GeminiResponse = withContext(Dispatchers.IO) {
         try {
-            val chat = model.startChat()
-
-            val initialPrompt = content {
+            val prompt = content {
                 image(image)
-                text(prompt)
+                text(promptText)
             }
 
-            val response = chat.sendMessage(initialPrompt)
-            val generatedText = response.text
+            val response = model.generateContent(prompt)
 
-            val generatedImage = response.candidates.firstOrNull()
-                ?.content?.parts?.firstNotNullOfOrNull { it.asImageOrNull() }
+            val generatedImage = response.candidates
+                .firstOrNull()
+                ?.content
+                ?.parts
+                ?.firstNotNullOfOrNull { it.asImageOrNull() }
 
             GeminiResponse(
                 bitmap = generatedImage,
-                text = generatedText,
                 isError = false
             )
         } catch (e: Exception) {
             GeminiResponse(
                 bitmap = null,
-                text = null,
                 isError = true,
                 errorMessage = e.message
             )
         }
     }
+
 
     /**
      * Generate anime images from text prompt using AnimeModel (multiple images)
@@ -155,6 +150,19 @@ class GeminiRepository(context: Context) {
     suspend fun generateAnimeImages(prompt: String): List<Bitmap> = withContext(Dispatchers.IO) {
         try {
             val imageResponse = AnimeModel.generateImages(prompt)
+            imageResponse.images.mapNotNull { it.asBitmap() }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    /**
+     * Generate multiple images from text prompt (for GenerateImageViewModel)
+     */
+    @OptIn(PublicPreviewAPI::class)
+    suspend fun generateImagesFromText(prompt: String): List<Bitmap> = withContext(Dispatchers.IO) {
+        try {
+            val imageResponse = GenImageModel.generateImages(prompt)
             imageResponse.images.mapNotNull { it.asBitmap() }
         } catch (e: Exception) {
             emptyList()

@@ -10,10 +10,10 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import com.example.artify.R
 import com.example.artify.databinding.ActivityLoginBinding
-import com.example.artify.ui.base.BaseActivity
+import com.example.common.base.BaseActivity
 import com.example.artify.ui.phone.PhoneLoginActivity
-import com.example.artify.utils.GradientDotDrawable
 import com.example.artify.utils.dpToPx
+import com.example.common.gradiant4.GradientDotDrawable
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -142,7 +142,7 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
     private fun setupUI() {
         val edtPassword = binding.edtInputPassword
 
-        val gradientBorder = GradientDotDrawable(
+        val gradientBorder = GradientDotDrawable    (
             height = dpToPx(2),
             cornerRadius = dpToPx(10).toFloat()
         )

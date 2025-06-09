@@ -149,4 +149,8 @@
     <string name="frame_gallery">Frame Gallery</string>
     <string name="reset_frames">Reset Frames</string>
     <string name="frame">Frame</string>
+    <string name="ai_image_generator">AI Image Generator</string>
+    <string name="ai_chat_edit_image">AI Chat Edit Image</string>
+    <string name="ai_anime_genarator">Ai Anime Genarator</string>
+    <string name="ai_background_remove">AI Background Remove</string>
 </resources>

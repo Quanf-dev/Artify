@@ -37,7 +37,7 @@
             app:layout_constraintTop_toTopOf="@id/imgAvatar" />
 
         <!-- Username Gradient -->
-        <com.example.artify.utils.GradientTextView
+        <com.example.common.gradiant4.GradientTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/user_name"
@@ -46,7 +46,7 @@
             tools:ignore="TouchTargetSizeCheck" />
 
         <!-- Gradient Button -->
-        <com.example.artify.utils.GradientButton
+        <com.example.common.gradiant4.GradientButton
             android:layout_width="@dimen/_80sdp"
             android:layout_height="@dimen/_30sdp"
             android:drawableStart="@drawable/img_king"
@@ -115,7 +115,7 @@
                 android:src="@drawable/ic_microphone" />
         </FrameLayout>
 
-        <com.example.artify.utils.GradientConstraintLayout
+        <com.example.common.gradiant4.GradientConstraintLayout
             android:id="@+id/csl2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -182,7 +182,7 @@
             </FrameLayout>
 
 
-        </com.example.artify.utils.GradientConstraintLayout>
+        </com.example.common.gradiant4.GradientConstraintLayout>
 
         <FrameLayout
             android:id="@+id/frmAnimeGen"

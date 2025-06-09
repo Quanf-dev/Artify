@@ -12,7 +12,7 @@ import androidx.activity.viewModels
 import com.example.artify.R
 import com.example.artify.databinding.ActivityEmailVerificationBinding
 import com.example.artify.databinding.DialogVerificationStatusBinding
-import com.example.artify.ui.base.BaseActivity
+import com.example.common.base.BaseActivity
 import com.example.artify.ui.login.LoginActivity
 import com.example.artify.ui.profile.SetupUsernameActivity
 import dagger.hilt.android.AndroidEntryPoint

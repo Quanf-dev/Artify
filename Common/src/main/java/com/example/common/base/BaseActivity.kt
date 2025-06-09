@@ -1,4 +1,4 @@
-package com.example.artify.ui.base
+package com.example.common.base
 
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -9,7 +9,7 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewbinding.ViewBinding
-import com.example.artify.R
+import com.example.common.R
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import eightbitlab.com.blurview.BlurView
@@ -45,7 +45,7 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
         appBarLayout = findViewById(R.id.app_bar_layout_base)
         loadingScrim = findViewById(R.id.loading_scrim)
 
-        val rootView = window.decorView.findViewById<ViewGroup>(android.R.id.content)
+        val rootView = window.decorView.findViewById<ViewGroup>(R.id.content_container_base)
         val windowBackground: Drawable? = window.decorView.background
 
         loadingScrim.setupWith(rootView, RenderScriptBlur(this))

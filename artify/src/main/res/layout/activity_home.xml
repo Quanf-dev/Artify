@@ -38,7 +38,7 @@
             app:layout_constraintTop_toTopOf="@id/imgAvatar" />
 
         <!-- Username Gradient -->
-        <com.example.artify.utils.GradientTextView
+        <com.example.common.gradiant4.GradientTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/user_name"
@@ -47,7 +47,7 @@
             tools:ignore="TouchTargetSizeCheck" />
 
         <!-- Gradient Button -->
-        <com.example.artify.utils.GradientButton
+        <com.example.common.gradiant4.GradientButton
             android:layout_width="@dimen/_80sdp"
             android:layout_height="@dimen/_30sdp"
             android:drawableStart="@drawable/img_king"
@@ -116,7 +116,7 @@
                 android:src="@drawable/ic_microphone" />
         </FrameLayout>
 
-        <com.example.artify.utils.GradientConstraintLayout
+        <com.example.common.gradiant4.GradientConstraintLayout
             android:id="@+id/csl2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -183,10 +183,10 @@
             </FrameLayout>
 
 
-        </com.example.artify.utils.GradientConstraintLayout>
+        </com.example.common.gradiant4.GradientConstraintLayout>
 
         <FrameLayout
-            android:id="@+id/frmAvatarGen"
+            android:id="@+id/frmImageGen"
             style="@style/FrameStyle_AvatarBox"
             app:layout_constraintStart_toStartOf="@+id/csl2"
             app:layout_constraintTop_toBottomOf="@+id/csl2">
@@ -198,11 +198,11 @@
 
             <TextView
                 style="@style/TextStyle_AlAvatarTitle"
-                android:text="@string/al_avatar_generator" />
+                android:text="@string/ai_image_generator" />
         </FrameLayout>
 
         <FrameLayout
-            android:id="@+id/frmSceneGen"
+            android:id="@+id/frmEditImage"
             style="@style/FrameStyle_AvatarBox"
             app:layout_constraintEnd_toEndOf="@+id/csl2"
             app:layout_constraintTop_toBottomOf="@+id/csl2">
@@ -214,15 +214,15 @@
 
             <TextView
                 style="@style/TextStyle_AlAvatarTitle"
-                android:text="@string/al_scene_generator" />
+                android:text="@string/ai_chat_edit_image" />
 
         </FrameLayout>
 
         <FrameLayout
             android:id="@+id/frmCartoonGen"
             style="@style/FrameStyle_AvatarBox"
-            app:layout_constraintEnd_toEndOf="@+id/frmSceneGen"
-            app:layout_constraintTop_toBottomOf="@+id/frmSceneGen">
+            app:layout_constraintEnd_toEndOf="@+id/frmEditImage"
+            app:layout_constraintTop_toBottomOf="@+id/frmEditImage">
 
             <ImageView
                 android:layout_width="wrap_content"
@@ -249,7 +249,7 @@
 
             <TextView
                 style="@style/TextStyle_AlAvatarTitle"
-                android:text="@string/ai_cartoonizer" />
+                android:text="@string/ai_background_remove" />
 
         </FrameLayout>
 
@@ -258,8 +258,8 @@
             android:layout_width="@dimen/_130sdp"
             android:layout_height="@dimen/_275sdp"
             android:layout_marginTop="20dp"
-            app:layout_constraintEnd_toEndOf="@+id/frmAvatarGen"
-            app:layout_constraintTop_toBottomOf="@+id/frmAvatarGen"
+            app:layout_constraintEnd_toEndOf="@+id/frmImageGen"
+            app:layout_constraintTop_toBottomOf="@+id/frmImageGen"
             >
 
             <ImageView
@@ -271,7 +271,7 @@
 
             <TextView
                 style="@style/TextStyle_AlAvatarTitle"
-                android:text="@string/ai_cartoonizer" />
+                android:text="@string/ai_anime_genarator" />
 
         </FrameLayout>
 

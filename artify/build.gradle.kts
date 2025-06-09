@@ -130,4 +130,8 @@ dependencies {
     // crop
     implementation ("com.github.yalantis:ucrop:2.2.10")
 
+    //common
+    implementation(project(":Common"))
+
+
 }

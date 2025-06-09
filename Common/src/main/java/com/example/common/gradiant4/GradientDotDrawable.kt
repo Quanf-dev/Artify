@@ -1,4 +1,4 @@
-package com.example.artify.utils
+package com.example.common.gradiant4
 
 import android.graphics.*
 import android.graphics.drawable.Drawable

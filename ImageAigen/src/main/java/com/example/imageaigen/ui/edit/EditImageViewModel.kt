@@ -20,9 +20,21 @@ class EditImageViewModel(application: Application) : AndroidViewModel(applicatio
     fun editImage(image: Bitmap, prompt: String) {
         _isLoading.value = true
         viewModelScope.launch {
-            val result = repository.startChatAndEditImage(image, prompt)
-            _imageEditResult.postValue(result)
-            _isLoading.postValue(false)
+            try {
+                val result = repository.startChatAndEditImage(image, prompt)
+                _imageEditResult.postValue(result)
+            } catch (e: Exception) {
+                _imageEditResult.postValue(
+                    GeminiResponse(
+                        bitmap = null,
+                        text = null,
+                        isError = true,
+                        errorMessage = e.message ?: "Failed to edit image"
+                    )
+                )
+            } finally {
+                _isLoading.postValue(false)
+            }
         }
     }
-} 
+}

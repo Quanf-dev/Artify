@@ -75,7 +75,7 @@
             app:layout_constraintEnd_toEndOf="@id/edt_input_password"
             app:layout_constraintTop_toBottomOf="@+id/edt_input_password" />
 
-        <com.example.artify.utils.GradientButton
+        <com.example.common.gradiant4.GradientButton
             android:id="@+id/btn_sign_in"
             android:layout_width="match_parent"
             android:layout_height="55dp"

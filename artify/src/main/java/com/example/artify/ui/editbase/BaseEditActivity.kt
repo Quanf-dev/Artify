@@ -12,8 +12,10 @@ import android.view.animation.OvershootInterpolator
 import android.view.animation.PathInterpolator
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.Navigator
 import androidx.viewbinding.ViewBinding
 import com.example.artify.R
+import com.example.artify.constants.Constants
 import com.example.artify.databinding.ActivityBaseEditBinding
 import com.example.artify.ui.blur.BlurActivity
 import com.example.artify.ui.crop.CropActivity
@@ -211,7 +213,7 @@ abstract class BaseEditActivity<VB : ViewBinding> : AppCompatActivity() {
      * Nhận bitmap đầu vào từ intent (ưu tiên image_path, sau đó share intent, fallback ảnh mẫu nếu cần)
      */
     protected fun getInputBitmap(onBitmapReady: (Bitmap) -> Unit, onError: (() -> Unit)? = null) {
-        val imagePath = intent.getStringExtra("image_path")
+        val imagePath = intent.getStringExtra(Constants.EXTRA_IMAGE_PATH)
         if (!imagePath.isNullOrEmpty()) {
             val bitmap = BitmapFactory.decodeFile(imagePath)
             if (bitmap != null) {

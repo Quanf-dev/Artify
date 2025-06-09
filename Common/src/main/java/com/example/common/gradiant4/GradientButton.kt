@@ -1,17 +1,18 @@
-package com.example.artify.utils
+package com.example.common.gradiant4
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatButton
-import com.example.artify.R
+import com.example.common.R
 
 class GradientButton @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = android.R.attr.buttonStyle
+    defStyleAttr: Int = androidx.appcompat.R.attr.buttonStyle
 ) : AppCompatButton(context, attrs, defStyleAttr) {
 
     private val colors = intArrayOf(
@@ -35,7 +36,7 @@ class GradientButton @JvmOverloads constructor(
 
         val rippleColor = Color.parseColor("#66FFFFFF") // màu ripple hơi trắng trong suốt
         val rippleDrawable = RippleDrawable(
-            android.content.res.ColorStateList.valueOf(rippleColor),
+            ColorStateList.valueOf(rippleColor),
             gradientDrawable, // nền button
             null // mask (null nghĩa ripple phủ hết background)
         )
