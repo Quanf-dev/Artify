@@ -16,7 +16,7 @@ import com.example.artify.ui.profile.SetupUsernameActivity
 import com.example.artify.utils.dpToPx
 import com.example.artify.utils.navigate
 import com.example.common.gradiant4.GradientDotDrawable
-import com.example.socialposts.ui.PostsActivity
+import com.example.artify.ui.posts.PostsActivity
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

@@ -5,10 +5,10 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewbinding.ViewBinding
+import com.airbnb.lottie.LottieAnimationView
 import com.example.common.R
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
@@ -17,7 +17,7 @@ import eightbitlab.com.blurview.RenderScriptBlur
 
 abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
 
-    private lateinit var progressBar: ProgressBar
+    private lateinit var progressBar: LottieAnimationView
     private lateinit var toolbar: MaterialToolbar
     private lateinit var appBarLayout: AppBarLayout
     private lateinit var loadingScrim: BlurView
@@ -40,7 +40,7 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
 
         contentContainer.addView(binding.root)
 
-        progressBar = findViewById(R.id.globalProgressBar)
+        progressBar = findViewById(R.id.lottieProgressBar)
         toolbar = findViewById(R.id.toolbar_base)
         appBarLayout = findViewById(R.id.app_bar_layout_base)
         loadingScrim = findViewById(R.id.loading_scrim)

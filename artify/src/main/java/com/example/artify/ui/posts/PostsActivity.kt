@@ -1,4 +1,4 @@
-package com.example.socialposts.ui
+package com.example.artify.ui.posts
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,16 +8,20 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.artify.ui.home.HomeActivity
+import com.example.artify.utils.navigate
 import com.example.common.base.BaseActivity
+import com.example.common.R
 import com.example.socialposts.adapter.PostAdapter
 import com.example.socialposts.databinding.ActivityPostsBinding
+import com.example.socialposts.ui.CreatePostActivity
+import com.example.socialposts.ui.MainBottomNavigationHelper
 import com.example.socialposts.viewmodel.PostViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class PostsActivity : BaseActivity<ActivityPostsBinding>() {
-
     private val viewModel: PostViewModel by viewModels()
     private lateinit var adapter: PostAdapter
 
@@ -27,7 +31,11 @@ class PostsActivity : BaseActivity<ActivityPostsBinding>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Hide the app bar
+        findViewById<View>(R.id.app_bar_layout_base).visibility = View.GONE
+        findViewById<View>(R.id.coordinator_base).fitsSystemWindows = false
 
+        
         setupRecyclerView()
         setupListeners()
         observeViewModel()
@@ -64,7 +72,7 @@ class PostsActivity : BaseActivity<ActivityPostsBinding>() {
             setOnItemSelectedListener { item ->
                 when (item.itemId) {
                     binding.bottomNavigation.menu.getItem(0).itemId -> {
-                        showMessage("Home feature will be available soon")
+                        navigate(HomeActivity::class.java)
                         true
                     }
 
@@ -92,17 +100,17 @@ class PostsActivity : BaseActivity<ActivityPostsBinding>() {
                 launch {
                     viewModel.posts.collect { posts ->
                         adapter.submitList(posts)
-                        binding.swipeRefresh.isRefreshing = false
                         binding.tvEmptyState.visibility = if (posts.isEmpty()) View.VISIBLE else View.GONE
                     }
                 }
 
                 launch {
                     viewModel.isLoading.collect { isLoading ->
-                        if (isLoading && !binding.swipeRefresh.isRefreshing) {
+                        if (isLoading) {
                             showLoading()
                         } else {
                             hideLoading()
+                            binding.swipeRefresh.isRefreshing = false
                         }
                     }
                 }

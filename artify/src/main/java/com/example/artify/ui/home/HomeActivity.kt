@@ -5,18 +5,18 @@ import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.example.artify.R
 import com.example.artify.databinding.ActivityHomeBinding
 import com.example.artify.ui.editMain.EditMainActivity
 import android.content.Intent
+import com.example.artify.ui.posts.PostsActivity
 import com.example.artify.utils.navigate
 import com.example.imageaigen.ui.anime.AnimeGenActivity
 import com.example.imageaigen.ui.cartoon.CartoonifyActivity
 import com.example.imageaigen.ui.edit.EditImageActivity
 import com.example.imageaigen.ui.generate.GenerateImageActivity
 import com.example.imageaigen.ui.removebg.RemoveBackgroundActivity
+import com.example.socialposts.ui.MainBottomNavigationHelper
 
 class HomeActivity : AppCompatActivity() {
     private lateinit var binding: ActivityHomeBinding
@@ -34,13 +34,7 @@ class HomeActivity : AppCompatActivity() {
         enableEdgeToEdge()
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
-        
+
         // Set up click listener for select photo button
         binding.btnSelectPhoto.setOnClickListener {
             pickImageLauncher.launch("image/*")
@@ -60,5 +54,36 @@ class HomeActivity : AppCompatActivity() {
         binding.frmCartoonGen.setOnClickListener{
             this.navigate(CartoonifyActivity::class.java)
         }
+
+        // Configure the bottom navigation as a fixed popup
+        setupFixedBottomNavigation()
+    }
+
+    private fun setupFixedBottomNavigation() {
+        // Get the BottomNavigationView
+        val bottomNav = binding.bottomNavigation
+        
+        // Apply animation
+        MainBottomNavigationHelper.animateBottomNavigation(bottomNav)
+        
+        // Set up item selection
+        bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.menu_home -> {
+                    // Already on home screen
+                    true
+                }
+                R.id.menu_social -> {
+                    navigate(PostsActivity::class.java)
+                    true
+                }
+                R.id.menu_settings -> {
+                    // Settings item (for future)
+                    true
+                }
+                else -> false
+            }
+        }
+        
     }
 }

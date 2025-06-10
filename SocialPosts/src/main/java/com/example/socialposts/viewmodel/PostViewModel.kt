@@ -1,8 +1,6 @@
 package com.example.socialposts.viewmodel
 
 import android.net.Uri
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.firebaseauth.repository.AuthRepository
@@ -12,10 +10,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -44,17 +39,18 @@ class PostViewModel @Inject constructor(
     fun loadPosts() {
         viewModelScope.launch {
             _errorMessage.value = null
+            _isLoading.value = true
             
-            postRepository.getPosts()
-                .onStart { _isLoading.value = true }
-                .catch { e -> 
-                    _errorMessage.value = "Failed to load posts: ${e.message}"
-                    _isLoading.value = false
-                }
-                .onCompletion { _isLoading.value = false }
-                .collectLatest { postsList ->
-                    _posts.value = postsList
-                }
+            try {
+                postRepository.getPosts()
+                    .collectLatest { postsList ->
+                        _posts.value = postsList
+                        _isLoading.value = false
+                    }
+            } catch (e: Exception) {
+                _errorMessage.value = "Failed to load posts: ${e.message}"
+                _isLoading.value = false
+            }
         }
     }
 
