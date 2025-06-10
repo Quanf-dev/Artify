@@ -5,7 +5,7 @@ import androidx.activity.viewModels
 import androidx.lifecycle.Observer
 import com.example.artify.R
 import com.example.artify.databinding.ActivityForgotPasswordBinding
-import com.example.artify.ui.base.BaseActivity
+import com.example.common.base.BaseActivity
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

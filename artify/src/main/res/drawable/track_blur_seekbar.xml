@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Background Track (Phần nền không thay đổi) -->
+    <item android:id="@android:id/background">
+        <shape android:shape="rectangle">
+            <corners android:radius="8dp" />
+            <solid android:color="#C1C1C1" /> <!-- Màu nền xám nhạt -->
+            <size android:height="8dp" />
+        </shape>
+    </item>
+
+    <!-- Secondary Progress (thường không thấy rõ, có thể bỏ qua nếu không cần) -->
+    <item android:id="@android:id/secondaryProgress">
+        <clip>
+            <shape android:shape="rectangle">
+                <corners android:radius="8dp" />
+                <solid android:color="#A0A0A0" />
+                <size android:height="8dp" />
+            </shape>
+        </clip>
+    </item>
+
+    <!-- Progress Track (Phần tiến trình với Gradient) -->
+    <item android:id="@android:id/progress">
+        <clip>
+            <shape android:shape="rectangle">
+                <corners android:radius="8dp" />
+                <gradient
+                    android:startColor="#60FFFFFF"
+                android:centerColor="#A0A7A7A7"
+                android:endColor="@color/colorPrimary"
+                android:angle="0" />
+                <size android:height="8dp" />
+            </shape>
+        </clip>
+    </item>
+
+</layer-list>

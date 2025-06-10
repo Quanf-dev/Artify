@@ -1,0 +1,67 @@
+Dưới đây là **file `tasks.md`** dạng checklist cho dự án thư viện Android `ProPaintEditor`, giúp theo dõi tiến độ các tính năng đã/đang được phát triển. Mỗi mục có thể được đánh dấu `✓` khi hoàn thành.
+
+---
+
+### ✅ `tasks.md` – Danh sách công việc cho thư viện **ProPaintEditor**
+
+#### 1. 📦 **Thiết lập thư viện & kiến trúc**
+
+* [✓] Cấu trúc theo Clean Architecture / MVVM
+* [✓] Tạo `PaintEditorView` (custom View dùng Canvas API)
+* [✓] Tạo ViewModel để quản lý trạng thái vẽ
+
+---
+
+#### 2. ✍️ **Vẽ tự do (Freestyle Drawing)**
+
+* [✓] Cho phép vẽ tự do bằng tay
+* [✓] Điều chỉnh độ dày nét vẽ (`lineWidth`)
+* [✓] Điều chỉnh độ mờ nét vẽ (`opacity`)
+* [✓] Cục tẩy (eraser)
+* [✓] Tăng/giảm kích thước cục tẩy
+
+#### 3. 🛠 **Drawing Tools (Công cụ kéo thả)**
+
+Mỗi công cụ cần hỗ trợ: kéo-thả, di chuyển, xoay, thay đổi màu, độ dày, độ mờ, tăng/giảm kích cỡ
+**(🔲 = fill toggle)**
+
+* [✓] Line
+* [✓] Arrow
+* [✓] Rectangle 🔲
+* [✓] Circle 🔲
+* [✓] DashLine
+* [✓] Polygon
+* [✓] Blur Area
+
+#### 4. 🧱 **Layer Management & Undo/Redo**
+
+* [✓] Mỗi đối tượng là một layer độc lập
+* [✓] Undo thao tác vẽ hoặc thêm/xoá đối tượng
+* [✓] Redo thao tác
+
+#### 5. 📤 **Export ảnh**
+
+* [✓] Xuất bitmap chứa toàn bộ nội dung đã vẽ
+* [✓] Lưu ảnh về thiết bị hoặc trả về callback
+
+#### 6. ⚙️ **Tích hợp dễ dàng**
+
+* [✓] Dễ sử dụng từ Activity/Fragment
+* [✓] Tạo API thân thiện cho lập trình viên tích hợp
+* [✓] Viết README hướng dẫn
+
+#### 7. 📈 **Mở rộng tương lai**
+
+* [✓] Thiết kế hệ thống mở rộng (thêm công cụ hoặc hiệu ứng)
+* [✓] Tạo interface/tool plugin để bổ sung tính năng mới dễ dàng
+
+#### 8. ✅ **Kiểm thử & Tối ưu**
+
+* [✓] Kiểm thử hiệu năng khi nhiều layer
+* [✓] Tối ưu hoá touch event và redraw
+* [✓] Kiểm thử export bitmap độ phân giải cao
+
+---
+
+Bạn có thể lưu file này với tên `tasks.md` trong root dự án hoặc module `propainteditor`.
+Nếu muốn mình có thể giúp tạo cấu trúc thư mục và các class nền luôn nhé.

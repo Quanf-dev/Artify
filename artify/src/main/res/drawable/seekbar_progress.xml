@@ -1,0 +1,19 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Nền -->
+    <item android:id="@android:id/background">
+        <shape android:shape="rectangle">
+            <size android:width="3dp"/>
+            <solid android:color="#E0E0E0"/>
+            <corners android:radius="6dp"/>
+        </shape>
+    </item>
+
+    <!-- Tiến trình chính -->
+    <item android:id="@android:id/progress">
+        <shape android:shape="rectangle">
+            <size android:width="3dp"/>
+            <solid android:color="#FF9800"/>
+            <corners android:radius="6dp"/>
+        </shape>
+    </item>
+</layer-list>

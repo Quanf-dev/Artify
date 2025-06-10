@@ -6,7 +6,7 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import com.example.artify.R
 import com.example.artify.databinding.ActivityRegisterBinding
-import com.example.artify.ui.base.BaseActivity
+import com.example.common.base.BaseActivity
 import com.example.artify.ui.login.LoginActivity
 import com.example.artify.ui.login.LoginState
 import dagger.hilt.android.AndroidEntryPoint

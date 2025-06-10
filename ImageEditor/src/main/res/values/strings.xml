@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="image_being_edited">Image being edited</string>
+    <string name="brightness">Brightness</string>
+    <string name="contrast">Contrast</string>
+    <string name="saturation">Saturation</string>
+    <string name="exposure">Exposure</string>
+    <string name="hue">Hue</string>
+    <string name="temperature">Temperature</string>
+    <string name="sharpness">Sharpness</string>
+    <string name="luminance">Luminance</string>
+    <string name="fade">Fade</string>
+    <string name="reset">Reset</string>
+    <string name="apply">Apply</string>
+    <string name="filter_preview">Filter preview</string>
+    <string name="filter_gallery">Filter Gallery</string>
+    
+    <!-- Frame Template -->
+    <string name="frame_name">Frame</string>
+    <string name="frame_preview">Frame preview</string>
+    <string name="frame_gallery">Frame Gallery</string>
+    <string name="image_with_frame">Image with frame</string>
+    <string name="no_frame">No Frame</string>
+    
+    <!-- Sticker Editor -->
+    <string name="image_background">Image background</string>
+    <string name="sticker_category_icon">Sticker category icon</string>
+    <string name="category_name">Category</string>
+    <string name="sticker_item">Sticker item</string>
+    <string name="add_sticker">Add Sticker</string>
+    <string name="remove_sticker">Remove Sticker</string>
+    <string name="sticker_gallery">Sticker Gallery</string>
+    <string name="stickers">Stickers</string>
+    <string name="clear_stickers">Clear All Stickers</string>
+</resources> 

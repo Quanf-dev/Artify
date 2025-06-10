@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources >
     <style name="ConstraintTopStartParent">
         <item name="layout_constraintTop_toTopOf">parent</item>
         <item name="layout_constraintStart_toStartOf">parent</item>
@@ -30,13 +30,36 @@
         <item name="android:drawablePadding">@dimen/_10sdp</item>
     </style>
 
-    <style name="CenteredInParentConstraint">
-        <item name="layout_constraintTop_toTopOf">parent</item>
-        <item name="layout_constraintBottom_toBottomOf">parent</item>
-        <item name="layout_constraintStart_toStartOf">parent</item>
-        <item name="layout_constraintEnd_toEndOf">parent</item>
+
+    <style name="TextStyle_AlAvatarTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">@dimen/_18ssp</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:layout_gravity">bottom|center</item>
+        <item name="android:layout_marginBottom">15dp</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
+    <style name="FrameStyle_AvatarBox">
+        <item name="android:layout_width">@dimen/_130sdp</item>
+        <item name="android:layout_height">@dimen/_130sdp</item>
+        <item name="android:layout_marginTop">20dp</item>
+    </style>
 
+    <style name="FrameStyle_AvatarBoxLand">
+        <item name="android:layout_width">@dimen/_170sdp</item>
+        <item name="android:layout_height">@dimen/_170sdp</item>
+        <item name="android:layout_marginTop">20dp</item>
+    </style>
+
+    <!-- Animation styles for activity transitions -->
+    <style name="ActivityAnimation.SlideFromRight" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/slide_in_right</item>
+        <item name="android:activityOpenExitAnimation">@anim/slide_out_left</item>
+        <item name="android:activityCloseEnterAnimation">@anim/slide_in_left</item>
+        <item name="android:activityCloseExitAnimation">@anim/slide_out_right</item>
+    </style>
 
 </resources>

@@ -1,0 +1,36 @@
+{
+    "categories": [
+        {
+            "name": "Emojis",
+            "icon": "drawable/ic_emoji_category",
+            "stickers": [
+                {
+                    "id": "emoji_smile",
+                    "path": "drawable/sticker_emoji_smile"
+                },
+                {
+                    "id": "emoji_love",
+                    "path": "drawable/sticker_emoji_love"
+                }
+            ]
+        },
+        {
+            "name": "Objects",
+            "icon": "drawable/ic_objects_category",
+            "stickers": [
+                {
+                    "id": "object_heart",
+                    "path": "drawable/sticker_heart"
+                },
+                {
+                    "id": "object_star",
+                    "path": "drawable/sticker_star"
+                },
+                {
+                    "id": "object_crown",
+                    "path": "drawable/sticker_crown"
+                }
+            ]
+        }
+    ]
+}

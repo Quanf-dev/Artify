@@ -76,7 +76,7 @@
                 android:maxLength="20" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <Button
+        <com.example.common.gradiant4.GradientButton
             android:id="@+id/btnOK"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

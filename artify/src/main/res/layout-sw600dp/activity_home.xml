@@ -1,0 +1,288 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scrollView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginTop="40dp"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/main"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="20dp"
+        android:background="@color/app_background"
+        android:paddingBottom="40dp"
+        tools:context=".ui.home.HomeActivity">
+
+        <!-- Avatar -->
+        <ImageView
+            android:id="@+id/imgAvatar"
+            android:layout_width="@dimen/_32sdp"
+            android:layout_height="@dimen/_32sdp"
+            android:contentDescription="@null"
+            android:src="@drawable/avatar_circle_1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:text="@string/welcome_back"
+            app:layout_constraintStart_toEndOf="@id/imgAvatar"
+            app:layout_constraintTop_toTopOf="@id/imgAvatar" />
+
+        <!-- Username Gradient -->
+        <com.example.common.gradiant4.GradientTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/user_name"
+            app:layout_constraintStart_toStartOf="@id/tvTitle"
+            app:layout_constraintTop_toBottomOf="@id/tvTitle"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <!-- Gradient Button -->
+        <com.example.common.gradiant4.GradientButton
+            android:layout_width="@dimen/_80sdp"
+            android:layout_height="@dimen/_30sdp"
+            android:drawableStart="@drawable/img_king"
+            android:paddingHorizontal="10dp"
+            android:text="@string/pro"
+            android:textColor="@color/white"
+            android:textSize="@dimen/_12ssp"
+            android:textStyle="bold"
+            app:cornerRadius="6dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <!-- Search Input with Icons -->
+        <FrameLayout
+            android:id="@+id/frameInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/imgAvatar">
+
+            <!-- EditText with padding for icons -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/welcome_back"
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusBottomEnd="10dp"
+                app:boxCornerRadiusBottomStart="10dp"
+                app:boxCornerRadiusTopEnd="10dp"
+                app:boxCornerRadiusTopStart="10dp"
+                app:boxStrokeColor="#565656">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edtSearch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:paddingStart="44dp"
+                    android:paddingEnd="44dp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Search Icon -->
+            <ImageView
+                android:id="@+id/imgSearch"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="start|center_vertical"
+                android:layout_marginStart="12dp"
+                android:contentDescription="@null"
+                android:elevation="4dp"
+                android:src="@drawable/ic_search" />
+
+            <!-- Mic Icon -->
+            <ImageView
+                android:id="@+id/imgMic"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="end|center_vertical"
+                android:layout_marginEnd="12dp"
+                android:contentDescription="@null"
+                android:elevation="4dp"
+                android:src="@drawable/ic_microphone" />
+        </FrameLayout>
+
+        <com.example.common.gradiant4.GradientConstraintLayout
+            android:id="@+id/csl2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:padding="26dp"
+            app:cornerRadius="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/frameInput"
+            app:layout_constraintWidth_percent="0.70">
+
+            <TextView
+                android:id="@+id/tvEditPhoto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/edit_photo"
+                android:textColor="@color/white"
+                android:textSize="@dimen/_20ssp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tvDescPhoto"
+                android:layout_width="130dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:text="@string/unleash_your_creativit_with_the_al_multi_editing_toolbox"
+                android:textColor="@color/white"
+                android:textSize="@dimen/_9ssp"
+                app:layout_constraintStart_toStartOf="@+id/tvEditPhoto"
+                app:layout_constraintTop_toBottomOf="@id/tvEditPhoto" />
+
+            <Button
+                android:id="@+id/btnSelectPhoto"
+                android:layout_width="0dp"
+                android:layout_height="24dp"
+                android:layout_marginTop="13dp"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/bg_photo_choose_trans"
+                android:paddingHorizontal="0dp"
+                android:paddingVertical="0dp"
+                android:text="@string/select_photo"
+                android:textColor="@color/white"
+                android:textSize="@dimen/_6ssp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="@+id/tvDescPhoto"
+                app:layout_constraintTop_toBottomOf="@+id/tvDescPhoto"
+                tools:ignore="TouchTargetSizeCheck" />
+
+            <FrameLayout
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:background="@drawable/bg_transparent_rounded"
+                android:rotation="56.67"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/tvDescPhoto"
+                app:layout_constraintTop_toTopOf="@+id/tvDescPhoto">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_editphoto" />
+            </FrameLayout>
+
+
+        </com.example.common.gradiant4.GradientConstraintLayout>
+
+        <FrameLayout
+            android:id="@+id/frmAnimeGen"
+            android:layout_width="@dimen/_130sdp"
+            android:layout_height="@dimen/_275sdp"
+            android:layout_marginTop="20dp"
+            app:layout_constraintStart_toEndOf="@+id/csl2"
+            android:layout_marginStart="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/frameInput">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/img_animegen" />
+
+            <TextView
+                style="@style/TextStyle_AlAvatarTitle"
+                android:text="@string/ai_cartoonizer" />
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/frmAvatarGen"
+            style="@style/FrameStyle_AvatarBoxLand"
+            app:layout_constraintStart_toStartOf="@+id/csl2"
+            app:layout_constraintTop_toBottomOf="@+id/csl2">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/img_avatargen" />
+
+            <TextView
+                style="@style/TextStyle_AlAvatarTitle"
+                android:text="@string/al_avatar_generator" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/frmSceneGen"
+            style="@style/FrameStyle_AvatarBoxLand"
+            android:layout_marginStart="20dp"
+            app:layout_constraintStart_toEndOf="@+id/frmAvatarGen"
+            app:layout_constraintEnd_toEndOf="@+id/csl2"
+            app:layout_constraintTop_toBottomOf="@+id/csl2">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/img_scenegen" />
+
+            <TextView
+                style="@style/TextStyle_AlAvatarTitle"
+                android:text="@string/al_scene_generator" />
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/frmCartoonGen"
+            style="@style/FrameStyle_AvatarBoxLand"
+            app:layout_constraintEnd_toEndOf="@+id/frmSceneGen"
+            app:layout_constraintTop_toBottomOf="@+id/frmSceneGen">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/img_cartoongen" />
+
+            <TextView
+                style="@style/TextStyle_AlAvatarTitle"
+                android:text="@string/ai_cartoonizer" />
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/frmBgRemove"
+            style="@style/FrameStyle_AvatarBoxLand"
+            app:layout_constraintEnd_toEndOf="@+id/frmAvatarGen"
+            app:layout_constraintTop_toBottomOf="@+id/frmAvatarGen">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/img_bgremove" />
+
+            <TextView
+                style="@style/TextStyle_AlAvatarTitle"
+                android:text="@string/ai_cartoonizer" />
+
+        </FrameLayout>
+
+        <View
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/frmAnimeGen" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>

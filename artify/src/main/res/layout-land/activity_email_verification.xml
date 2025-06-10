@@ -47,7 +47,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_verification_title" />
 
-    <Button
+    <com.example.common.gradiant4.GradientButton
         android:id="@+id/btnCheckVerification"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

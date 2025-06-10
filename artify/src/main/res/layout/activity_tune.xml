@@ -1,0 +1,31 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+
+    <!-- Toolbar ở trên -->
+    <include
+        android:id="@+id/include"
+        layout="@layout/item_toolbar_edit_main"
+        />
+
+    <ImageView
+        android:background="@color/imageSurroundBackground"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scaleType="centerCrop"
+        android:src="@drawable/img_scenegen"
+        android:padding="50dp"
+        />
+
+    <!-- Bottom bar ở dưới -->
+    <include
+        layout="@layout/item_bottom_tune"
+        />
+
+</LinearLayout>

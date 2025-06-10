@@ -1,0 +1,17 @@
+<resources>
+    <string-array name="font_names">
+        <item>Default</item>
+        <item>Roboto</item>
+        <item>Open Sans</item>
+        <item>Lato</item>
+        <item>Montserrat</item>
+        <item>Slabo 27px</item>
+        <item>Raleway</item>
+        <item>Merriweather</item>
+        <item>PT Sans</item>
+        <item>Lobster</item>
+        <item>Pacifico</item>
+        <item>Caveat</item>
+        <item>Dancing Script</item>
+    </string-array>
+</resources> 

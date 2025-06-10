@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="300dp"
+    android:height="300dp"
+    android:viewportWidth="300"
+    android:viewportHeight="300">
+    
+    <!-- Sky background -->
+    <path
+        android:fillColor="#87CEEB"
+        android:pathData="M0,0h300v200h-300z"/>
+    
+    <!-- Ground -->
+    <path
+        android:fillColor="#8FBC8F"
+        android:pathData="M0,200h300v100h-300z"/>
+    
+    <!-- Sun -->
+    <path
+        android:fillColor="#FFFF00"
+        android:pathData="M50,50m-30,0a30,30 0,1 1,60 0a30,30 0,1 1,-60 0"/>
+    
+    <!-- Mountain -->
+    <path
+        android:fillColor="#A52A2A"
+        android:pathData="M0,200l100,-150l100,150z"/>
+    
+    <!-- House -->
+    <path
+        android:fillColor="#CD853F"
+        android:pathData="M180,170h60v30h-60z"/>
+    
+    <!-- Roof -->
+    <path
+        android:fillColor="#8B0000"
+        android:pathData="M170,170l40,-25l40,25z"/>
+    
+    <!-- Door -->
+    <path
+        android:fillColor="#8B4513"
+        android:pathData="M200,180h20v20h-20z"/>
+    
+    <!-- Window -->
+    <path
+        android:fillColor="#ADD8E6"
+        android:pathData="M190,175h10v10h-10z"/>
+    
+    <!-- Tree trunk -->
+    <path
+        android:fillColor="#8B4513"
+        android:pathData="M80,170h10v30h-10z"/>
+    
+    <!-- Tree top -->
+    <path
+        android:fillColor="#006400"
+        android:pathData="M85,120m-25,0a25,25 0,1 1,50 0a25,25 0,1 1,-50 0"/>
+    
+</vector> 

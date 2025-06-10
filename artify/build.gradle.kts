@@ -40,6 +40,7 @@ android {
         viewBinding = true
         dataBinding = true
     }
+
 }
 
 dependencies {
@@ -49,6 +50,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(project(":ImageAigen"))
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -66,6 +68,9 @@ dependencies {
 
     // Firebase Auth Module
     implementation(project(":FirebaseAuth"))
+    
+    // Image Editor Module
+    implementation(project(":ImageEditor"))
 
     // Hilt
     implementation("com.google.dagger:hilt-android:2.50")
@@ -104,5 +109,29 @@ dependencies {
 
     //shimmer
     implementation ("com.facebook.shimmer:shimmer:0.5.0")
+
+    //iconic
+    implementation ("com.mikepenz:material-design-iconic-typeface:2.2.0.9-kotlin@aar")
+    implementation ("com.mikepenz:iconics-core:5.3.4")
+    implementation ("com.mikepenz:iconics-views:5.3.4")
+    implementation ("androidx.appcompat:appcompat:1.6.1")
+
+    // Color Picker (remove QuadFlask, add skydoves)
+    // implementation("com.github.QuadFlask:colorpicker:0.0.15") // Remove this
+    implementation("com.github.skydoves:colorpickerview:2.3.0") // Add this
+
+
+    // drag delete crop rotate view
+    implementation("com.github.miaoyongjun:StickerView:1.1")
+
+    // verticalseekbar
+    implementation ("com.h6ah4i.android.widget.verticalseekbar:verticalseekbar:1.0.0")
+
+    // crop
+    implementation ("com.github.yalantis:ucrop:2.2.10")
+
+    //common
+    implementation(project(":Common"))
+
 
 }

@@ -1,0 +1,56 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:iconics="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
+    android:orientation="horizontal"
+    android:id="@+id/tbMain"
+    android:gravity="center_vertical"
+    android:paddingHorizontal="16dp">
+
+    <!-- Icon ở bên trái -->
+    <com.mikepenz.iconics.view.IconicsImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        iconics:iiv_color="@color/iconColor"
+        iconics:iiv_icon="gmi-close"
+        iconics:iiv_size="18dp" />
+
+    <!-- View đệm đẩy phần còn lại về bên phải -->
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Hai icon nằm sát nhau ở cuối -->
+    <com.mikepenz.iconics.view.IconicsImageView
+        android:id="@+id/ivUndo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="15dp"
+        iconics:iiv_color="@color/iconColor"
+        iconics:iiv_icon="gmi-undo"
+        android:background="?android:selectableItemBackground"
+        iconics:iiv_size="22dp" />
+
+    <com.mikepenz.iconics.view.IconicsImageView
+        android:id="@+id/ivRedo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        iconics:iiv_color="@color/iconColor"
+        iconics:iiv_icon="gmi-redo"
+        android:layout_marginEnd="15dp"
+        android:background="?android:selectableItemBackground"
+
+        iconics:iiv_size="22dp" />
+
+    <com.mikepenz.iconics.view.IconicsImageView
+        android:id="@+id/ivDone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        iconics:iiv_color="@color/iconColor"
+        iconics:iiv_icon="gmi-check"
+        android:background="?android:selectableItemBackground"
+
+        iconics:iiv_size="22dp" />
+
+</LinearLayout>

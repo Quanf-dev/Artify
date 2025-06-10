@@ -6,9 +6,9 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.viewModels
 import com.example.artify.databinding.ActivityPhoneLoginBinding
-import com.example.artify.ui.base.BaseActivity
-import com.example.artify.utils.GradientDotDrawable
+import com.example.common.base.BaseActivity
 import com.example.artify.utils.dpToPx
+import com.example.common.gradiant4.GradientDotDrawable
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

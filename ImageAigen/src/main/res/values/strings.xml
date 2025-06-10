@@ -1,0 +1,12 @@
+<resources>
+    <string name="upload_icon">Upload Icon</string>
+    <string name="upload_photo">Upload Your Photo</string>
+    <string name="convert_to_cartoon">Convert to Cartoon</string>
+    <string name="download">Download</string>
+    <string name="share">Share</string>
+    <string name="edit">Edit</string>
+    <string name="edit_image_by_ai">Edit Image by AI</string>
+    <string name="describe_how_you_want_to_edit_the_image">Describe how you want to edit the image</string>
+    <string name="original_image">Original Image</string>
+    <string name="generate_image">Generate Image</string>
+</resources>

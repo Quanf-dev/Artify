@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:name=".ArtifyApplication"
@@ -11,41 +18,83 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Artify">
+<!--        <activity-->
+<!--            android:name=".TestzActivity"-->
+<!--            android:exported="false" />-->
+        <!-- <activity -->
+        <!-- android:name=".TestActivity" -->
+        <!-- android:exported="false" /> -->
+        <!-- <activity -->
+        <!-- android:name=".ui.home.HomeActivity" -->
+        <!-- android:exported="false" /> -->
+        <!-- <activity -->
+        <!-- android:name=".ui.home.HomeActivity" -->
+        <!-- android:exported="true"> -->
+        <!-- <intent-filter> -->
+        <!-- <action android:name="android.intent.action.MAIN" /> -->
+        <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+        <!-- </intent-filter> -->
+        <!-- </activity> -->
         <activity
             android:name=".ui.home.HomeActivity"
-            android:exported="false" />
-        <!-- Facebook Configuration -->
-        <meta-data
-            android:name="com.facebook.sdk.ApplicationId"
-            android:value="@string/facebook_app_id" />
-        <meta-data
-            android:name="com.facebook.sdk.ClientToken"
-            android:value="@string/facebook_client_token" />
-
-        <activity
-            android:name=".ui.profile.SetupUsernameActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
+        
+        <activity
+            android:name=".ui.frame.FrameActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ui.sticker.StickerActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.blur.BlurActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.filter.FilterActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.tune.ImageTuneActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.paint.PaintActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.editMain.EditMainActivity"
+            android:exported="false" />
+            
         <activity
             android:name=".ui.phone.PhoneLoginActivity"
             android:exported="false" />
         <activity
             android:name=".ui.register.RegisterActivity"
             android:exported="false" />
-<!--        <activity-->
-<!--            android:name=".ui.profile.SetupUsernameActivity"-->
-<!--            android:exported="false" />-->
+        <activity
+            android:name=".ui.profile.SetupUsernameActivity"
+            android:exported="false" />
         <activity
             android:name=".ui.forgot.ForgotPasswordActivity"
             android:exported="false" />
         <activity
             android:name=".ui.verification.EmailVerificationActivity"
-            android:exported="false" /> <!-- Facebook Activity -->
+            android:exported="false" />
+        <!-- Facebook Activity -->
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
+        <meta-data
+            android:name="com.facebook.sdk.ClientToken"
+            android:value="@string/facebook_client_token"/>
         <activity
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation" />
@@ -61,6 +110,27 @@
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".ui.crop.CropActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+        
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+            
+        <!-- FileProvider for camera functionality -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

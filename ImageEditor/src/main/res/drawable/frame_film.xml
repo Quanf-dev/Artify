@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Black background -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#000000" />
+            <corners android:radius="2dp" />
+        </shape>
+    </item>
+    
+    <!-- Film perforations on the left -->
+    <item android:left="2dp" android:top="10dp" android:right="0dp" android:bottom="10dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#000000" />
+            <stroke android:width="2dp" android:color="#FFFFFF" dashWidth="8dp" dashGap="20dp" />
+        </shape>
+    </item>
+    
+    <!-- Film perforations on the right -->
+    <item android:left="0dp" android:top="10dp" android:right="2dp" android:bottom="10dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#000000" />
+            <stroke android:width="2dp" android:color="#FFFFFF" dashWidth="8dp" dashGap="20dp" />
+        </shape>
+    </item>
+    
+    <!-- Photo area (transparent to show image) -->
+    <item android:left="15dp" android:top="10dp" android:right="15dp" android:bottom="10dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#00000000" />
+        </shape>
+    </item>
+</layer-list> 

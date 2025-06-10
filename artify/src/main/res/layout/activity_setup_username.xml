@@ -55,7 +55,7 @@
             app:layout_constraintEnd_toEndOf="parent"
            />
 
-        <com.example.artify.utils.GradientTextView
+        <com.example.common.gradiant4.GradientTextView
             android:id="@+id/tvChooseAvatar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -89,7 +89,7 @@
                 android:maxLength="20" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.example.artify.utils.GradientButton
+        <com.example.common.gradiant4.GradientButton
             android:id="@+id/btncOK"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

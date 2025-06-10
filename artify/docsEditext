@@ -1,0 +1,66 @@
+Hãy thiết kế và giải thích chi tiết luồng hoạt động (workflow) cho tính năng chỉnh sửa ảnh trong ứng dụng Android, bao gồm các bước sau:
+
+**1. Khởi tạo từ HomeActivity:**
+
+*   Người dùng nhấn vào một ConstraintLayout (ví dụ: `csl2`) trên `HomeActivity`.
+*   Hành động này sẽ khởi chạy tiến trình chọn ảnh từ thư viện của thiết bị.
+
+**2. Chọn ảnh và hiển thị ban đầu:**
+
+*   Sử dụng `ActivityResultLauncher` (ví dụ: `registerForActivityResult(ActivityResultContracts.GetContent())`) để người dùng chọn một ảnh từ thư viện.
+*   Sau khi ảnh được chọn, URI của ảnh sẽ được truyền đến `HomeActivity`.
+*   Ảnh được chọn sẽ được hiển thị trong một `EditText` (ví dụ: `edtMain`) trên `HomeActivity`. (Lưu ý: Hiển thị ảnh trực tiếp trong `EditText` không phải là cách thông thường. Cân nhắc sử dụng `ImageView` để hiển thị ảnh. Nếu bắt buộc dùng `EditText`, hãy làm rõ cách bạn dự định hiển thị ảnh trong đó, ví dụ như hiển thị đường dẫn URI hoặc một thumbnail nhỏ thông qua `ImageSpan`).
+
+**3. Điều hướng đến các Activity chỉnh sửa:**
+
+*   `HomeActivity` sẽ có các nút hoặc mục chọn (ví dụ: trong một `ItemBottom` layout hoặc menu) tương ứng với các chức năng chỉnh sửa khác nhau.
+*   Khi người dùng nhấn vào một chức năng chỉnh sửa (ví dụ: "Blur", "Crop", "Filter", "Frame", "Paint", "Sticker", "Tune"), ứng dụng sẽ điều hướng đến Activity tương ứng:
+    *   `BlurActivity`
+    *   `CropActivity`
+    *   `FilterActivity`
+    *   `FrameActivity`
+    *   `PaintActivity`
+    *   `StickerActivity`
+    *   `ImageTuneActivity`
+*   **Quan trọng:** URI của ảnh hiện tại (đang hiển thị trong `edtMain` hoặc `ImageView` của `HomeActivity`) phải được truyền đến Activity chỉnh sửa được chọn.
+
+**4. BaseEditActivity để tái sửu dụng code:**
+
+*   Tạo một lớp `BaseEditActivity` là lớp cha cho tất cả các Activity chỉnh sửa (`BlurActivity`, `CropActivity`, v.v.).
+*   `BaseEditActivity` sẽ chứa các chức năng chung như:
+    *   Nhận URI ảnh từ `Intent`.
+    *   Tải và hiển thị ảnh (ví dụ: trong một `ImageView` chung).
+    *   Xử lý nút "Done" (hoặc "Apply", "Save") để trả kết quả về `HomeActivity`.
+    *   Có thể chứa các thành phần UI chung như thanh công cụ tùy chỉnh (custom toolbar).
+*   Mỗi Activity con (ví dụ: `FilterActivity`) sẽ kế thừa từ `BaseEditActivity` và triển khai logic chỉnh sửa cụ thể cho chức năng của nó.
+
+**5. Luồng chỉnh sửa trong từng Activity con:**
+
+*   Mỗi Activity chỉnh sửa (ví dụ: `ImageTuneActivity`) sẽ tải ảnh từ URI nhận được.
+*   Activity này sẽ có một layout riêng (ví dụ: `ItemBottomTuneBinding` cho `ImageTuneActivity`) chứa các công cụ/tùy chọn chỉnh sửa cụ thể.
+*   Thiết lập `OnClickListener` cho các thành phần trong `ItemBottom...` layout để áp dụng các hiệu ứng/thay đổi lên ảnh. Ví dụ:
+    *   Trong `ImageTuneActivity`, các `LinearLayout` như `llBrightness`, `llContrast` sẽ gọi các phương thức tương ứng trên một view chỉnh sửa ảnh (ví dụ: `imageAdjustmentView.setAdjustmentType(...)`).
+*   Người dùng có thể thực hiện nhiều thao tác chỉnh sửa trong Activity hiện tại.
+
+**6. Hoàn thành chỉnh sửa và trả kết quả:**
+
+*   Khi người dùng nhấn nút "Done" (hoặc tương tự) trong một Activity chỉnh sửa (ví dụ: `toolbarBinding.ivDone.setOnClickListener`):
+    *   Activity chỉnh sửa hiện tại sẽ xử lý để lấy ảnh đã chỉnh sửa (dưới dạng `Bitmap` hoặc URI của file tạm mới).
+    *   Sử dụng `setResult(Activity.RESULT_OK, intent)` để đóng Activity hiện tại và gửi URI của ảnh đã chỉnh sửa (hoặc dữ liệu ảnh) trở lại `HomeActivity`.
+    *   `HomeActivity` sẽ nhận kết quả này thông qua `ActivityResultLauncher` (đã được đăng ký để khởi chạy các Activity chỉnh sửa).
+    *   Cập nhật `edtMain` (hoặc `ImageView`) trong `HomeActivity` để hiển thị ảnh vừa được chỉnh sửa.
+    *   URI của ảnh đã chỉnh sửa này sẽ trở thành URI "hiện tại" cho các thao tác chỉnh sửa tiếp theo.
+
+**Yêu cầu bổ sung:**
+
+*   Giải thích cách quản lý URI ảnh qua các Activity để đảm bảo ảnh luôn được cập nhật chính xác. Cân nhắc việc lưu ảnh đã chỉnh sửa vào một file tạm và truyền URI của file tạm đó.
+*   Mô tả cách `ItemBottom...` layout được bind và sử dụng trong từng Activity chỉnh sửa.
+*   Đưa ra các đoạn code ví dụ (Kotlin) cho các phần quan trọng như:
+    *   Khởi chạy Activity chọn ảnh và nhận kết quả.
+    *   Truyền URI ảnh giữa các Activity.
+    *   Cấu trúc cơ bản của `BaseEditActivity`.
+    *   Cách một Activity con (ví dụ: `ImageTuneActivity`) kế thừa và sử dụng `BaseEditActivity`.
+    *   Xử lý nút "Done" và trả kết quả.
+    *   Cập nhật ảnh trong `HomeActivity` sau khi nhận kết quả.
+
+**Mục tiêu:** Tạo ra một luồng người dùng mượt mà, code có tổ chức tốt, dễ bảo trì và mở rộng bằng cách sử dụng `BaseEditActivity` và `ActivityResultLauncher`.

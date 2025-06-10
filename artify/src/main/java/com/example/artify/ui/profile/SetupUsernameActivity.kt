@@ -15,7 +15,7 @@ import com.bumptech.glide.Glide
 // import com.bumptech.glide.request.target.Target // No longer needed here
 import com.example.artify.R
 import com.example.artify.databinding.ActivitySetupUsernameBinding
-import com.example.artify.ui.base.BaseActivity
+import com.example.common.base.BaseActivity
 import com.example.artify.ui.home.HomeActivity
 import dagger.hilt.android.AndroidEntryPoint
 // import com.example.artify.ui.profile.AvatarAdapter // No longer directly used here

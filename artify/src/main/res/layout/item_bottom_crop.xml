@@ -1,0 +1,108 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:iconics="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
+    android:gravity="center_vertical"
+    android:id="@+id/filterBottomMenu"
+
+    android:orientation="horizontal"
+    android:paddingHorizontal="8dp">
+
+
+    <!-- Save -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="?android:selectableItemBackground">
+
+        <com.mikepenz.iconics.view.IconicsImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            iconics:iiv_color="@color/iconColor"
+            iconics:iiv_icon="gmi-rotate-ccw"
+            iconics:iiv_size="22dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/rotate"
+            android:textSize="12sp"
+            android:textColor="@color/iconColor" />
+    </LinearLayout>
+
+    <!-- Reset -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="?android:selectableItemBackground">
+
+        <com.mikepenz.iconics.view.IconicsImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            iconics:iiv_color="@color/iconColor"
+            iconics:iiv_icon="gmi-flip"
+            iconics:iiv_size="22dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/flip"
+            android:textSize="12sp"
+            android:textColor="@color/iconColor" />
+    </LinearLayout>
+
+    <!-- Hủy -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="?android:selectableItemBackground">
+
+        <com.mikepenz.iconics.view.IconicsImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            iconics:iiv_color="@color/iconColor"
+            iconics:iiv_icon="gmi-crop"
+            iconics:iiv_size="22dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ratio"
+            android:textSize="12sp"
+            android:textColor="@color/iconColor" />
+    </LinearLayout>
+
+    <!-- Thoát -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="?android:selectableItemBackground">
+
+        <com.mikepenz.iconics.view.IconicsImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            iconics:iiv_color="@color/iconColor"
+            iconics:iiv_icon="gmi-time-restore"
+            iconics:iiv_size="22dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/reset"
+            android:textSize="12sp"
+            android:textColor="@color/iconColor" />
+    </LinearLayout>
+
+</LinearLayout>

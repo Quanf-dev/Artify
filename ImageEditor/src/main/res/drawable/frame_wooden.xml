@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Outer wooden frame -->
+    <item>
+        <shape android:shape="rectangle">
+            <stroke android:width="25dp" android:color="#8B4513" />
+            <corners android:radius="5dp" />
+            <solid android:color="#00000000" />
+        </shape>
+    </item>
+    
+    <!-- Wood grain texture (inner stroke) -->
+    <item>
+        <shape android:shape="rectangle">
+            <stroke android:width="18dp" android:color="#A0522D" />
+            <corners android:radius="4dp" />
+            <solid android:color="#00000000" />
+        </shape>
+    </item>
+    
+    <!-- Inner shadow effect -->
+    <item>
+        <shape android:shape="rectangle">
+            <stroke android:width="5dp" android:color="#5E2E06" />
+            <corners android:radius="2dp" />
+            <solid android:color="#00000000" />
+        </shape>
+    </item>
+</layer-list> 
