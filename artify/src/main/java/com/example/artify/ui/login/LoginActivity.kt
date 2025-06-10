@@ -12,8 +12,11 @@ import com.example.artify.R
 import com.example.artify.databinding.ActivityLoginBinding
 import com.example.common.base.BaseActivity
 import com.example.artify.ui.phone.PhoneLoginActivity
+import com.example.artify.ui.profile.SetupUsernameActivity
 import com.example.artify.utils.dpToPx
+import com.example.artify.utils.navigate
 import com.example.common.gradiant4.GradientDotDrawable
+import com.example.socialposts.ui.PostsActivity
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -73,15 +76,12 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                     hideLoading()
                     Toast.makeText(this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show()
                     Log.d("LoginActivity", "Đăng nhập thành công: ${state.user}")
-                    // TODO: Chuyển đến màn hình chính (MainActivity)
-                    // Example: startActivity(Intent(this, MainActivity::class.java))
-                    // finishAffinity() // Close all previous activities
+                    navigate(PostsActivity::class.java)
                 }
                 is LoginState.UsernameSetupRequired -> {
                     hideLoading()
                     Toast.makeText(this, getString(R.string.please_setup_username), Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, com.example.artify.ui.profile.SetupUsernameActivity::class.java))
-                    // Do not finish LoginActivity yet, user might come back
+                    navigate(SetupUsernameActivity::class.java)
                 }
                 is LoginState.Error -> {
                     hideLoading()

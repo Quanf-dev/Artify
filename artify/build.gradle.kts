@@ -133,5 +133,6 @@ dependencies {
     //common
     implementation(project(":Common"))
 
-
+    //SocialPosts
+    implementation(project(":SocialPosts"))
 }
