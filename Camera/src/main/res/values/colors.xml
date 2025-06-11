@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Colors -->
+    <color name="camera_primary">#FF6200EE</color>
+    <color name="camera_primary_variant">#FF3700B3</color>
+    <color name="camera_secondary">#FF03DAC5</color>
+    
+    <!-- Background Colors -->
+    <color name="camera_background">#FF000000</color>
+    <color name="overlay_background">#80000000</color>
+    
+    <!-- Control Colors -->
+    <color name="control_button_background">#40FFFFFF</color>
+    <color name="control_button_stroke">#60FFFFFF</color>
+    <color name="capture_button_stroke">#CCFFFFFF</color>
+    
+    <!-- Filter Item Colors -->
+    <color name="filter_item_background">#30FFFFFF</color>
+    <color name="filter_item_stroke">#50FFFFFF</color>
+    <color name="filter_item_selected">#80FFFFFF</color>
+    <color name="filter_item_selected_stroke">#FFFFFFFF</color>
+    
+    <!-- Ripple Effect -->
+    <color name="ripple_color">#40FFFFFF</color>
+    
+    <!-- Timer Colors -->
+    <color name="timer_background">#CC000000</color>
+    <color name="timer_text">#FFFFFFFF</color>
+    
+    <!-- Selection Indicator -->
+    <color name="selection_indicator">#FF03DAC5</color>
+    
+    <!-- Slider Colors -->
+    <color name="slider_background">#60000000</color>
+    <color name="slider_thumb">#FFFFFFFF</color>
+    <color name="slider_progress">#FF03DAC5</color>
+    
+    <!-- Bottom Controls -->
+    <color name="bottom_controls_background">#80000000</color>
+    
+    <!-- Timer Countdown Colors -->
+    <color name="timer_countdown_bg">#CC000000</color>
+    <color name="timer_countdown_border">#FFFFFFFF</color>
+    
+    <!-- Gallery Button Colors -->
+    <color name="gallery_button_bg">#40FFFFFF</color>
+    <color name="gallery_button_border">#80FFFFFF</color>
+</resources> 

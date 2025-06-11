@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Spacing -->
+    <dimen name="spacing_tiny">4dp</dimen>
+    <dimen name="spacing_small">8dp</dimen>
+    <dimen name="spacing_medium">16dp</dimen>
+    <dimen name="spacing_large">24dp</dimen>
+    <dimen name="spacing_xlarge">32dp</dimen>
+
+    <!-- Control Buttons -->
+    <dimen name="control_button_size">48dp</dimen>
+    <dimen name="control_button_large">56dp</dimen>
+    <dimen name="capture_button_size">80dp</dimen>
+    <dimen name="control_icon_small">20dp</dimen>
+
+    <!-- Filter and Mask Items -->
+    <dimen name="filter_item_size">60dp</dimen>
+    <dimen name="filter_icon_size">28dp</dimen>
+    <dimen name="mask_preview_size">28dp</dimen>
+    <dimen name="selection_indicator_size">12dp</dimen>
+
+    <!-- Corner Radius -->
+    <dimen name="corner_radius_small">8dp</dimen>
+    <dimen name="corner_radius_medium">12dp</dimen>
+    <dimen name="corner_radius_large">16dp</dimen>
+
+    <!-- Elevation -->
+    <dimen name="elevation_small">2dp</dimen>
+    <dimen name="elevation_medium">4dp</dimen>
+    <dimen name="elevation_large">8dp</dimen>
+
+    <!-- Bottom Controls -->
+    <dimen name="bottom_controls_height">120dp</dimen>
+    <dimen name="spacing_xsmall">20dp</dimen>
+
+
+</resources> 
