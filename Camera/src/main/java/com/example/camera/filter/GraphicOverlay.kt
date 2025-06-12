@@ -17,6 +17,8 @@ package com.example.camera.filter
 
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
 import com.google.android.gms.vision.CameraSource
@@ -54,6 +56,15 @@ class GraphicOverlay(context: Context?, attrs: AttributeSet?) : View(context, at
     private var mHeightScaleFactor = 1.0f
     private var mFacing = CameraSource.CAMERA_FACING_BACK
     private val mGraphics: MutableSet<Graphic> = HashSet<Graphic>()
+
+    // Grid functionality
+    private var isGridEnabled: Boolean = false
+    private val gridPaint: Paint = Paint().apply {
+        color = Color.WHITE
+        alpha = 128
+        strokeWidth = 2f
+        style = Paint.Style.STROKE
+    }
 
     /**
      * Base class for a custom graphics object to be rendered within the graphic overlay.  Subclass
@@ -163,6 +174,14 @@ class GraphicOverlay(context: Context?, attrs: AttributeSet?) : View(context, at
     }
 
     /**
+     * Enable or disable grid lines overlay
+     */
+    fun setGridEnabled(enabled: Boolean) {
+        isGridEnabled = enabled
+        postInvalidate()
+    }
+
+    /**
      * Draws the overlay with its associated graphic objects.
      */
     override fun onDraw(canvas: Canvas) {
@@ -175,11 +194,38 @@ class GraphicOverlay(context: Context?, attrs: AttributeSet?) : View(context, at
             }
             
             // Clear the canvas first to prevent artifacts
-            canvas.drawColor(android.graphics.Color.TRANSPARENT, android.graphics.PorterDuff.Mode.CLEAR)
+            canvas.drawColor(Color.TRANSPARENT, android.graphics.PorterDuff.Mode.CLEAR)
+            
+            // Draw grid lines if enabled
+            if (isGridEnabled) {
+                drawGrid(canvas)
+            }
             
             for (graphic in mGraphics) {
                 graphic.draw(canvas)
             }
         }
+    }
+    
+    /**
+     * Draw grid lines (rule of thirds)
+     */
+    private fun drawGrid(canvas: Canvas) {
+        val viewWidth = width.toFloat()
+        val viewHeight = height.toFloat()
+        
+        // Vertical lines (divide into thirds)
+        val verticalLine1 = viewWidth / 3f
+        val verticalLine2 = viewWidth * 2f / 3f
+        
+        canvas.drawLine(verticalLine1, 0f, verticalLine1, viewHeight, gridPaint)
+        canvas.drawLine(verticalLine2, 0f, verticalLine2, viewHeight, gridPaint)
+        
+        // Horizontal lines (divide into thirds)
+        val horizontalLine1 = viewHeight / 3f
+        val horizontalLine2 = viewHeight * 2f / 3f
+        
+        canvas.drawLine(0f, horizontalLine1, viewWidth, horizontalLine1, gridPaint)
+        canvas.drawLine(0f, horizontalLine2, viewWidth, horizontalLine2, gridPaint)
     }
 }

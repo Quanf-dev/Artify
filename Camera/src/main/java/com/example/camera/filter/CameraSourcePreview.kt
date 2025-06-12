@@ -1,18 +1,3 @@
-/*
- * Copyright (C) The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.example.camera.filter
 
 import android.Manifest
@@ -21,6 +6,8 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.util.AttributeSet
 import android.util.Log
+import android.view.MotionEvent
+import android.view.ScaleGestureDetector
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.ViewGroup
@@ -29,17 +16,43 @@ import com.google.android.gms.vision.CameraSource
 import java.io.IOException
 
 class CameraSourcePreview(context: Context, attrs: AttributeSet?) : ViewGroup(context, attrs) {
-    private val TAG = "CameraSourcePreview"
-    private val mSurfaceView: SurfaceView
-    private var mStartRequested = false
-    private var mSurfaceAvailable = false
-    private var mCameraSource: CameraSource? = null
-    private var mOverlay: GraphicOverlay? = null
+    private val tag = "CameraSourcePreview"
+    private val surfaceView: SurfaceView
+    private var isStartRequested: Boolean = false
+    private var isSurfaceAvailable: Boolean = false
+    private var cameraSource: CameraSource? = null
+    private var overlay: GraphicOverlay? = null
+    
+    // Zoom functionality
+    private var scaleGestureDetector: ScaleGestureDetector? = null
+    private var scaleFactor: Float = 1.0f
+    private val maxZoom: Float = 3.0f
+    private val minZoom: Float = 1.0f
 
     init {
-        mSurfaceView = SurfaceView(context)
-        mSurfaceView.holder.addCallback(SurfaceCallback())
-        addView(mSurfaceView)
+        surfaceView = SurfaceView(context)
+        surfaceView.holder.addCallback(SurfaceCallback())
+        addView(surfaceView)
+        
+        setupZoomGesture()
+    }
+    
+    private fun setupZoomGesture() {
+        scaleGestureDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            override fun onScale(detector: ScaleGestureDetector): Boolean {
+                scaleFactor *= detector.scaleFactor
+                scaleFactor = scaleFactor.coerceIn(minZoom, maxZoom)
+                
+                // Apply zoom - this would need camera API support
+                Log.d(tag, "Zoom factor: $scaleFactor")
+                return true
+            }
+        })
+    }
+    
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        scaleGestureDetector?.onTouchEvent(event)
+        return true
     }
 
     @Throws(IOException::class)
@@ -49,29 +62,29 @@ class CameraSourcePreview(context: Context, attrs: AttributeSet?) : ViewGroup(co
             return
         }
 
-        mCameraSource = cameraSource
-        mStartRequested = true
+        this.cameraSource = cameraSource
+        isStartRequested = true
         startIfReady()
     }
 
     @Throws(IOException::class)
     fun start(cameraSource: CameraSource?, overlay: GraphicOverlay?) {
-        mOverlay = overlay
+        this.overlay = overlay
         start(cameraSource)
     }
 
     fun stop() {
-        mCameraSource?.stop()
+        cameraSource?.stop()
     }
 
     fun release() {
-        mCameraSource?.release()
-        mCameraSource = null
+        cameraSource?.release()
+        cameraSource = null
     }
 
     @Throws(IOException::class)
     private fun startIfReady() {
-        if (mStartRequested && mSurfaceAvailable) {
+        if (isStartRequested && isSurfaceAvailable) {
             if (ActivityCompat.checkSelfPermission(
                     context,
                     Manifest.permission.CAMERA
@@ -81,15 +94,15 @@ class CameraSourcePreview(context: Context, attrs: AttributeSet?) : ViewGroup(co
             }
             
             try {
-                Log.d(TAG, "Starting camera source")
-                mCameraSource?.start(mSurfaceView.holder)
+                Log.d(tag, "Starting camera source")
+                cameraSource?.start(surfaceView.holder)
                 
-                mCameraSource?.let { source ->
+                cameraSource?.let { source ->
                     val size = source.previewSize
-                    val min = Math.min(size.width, size.height)
-                    val max = Math.max(size.width, size.height)
+                    val min = kotlin.math.min(size.width, size.height)
+                    val max = kotlin.math.max(size.width, size.height)
                     
-                    mOverlay?.let { overlay ->
+                    overlay?.let { overlay ->
                         if (isPortraitMode) {
                             // Swap width and height sizes when in portrait
                             overlay.setCameraInfo(min, max, source.cameraFacing)
@@ -100,54 +113,51 @@ class CameraSourcePreview(context: Context, attrs: AttributeSet?) : ViewGroup(co
                     }
                 }
                 
-                mStartRequested = false
-                Log.d(TAG, "Camera source started successfully")
+                isStartRequested = false
+                Log.d(tag, "Camera source started successfully")
             } catch (e: Exception) {
-                Log.e(TAG, "Could not start camera source.", e)
+                Log.e(tag, "Could not start camera source.", e)
             }
         }
     }
 
     private inner class SurfaceCallback : SurfaceHolder.Callback {
         override fun surfaceCreated(holder: SurfaceHolder) {
-            Log.d(TAG, "Surface created")
-            mSurfaceAvailable = true
+            Log.d(tag, "Surface created")
+            isSurfaceAvailable = true
             try {
                 startIfReady()
             } catch (e: IOException) {
-                Log.e(TAG, "Could not start camera source.", e)
+                Log.e(tag, "Could not start camera source.", e)
             }
         }
 
         override fun surfaceDestroyed(holder: SurfaceHolder) {
-            Log.d(TAG, "Surface destroyed")
-            mSurfaceAvailable = false
+            Log.d(tag, "Surface destroyed")
+            isSurfaceAvailable = false
         }
 
         override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-            Log.d(TAG, "Surface changed: $width x $height")
+            Log.d(tag, "Surface changed: $width x $height")
             // No specific action needed
         }
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
-        Log.d(TAG, "onLayout: $left, $top, $right, $bottom")
+        Log.d(tag, "onLayout: $left, $top, $right, $bottom")
         
         val width = right - left
         val height = bottom - top
         
-        // Just center the SurfaceView in the available space
-        val childLeft = 0
-        val childTop = 0
-        
+        // Center the SurfaceView in the available space
         for (i in 0 until childCount) {
-            getChildAt(i).layout(childLeft, childTop, width, height)
+            getChildAt(i).layout(0, 0, width, height)
         }
 
         try {
             startIfReady()
         } catch (e: IOException) {
-            Log.e(TAG, "Could not start camera source.", e)
+            Log.e(tag, "Could not start camera source.", e)
         }
     }
 

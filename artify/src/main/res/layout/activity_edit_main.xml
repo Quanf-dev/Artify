@@ -1,55 +1,52 @@
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-
-    >
+    android:layout_height="match_parent">
 
     <LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:orientation="vertical"
         tools:context=".ui.editMain.EditMainActivity"
         tools:ignore="ExtraText">
         >
-    <!-- Toolbar ở trên -->
-    <include
-        android:id="@+id/toolbar"
-        layout="@layout/item_toolbar_edit_main" />
+        <!-- Toolbar ở trên -->
+        <include
+            android:id="@+id/toolbar"
+            layout="@layout/item_toolbar_edit_main" />
 
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:background="@color/imageSurroundBackground">
-    <!-- Fragment text sẽ nằm trên ảnh -->
-    <FrameLayout
-        android:id="@+id/containImage"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center">
+            <!-- Fragment text sẽ nằm trên ảnh -->
+            <FrameLayout
+                android:id="@+id/containImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center">
 
-        <ImageView
-            android:layout_gravity="center"
-            android:id="@+id/editorView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:scaleType="centerCrop"
-            android:adjustViewBounds="true"
-            android:src="@drawable/img_animegen" />
+                <ImageView
+                    android:id="@+id/editorView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:adjustViewBounds="true"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/img_scenegen" />
 
-        <miaoyongjun.stickerview.StickerView
-            android:id="@+id/sticker_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </FrameLayout>
+                <miaoyongjun.stickerview.StickerView
+                    android:id="@+id/sticker_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </FrameLayout>
         </FrameLayout>
 
-    <!-- Bottom bar ở dưới -->
-    <include
-        android:id="@+id/bottomBar"
-        layout="@layout/item_bottom_bar_edt_main" />
+        <!-- Bottom bar ở dưới -->
+        <include
+            android:id="@+id/bottomBar"
+            layout="@layout/item_bottom_bar_edt_main" />
 
     </LinearLayout>
 

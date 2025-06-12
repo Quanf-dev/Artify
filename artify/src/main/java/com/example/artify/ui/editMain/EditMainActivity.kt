@@ -221,47 +221,63 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
     }
 
     private fun saveImage() {
+        // Luôn cập nhật bitmap mới nhất từ container (bao gồm sticker/text)
+        updateCurrentImageBitmapFromContainer()
+
+        val mergedBitmap = currentImageBitmap
+        if (mergedBitmap == null) {
+            Toast.makeText(this, "No image to save (bitmap null)", Toast.LENGTH_SHORT).show()
+            android.util.Log.e("EditMainActivity", "currentImageBitmap null sau updateCurrentImageBitmapFromContainer")
+            return
+        }
+        var fos: OutputStream? = null
         try {
-            var fos: OutputStream? = null
             val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
             val imageFileName = "Artify_" + timeStamp
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                // For Android 10+
                 val contentValues = ContentValues().apply {
                     put(MediaStore.MediaColumns.DISPLAY_NAME, "$imageFileName.jpg")
                     put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-                    put(
-                        MediaStore.MediaColumns.RELATIVE_PATH,
-                        Environment.DIRECTORY_PICTURES + "/Artify"
-                    )
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Artify")
                 }
-
-                val uri = contentResolver.insert(
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                    contentValues
-                )
-                uri?.let { fos = contentResolver.openOutputStream(it) }
+                val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+                if (uri == null) {
+                    Toast.makeText(this, "Failed to create image file", Toast.LENGTH_SHORT).show()
+                    android.util.Log.e("EditMainActivity", "contentResolver.insert trả về null")
+                    return
+                }
+                fos = contentResolver.openOutputStream(uri)
             } else {
-                // For Android 9 and below
-                val imagesDir =
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES + "/Artify")
-                if (!imagesDir.exists()) {
-                    imagesDir.mkdirs()
-                }
+                val imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES + "/Artify")
+                if (!imagesDir.exists()) imagesDir.mkdirs()
                 val image = File(imagesDir, "$imageFileName.jpg")
                 fos = FileOutputStream(image)
             }
 
-            fos?.use {
-                currentImageBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, it)
+            if (fos == null) {
+                Toast.makeText(this, "Failed to open output stream", Toast.LENGTH_SHORT).show()
+                android.util.Log.e("EditMainActivity", "fos là null")
+                return
+            }
+
+            val success = mergedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+            fos.flush()
+            fos.close()
+            if (success) {
                 Toast.makeText(this, "Image saved successfully", Toast.LENGTH_SHORT).show()
-                // Return to home activity
+                android.util.Log.d("EditMainActivity", "Lưu ảnh thành công")
                 finish()
+            } else {
+                Toast.makeText(this, "Failed to save image (compress error)", Toast.LENGTH_SHORT).show()
+                android.util.Log.e("EditMainActivity", "compress trả về false")
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Failed to save image: ${e.message}", Toast.LENGTH_SHORT).show()
+            android.util.Log.e("EditMainActivity", "Exception khi lưu ảnh: ${e.message}")
+        } finally {
+            try { fos?.close() } catch (_: Exception) {}
         }
     }
 
@@ -359,7 +375,6 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
         if (container.width > 0 && container.height > 0) {
             currentImageBitmap = getBitmapFromView(container)
             currentImageBitmap = getEditedBitmap()
-
         }
     }
 }

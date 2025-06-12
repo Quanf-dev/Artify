@@ -19,55 +19,89 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 
 /**
- * Graphic instance for rendering face position, orientation, and landmarks within an associated
- * graphic overlay view.
+ * Graphic instance for rendering text overlays on the camera preview.
  */
 class TextGraphic(overlay: GraphicOverlay?) : GraphicOverlay.Graphic(overlay) {
+    
+    private val textPaint = Paint().apply {
+        color = Color.WHITE
+        alpha = TEXT_ALPHA
+        textSize = TEXT_SIZE
+        isAntiAlias = true
+        isUnderlineText = false
+    }
+
     /**
-     * Updates the face instance from the detection of the most recent frame.  Invalidates the
-     * relevant portions of the overlay to trigger a redraw.
+     * Updates the text graphic.
      */
-    fun updateText(c: Int) {
+    fun updateText() {
         postInvalidate()
     }
 
     /**
-     * Draws the face annotations for position on the supplied canvas.
+     * Draws the text on the supplied canvas.
      */
-
     override fun draw(canvas: Canvas?) {
-        val df: DateFormat = SimpleDateFormat("HH:mm")
-        val date = df.format(Calendar.getInstance().getTime())
-        val cc: Bitmap = drawTextBitmap(date, Color.WHITE, 100, 150, false, 500, 500)
-        canvas?.drawBitmap(cc, 0f, 10f, Paint())
+        if (canvas == null) return
+        
+        val currentTime = getCurrentTimeString()
+        val textBitmap = createTextBitmap(currentTime)
+        canvas.drawBitmap(textBitmap, TEXT_X_POSITION, TEXT_Y_POSITION, null)
+    }
+
+    private fun getCurrentTimeString(): String {
+        val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+        return dateFormat.format(Calendar.getInstance().time)
+    }
+
+    private fun createTextBitmap(text: String): Bitmap {
+        val bitmap = Bitmap.createBitmap(BITMAP_WIDTH, BITMAP_HEIGHT, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        canvas.drawText(text, TEXT_DRAW_X, TEXT_DRAW_Y, textPaint)
+        return bitmap
     }
 
     companion object {
-        fun drawTextBitmap(
-            string: String,
-            color: Int,
-            alpha: Int,
-            size: Int,
-            underline: Boolean,
-            width: Int,
-            height: Int
+        // Text display constants
+        private const val TEXT_SIZE = 100f
+        private const val TEXT_ALPHA = 150
+        private const val TEXT_X_POSITION = 0f
+        private const val TEXT_Y_POSITION = 10f
+        private const val TEXT_DRAW_X = 100f
+        private const val TEXT_DRAW_Y = 150f
+        private const val BITMAP_WIDTH = 500
+        private const val BITMAP_HEIGHT = 500
+
+        /**
+         * Creates a bitmap with custom text properties.
+         */
+        fun createCustomTextBitmap(
+            text: String,
+            color: Int = Color.WHITE,
+            alpha: Int = 100,
+            size: Int = 150,
+            underline: Boolean = false,
+            width: Int = 500,
+            height: Int = 500
         ): Bitmap {
-            val result = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-            val canvas = Canvas(result)
-            //canvas.drawBitmap();
-            val paint = Paint()
-            paint.setColor(color)
-            paint.setAlpha(alpha)
-            paint.setTextSize(size.toFloat())
-            paint.setAntiAlias(true)
-            paint.setUnderlineText(underline)
-            canvas.drawText(string, 100f, 150f, paint)
-            return result
+            val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(bitmap)
+            
+            val paint = Paint().apply {
+                this.color = color
+                this.alpha = alpha
+                textSize = size.toFloat()
+                isAntiAlias = true
+                isUnderlineText = underline
+            }
+            
+            canvas.drawText(text, 100f, 150f, paint)
+            return bitmap
         }
     }
 }
