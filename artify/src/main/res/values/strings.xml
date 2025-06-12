@@ -132,7 +132,7 @@
     <string name="fade">Fade</string>
     <string name="done">Done</string>
     <string name="enter_text">Enter text</string>
-    
+
     <!-- Filter Test Activity -->
     <string name="filter_gallery">Filter Gallery</string>
     <string name="filter_preview">Filter Preview</string>
@@ -144,7 +144,7 @@
     <string name="error_saving_image">Error saving image</string>
     <string name="error_loading_image">Error loading image</string>
     <string name="permission_required">Storage permission required</string>
-    
+
     <!-- Frame Test Activity -->
     <string name="frame_gallery">Frame Gallery</string>
     <string name="reset_frames">Reset Frames</string>
@@ -153,4 +153,26 @@
     <string name="ai_chat_edit_image">AI Chat Edit Image</string>
     <string name="ai_anime_genarator">Ai Anime Genarator</string>
     <string name="ai_background_remove">AI Background Remove</string>
+    <string name="davis_rubin">Davis Rubin</string>
+    <string name="rubindavis_gmali_com">rubindavis@gmali.com</string>
+    <string name="upgrade_to_pro">Upgrade to PRO</string>
+    <string name="enjoy_all_features_benefitswithout_any_restrictions"><![CDATA[Enjoy all features & benefits\nwithout any restrictions]]></string>
+    <string name="personal_info">Personal Info</string>
+    <string name="payment_methods">Payment Methods</string>
+    <string name="security">Security</string>
+    <string name="language">Language</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="follow_us_on_social_media">Follow us on Social Media</string>
+    <string name="help_centre">Help Centre</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="about_artify">About Artify</string>
+    <string name="log_out">Log out</string>
+
+    <!-- Language Selection -->
+    <string name="select_language">Select Language</string>
+    <string name="language_description">Choose your preferred language</string>
+    <string name="language_english">English</string>
+    <string name="language_vietnamese">Vietnamese</string>
+    <string name="language_spanish">Spanish</string>
+    <string name="language_changed">Language changed successfully</string>
 </resources>

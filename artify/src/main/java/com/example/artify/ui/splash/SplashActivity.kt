@@ -30,15 +30,13 @@ class SplashActivity : AppCompatActivity() {
         when (savedTheme) {
             ThemeHelper.LIGHT_MODE -> radioGroup.check(R.id.radioLight)
             ThemeHelper.DARK_MODE -> radioGroup.check(R.id.radioDark)
-            ThemeHelper.SYSTEM_MODE -> radioGroup.check(R.id.radioSystem)
         }
 
         radioGroup.setOnCheckedChangeListener { _, checkedId ->
             val selectedMode = when (checkedId) {
                 R.id.radioLight -> ThemeHelper.LIGHT_MODE
                 R.id.radioDark -> ThemeHelper.DARK_MODE
-                R.id.radioSystem -> ThemeHelper.SYSTEM_MODE
-                else -> ThemeHelper.SYSTEM_MODE
+                else -> ThemeHelper.DARK_MODE
             }
             ThemeHelper.saveTheme(this, selectedMode)
             ThemeHelper.applyTheme(selectedMode)

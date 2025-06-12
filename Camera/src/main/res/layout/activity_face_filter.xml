@@ -16,7 +16,9 @@
         <com.example.camera.filter.CameraSourcePreview
             android:id="@+id/preview"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            >
 
             <com.example.camera.filter.GraphicOverlay
                 android:id="@+id/faceOverlay"
@@ -94,6 +96,16 @@
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:scaleType="fitCenter"
                         app:srcCompat="@android:drawable/ic_menu_view"
+                        app:tint="#ffffff" />
+
+                    <ImageButton
+                        android:id="@+id/aspect_ratio_button"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="15dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:scaleType="fitCenter"
+                        app:srcCompat="@drawable/ic_brightness_low"
                         app:tint="#ffffff" />
 
                     <ImageButton

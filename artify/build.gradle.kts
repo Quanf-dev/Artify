@@ -40,6 +40,11 @@ android {
         viewBinding = true
         dataBinding = true
     }
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
 
 }
 
@@ -74,8 +79,8 @@ dependencies {
     implementation(project(":ImageEditor"))
 
     // Hilt
-    implementation("com.google.dagger:hilt-android:2.48")
-    kapt("com.google.dagger:hilt-android-compiler:2.48")
+    implementation("com.google.dagger:hilt-android:2.50")
+    kapt("com.google.dagger:hilt-android-compiler:2.50")
     implementation("androidx.hilt:hilt-navigation-fragment:1.0.0")
 
     // ViewModel & LiveData
@@ -124,9 +129,6 @@ dependencies {
 
     // drag delete crop rotate view
     implementation("com.github.miaoyongjun:StickerView:1.1")
-    
-    // Timber for logging
-    implementation("com.jakewharton.timber:timber:5.0.1")
 
     // verticalseekbar
     implementation ("com.h6ah4i.android.widget.verticalseekbar:verticalseekbar:1.0.0")
@@ -140,7 +142,11 @@ dependencies {
     //SocialPosts
     implementation(project(":SocialPosts"))
 
-    //Camera
-    implementation(project(":Camera"))
+    //Toggle Switch
+    implementation ("com.github.angads25:toggle:1.1.0")
+
+    //language
+    implementation ("com.zeugmasolutions.localehelper:locale-helper-android:1.5.1")
+
 
 }

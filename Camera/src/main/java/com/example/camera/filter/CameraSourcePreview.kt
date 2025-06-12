@@ -22,6 +22,7 @@ class CameraSourcePreview(context: Context, attrs: AttributeSet?) : ViewGroup(co
     private var isSurfaceAvailable: Boolean = false
     private var cameraSource: CameraSource? = null
     private var overlay: GraphicOverlay? = null
+    private var aspectRatio: Float = 4f / 3f
     
     // Zoom functionality
     private var scaleGestureDetector: ScaleGestureDetector? = null
@@ -53,6 +54,12 @@ class CameraSourcePreview(context: Context, attrs: AttributeSet?) : ViewGroup(co
     override fun onTouchEvent(event: MotionEvent): Boolean {
         scaleGestureDetector?.onTouchEvent(event)
         return true
+    }
+
+    fun setAspectRatio(ratio: Float) {
+        if (ratio <= 0) return
+        aspectRatio = ratio
+        requestLayout() // Force a re-layout
     }
 
     @Throws(IOException::class)
@@ -144,14 +151,26 @@ class CameraSourcePreview(context: Context, attrs: AttributeSet?) : ViewGroup(co
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
-        Log.d(tag, "onLayout: $left, $top, $right, $bottom")
-        
-        val width = right - left
-        val height = bottom - top
-        
-        // Center the SurfaceView in the available space
+        val parentWidth = (right - left)
+        val parentHeight = (bottom - top)
+
+        var previewWidth = parentWidth
+        var previewHeight = (previewWidth / aspectRatio).toInt()
+
+        if (previewHeight > parentHeight) {
+            previewHeight = parentHeight
+            previewWidth = (previewHeight * aspectRatio).toInt()
+        }
+
+        val childLeft = (parentWidth - previewWidth) / 2
+        val childTop = (parentHeight - previewHeight) / 2
+        val childRight = childLeft + previewWidth
+        val childBottom = childTop + previewHeight
+
+        Log.d(tag, "Layout preview to: $childLeft, $childTop, $childRight, $childBottom")
+
         for (i in 0 until childCount) {
-            getChildAt(i).layout(0, 0, width, height)
+            getChildAt(i).layout(childLeft, childTop, childRight, childBottom)
         }
 
         try {

@@ -1,11 +1,8 @@
 package com.example.camera.filter
 
 import android.Manifest
-import android.app.Activity
+import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.content.ContentValues
-import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
@@ -17,10 +14,7 @@ import android.hardware.Camera
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Environment
-import android.provider.MediaStore
 import android.util.Log
-import android.view.GestureDetector
-import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
 import android.widget.ImageButton
@@ -45,8 +39,17 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.util.Date
+import kotlin.math.abs
 
 class FaceFilterActivity : AppCompatActivity() {
+
+    // Aspect ratio definitions
+    private enum class AspectRatio(val ratio: Float) {
+        RATIO_4_3(4.0f / 3.0f),
+        RATIO_16_9(16.0f / 9.0f),
+        RATIO_1_1(1.0f / 1.0f),
+        RATIO_3_4(3.0f / 4.0f)
+    }
 
     // Camera and detection properties
     private var mCameraSource: CameraSource? = null
@@ -59,6 +62,7 @@ class FaceFilterActivity : AppCompatActivity() {
     private var isGridEnabled: Boolean = false
     private var currentTimerSeconds: Int = 0
     private var cameraFacing: Int = CameraSource.CAMERA_FACING_FRONT
+    private var currentAspectRatio: AspectRatio = AspectRatio.RATIO_4_3
     
     // Zoom functionality
     private var scaleGestureDetector: ScaleGestureDetector? = null
@@ -78,6 +82,7 @@ class FaceFilterActivity : AppCompatActivity() {
     private var timerButton: ImageButton? = null
     private var switchCameraButton: ImageButton? = null
     private var zoomSeekBar: SeekBar? = null
+    private var aspectRatioButton: ImageButton? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -101,6 +106,7 @@ class FaceFilterActivity : AppCompatActivity() {
         timerButton = findViewById(R.id.timer)
         switchCameraButton = findViewById(R.id.change)
         zoomSeekBar = findViewById(R.id.seekBarZoom)
+        aspectRatioButton = findViewById(R.id.aspect_ratio_button)
         
         setupUIClickListeners()
         setupFilterButtons()
@@ -134,6 +140,7 @@ class FaceFilterActivity : AppCompatActivity() {
         gridButton?.setOnClickListener { toggleGrid() }
         timerButton?.setOnClickListener { showTimerDialog() }
         switchCameraButton?.setOnClickListener { switchCamera() }
+        aspectRatioButton?.setOnClickListener { showAspectRatioDialog() }
 
         zoomSeekBar?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -174,6 +181,7 @@ class FaceFilterActivity : AppCompatActivity() {
         faceButton?.setImageResource(iconResource)
     }
 
+    @SuppressLint("SuspiciousIndentation")
     private fun selectFilter(filterType: Int) {
         findViewById<View>(FILTER_BUTTON_IDS[currentFilterType])?.background = 
             ContextCompat.getDrawable(this, R.drawable.round_background)
@@ -320,30 +328,7 @@ class FaceFilterActivity : AppCompatActivity() {
                             runOnUiThread { showErrorMessage("Failed to decode image: ${e.message}") }
                             return
                         }
-                        val imageFile = try {
-                            saveImageToCache(bitmap)
-                        } catch (e: Exception) {
-                            Log.e(TAG, "Failed to save image to cache", e)
-                            runOnUiThread { showErrorMessage("Failed to save image: ${e.message}") }
-                            return
-                        }
-                        runOnUiThread {
-                            if (!imageFile.exists() || imageFile.length() == 0L) {
-                                Log.e(TAG, "Image file does not exist or is empty: ${imageFile.absolutePath}")
-                                showErrorMessage("Image file not saved correctly")
-                                return@runOnUiThread
-                            }
-                            try {
-                                val intent = Intent(this@FaceFilterActivity, com.example.camera.ui.preview.PreviewActivity::class.java).apply {
-                                    putExtra(com.example.camera.ui.preview.PreviewActivity.EXTRA_IMAGE_PATH, imageFile.absolutePath)
-                                }
-                                Log.d(TAG, "Navigating to PreviewActivity with path: ${imageFile.absolutePath}")
-                                startActivity(intent)
-                            } catch (e: Exception) {
-                                Log.e(TAG, "Failed to navigate to preview", e)
-                                showErrorMessage("Failed to open preview: ${e.message}")
-                            }
-                        }
+                        saveBitmapToCacheAndPreview(bitmap)
                     } catch (e: Exception) {
                         Log.e(TAG, "Error processing captured image", e)
                         runOnUiThread { showErrorMessage("Failed to save photo: ${e.message}") }
@@ -353,6 +338,34 @@ class FaceFilterActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e(TAG, "takePicture failed", e)
             runOnUiThread { showErrorMessage("Camera error: ${e.message}") }
+        }
+    }
+
+    private fun saveBitmapToCacheAndPreview(bitmap: Bitmap) {
+        val imageFile = try {
+            saveImageToCache(bitmap)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to save image to cache", e)
+            runOnUiThread { showErrorMessage("Failed to save image: ${e.message}") }
+            return
+        }
+
+        runOnUiThread {
+            if (!imageFile.exists() || imageFile.length() == 0L) {
+                Log.e(TAG, "Image file does not exist or is empty: ${imageFile.absolutePath}")
+                showErrorMessage("Image file not saved correctly")
+                return@runOnUiThread
+            }
+            try {
+                val intent = Intent(this@FaceFilterActivity, com.example.camera.ui.preview.PreviewActivity::class.java).apply {
+                    putExtra(com.example.camera.ui.preview.PreviewActivity.EXTRA_IMAGE_PATH, imageFile.absolutePath)
+                }
+                Log.d(TAG, "Navigating to PreviewActivity with path: ${imageFile.absolutePath}")
+                startActivity(intent)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to navigate to preview", e)
+                showErrorMessage("Failed to open preview: ${e.message}")
+            }
         }
     }
 
@@ -378,11 +391,30 @@ class FaceFilterActivity : AppCompatActivity() {
         
         val width = bitmap.width
         val height = bitmap.height
-        val ratioBitmap = width.toFloat() / height.toFloat()
-        val ratioMax = maxWidth.toFloat() / maxHeight.toFloat()
 
-        val finalWidth = if (ratioMax > ratioBitmap) (maxHeight * ratioBitmap).toInt() else maxWidth
-        val finalHeight = if (ratioMax > ratioBitmap) maxHeight else (maxWidth / ratioBitmap).toInt()
+        val finalWidth: Int
+        val finalHeight: Int
+
+        if (width.toFloat() / height.toFloat() == currentAspectRatio.ratio) {
+            // Aspect ratio is already correct, just scale down if needed
+            if (width > maxWidth || height > maxHeight) {
+                val widthRatio = maxWidth.toFloat() / width.toFloat()
+                val heightRatio = maxHeight.toFloat() / height.toFloat()
+                val ratio = minOf(widthRatio, heightRatio)
+                finalWidth = (width * ratio).toInt()
+                finalHeight = (height * ratio).toInt()
+            } else {
+                finalWidth = width
+                finalHeight = height
+            }
+        } else {
+             // Scale to fit max dimensions while maintaining original aspect ratio
+            val ratioBitmap = width.toFloat() / height.toFloat()
+            val ratioMax = maxWidth.toFloat() / maxHeight.toFloat()
+
+            finalWidth = if (ratioMax > ratioBitmap) (maxHeight * ratioBitmap).toInt() else maxWidth
+            finalHeight = if (ratioMax > ratioBitmap) maxHeight else (maxWidth / ratioBitmap).toInt()
+        }
 
         return Bitmap.createScaledBitmap(bitmap, finalWidth, finalHeight, true)
     }
@@ -450,9 +482,62 @@ class FaceFilterActivity : AppCompatActivity() {
         }
     }
 
+    private fun showAspectRatioDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_aspect_ratio, null)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        dialogView.findViewById<TextView>(R.id.aspectRatio43).setOnClickListener {
+            setAspectRatio(AspectRatio.RATIO_4_3)
+            dialog.dismiss()
+        }
+        dialogView.findViewById<TextView>(R.id.aspectRatio169).setOnClickListener {
+            setAspectRatio(AspectRatio.RATIO_16_9)
+            dialog.dismiss()
+        }
+        dialogView.findViewById<TextView>(R.id.aspectRatio11).setOnClickListener {
+            setAspectRatio(AspectRatio.RATIO_1_1)
+            dialog.dismiss()
+        }
+        dialogView.findViewById<TextView>(R.id.aspectRatio34).setOnClickListener {
+            setAspectRatio(AspectRatio.RATIO_3_4)
+            dialog.dismiss()
+        }
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
+    }
+
+    private fun setAspectRatio(aspectRatio: AspectRatio) {
+        if (currentAspectRatio == aspectRatio) return
+
+        currentAspectRatio = aspectRatio
+        Log.d(TAG, "Setting aspect ratio to: ${aspectRatio.ratio}")
+
+        mPreview?.setAspectRatio(aspectRatio.ratio)
+
+        // Restart camera with new settings
+        mPreview?.stop()
+        mCameraSource?.release()
+        mCameraSource = null
+        createCameraSource()
+        startCameraSource()
+    }
+
     private fun createCameraSource() {
         Log.d(TAG, "Creating camera source for facing: $cameraFacing")
-        
+
+        val previewSize: Camera.Size? = try {
+            val tempCamera = Camera.open(if (cameraFacing == CameraSource.CAMERA_FACING_FRONT) Camera.CameraInfo.CAMERA_FACING_FRONT else Camera.CameraInfo.CAMERA_FACING_BACK)
+            val bestSize = findBestPreviewSize(tempCamera, currentAspectRatio.ratio)
+            tempCamera.release()
+            bestSize
+        } catch (e: Exception) {
+            Log.e(TAG, "Could not open camera to get preview sizes", e)
+            null
+        }
+
         val detector = FaceDetector.Builder(applicationContext)
             .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
             .setLandmarkType(FaceDetector.ALL_LANDMARKS)
@@ -469,12 +554,20 @@ class FaceFilterActivity : AppCompatActivity() {
             return
         }
 
-        mCameraSource = CameraSource.Builder(applicationContext, detector)
-            .setRequestedPreviewSize(PREVIEW_WIDTH, PREVIEW_HEIGHT)
+        val builder = CameraSource.Builder(applicationContext, detector)
             .setFacing(cameraFacing)
-                .setAutoFocusEnabled(true)
+            .setAutoFocusEnabled(true)
             .setRequestedFps(PREVIEW_FPS)
-                .build()
+
+        if (previewSize != null) {
+            Log.d(TAG, "Using preview size: ${previewSize.width}x${previewSize.height}")
+            builder.setRequestedPreviewSize(previewSize.width, previewSize.height)
+        } else {
+            Log.d(TAG, "Using default preview size.")
+            builder.setRequestedPreviewSize(PREVIEW_WIDTH, PREVIEW_HEIGHT)
+        }
+
+        mCameraSource = builder.build()
         
             Log.d(TAG, "Camera source created successfully")
     }
@@ -576,6 +669,25 @@ class FaceFilterActivity : AppCompatActivity() {
         }
         override fun onMissing(detections: Detector.Detections<Face?>) = overlay.remove(faceGraphic)
         override fun onDone() = overlay.remove(faceGraphic)
+    }
+
+    private fun findBestPreviewSize(camera: Camera, targetRatio: Float): Camera.Size {
+        val supportedSizes = camera.parameters.supportedPreviewSizes
+        var bestSize = supportedSizes[0]
+        var bestDiff = abs((bestSize.width.toFloat() / bestSize.height.toFloat()) - targetRatio)
+
+        for (size in supportedSizes) {
+            val ratio = size.width.toFloat() / size.height.toFloat()
+            val diff = abs(ratio - targetRatio)
+            if (diff < bestDiff) {
+                bestSize = size
+                bestDiff = diff
+            } else if (diff == bestDiff && size.width > bestSize.width) {
+                // Prefer larger sizes for better quality
+                bestSize = size
+            }
+        }
+        return bestSize
     }
 
     companion object {

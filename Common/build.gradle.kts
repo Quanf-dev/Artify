@@ -51,5 +51,8 @@ dependencies {
 
     implementation ("com.airbnb.android:lottie:6.4.0" )
 
+    //language
+    implementation ("com.zeugmasolutions.localehelper:locale-helper-android:1.5.1")
+
 
 }

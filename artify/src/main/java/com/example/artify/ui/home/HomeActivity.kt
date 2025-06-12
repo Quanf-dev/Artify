@@ -9,6 +9,7 @@ import com.example.artify.R
 import com.example.artify.databinding.ActivityHomeBinding
 import com.example.artify.ui.editMain.EditMainActivity
 import android.content.Intent
+import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.example.artify.ui.posts.PostsActivity
 import com.example.artify.utils.EdgeToEdgeUtils
@@ -22,11 +23,12 @@ import com.example.imageaigen.ui.removebg.RemoveBackgroundActivity
 import com.example.socialposts.ui.MainBottomNavigationHelper
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import com.example.artify.ui.setting.SettingActivity
 import com.example.camera.filter.FaceFilterActivity
+import com.example.common.base.BaseActivity
 
-class HomeActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityHomeBinding
-    
+class HomeActivity : BaseActivity<ActivityHomeBinding>() {
+
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
             val intent = Intent(this, EditMainActivity::class.java)
@@ -46,11 +48,13 @@ class HomeActivity : AppCompatActivity() {
         }
     }
     
+    override fun inflateBinding(): ActivityHomeBinding = ActivityHomeBinding.inflate(layoutInflater)
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        binding = ActivityHomeBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        // Hide the app bar
+        findViewById<View>(com.example.common.R.id.app_bar_layout_base).visibility = View.GONE
+        findViewById<View>(com.example.common.R.id.coordinator_base).fitsSystemWindows = false
 
         // Set up click listener for select photo button
         binding.btnSelectPhoto.setOnClickListener {
@@ -105,7 +109,7 @@ class HomeActivity : AppCompatActivity() {
                     true
                 }
                 R.id.menu_settings -> {
-                    // Settings item (for future)
+                    navigate(SettingActivity::class.java)
                     true
                 }
                 else -> false
