@@ -168,4 +168,10 @@
     <string name="privacy_policy">Política de privacidad</string>
     <string name="about_artify">Acerca de Artify</string>
     <string name="log_out">Cerrar sesión</string>
+
+    <string name="select_your_preferred_language">Selecciona tu idioma preferido</string>
+    <string name="english">Inglés</string>
+    <string name="selected_language">Idioma seleccionado</string>
+    <string name="ai_logo_maker">Creador de Logos con IA</string>
+    <string name="ai_action_figure">Figura de Acción con IA</string>
 </resources>

@@ -17,9 +17,8 @@
         <activity android:name=".ui.generate.GenerateImageActivity" />
         <activity android:name=".ui.removebg.RemoveBackgroundActivity" />
         <activity android:name=".ui.preview.PreviewImageActivity" />
-
-
-
+        <activity android:name=".ui.logo.LogoMakerActivity" />
+        <activity android:name=".ui.toyfigure.ToyFigureActivity" />
     </application>
 
 </manifest>

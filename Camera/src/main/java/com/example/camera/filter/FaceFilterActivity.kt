@@ -34,21 +34,28 @@ import com.google.android.gms.vision.Tracker
 import com.google.android.gms.vision.face.Face
 import com.google.android.gms.vision.face.FaceDetector
 import com.google.android.material.snackbar.Snackbar
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.util.Date
 import kotlin.math.abs
 
 class FaceFilterActivity : AppCompatActivity() {
 
     // Aspect ratio definitions
     private enum class AspectRatio(val ratio: Float) {
-        RATIO_4_3(4.0f / 3.0f),
-        RATIO_16_9(16.0f / 9.0f),
-        RATIO_1_1(1.0f / 1.0f),
-        RATIO_3_4(3.0f / 4.0f)
+        RATIO_4_3(4.0f / 3.0f),    // 1.333... chuẩn camera
+        RATIO_1_1(1.0f),           // 1.0
+        FULL(-1f)                  // -1f: full screen, sẽ xử lý riêng
+    }
+
+    // Color filter definitions
+    private enum class ColorFilter {
+        NORMAL,
+        BLACK_WHITE,
+        SEPIA,
+        VINTAGE,
+        COOL,
+        WARM
     }
 
     // Camera and detection properties
@@ -58,22 +65,25 @@ class FaceFilterActivity : AppCompatActivity() {
 
     // Filter and camera state
     private var currentFilterType: Int = 0
+    private var currentColorFilter: ColorFilter = ColorFilter.NORMAL
     private var isFlashEnabled: Boolean = false
     private var isGridEnabled: Boolean = false
+    private var isZoomVisible: Boolean = false
     private var currentTimerSeconds: Int = 0
     private var cameraFacing: Int = CameraSource.CAMERA_FACING_FRONT
     private var currentAspectRatio: AspectRatio = AspectRatio.RATIO_4_3
-    
+    private var brightness: Float = 0.0f // -1.0 to 1.0
+
     // Zoom functionality
     private var scaleGestureDetector: ScaleGestureDetector? = null
     private var scaleFactor: Float = 1.0f
     private val maxZoom: Float = 5.0f
     private val minZoom: Float = 1.0f
-    
+
     // Timer functionality
     private var countDownTimer: CountDownTimer? = null
     private var timerTextView: TextView? = null
-    
+
     // UI elements
     private var faceButton: ImageButton? = null
     private var flashButton: ImageButton? = null
@@ -82,7 +92,10 @@ class FaceFilterActivity : AppCompatActivity() {
     private var timerButton: ImageButton? = null
     private var switchCameraButton: ImageButton? = null
     private var zoomSeekBar: SeekBar? = null
+    private var brightnessSeekBar: SeekBar? = null
     private var aspectRatioButton: ImageButton? = null
+    private var colorFilterButton: ImageButton? = null
+    private var zoomToggleButton: ImageButton? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,7 +110,7 @@ class FaceFilterActivity : AppCompatActivity() {
         mPreview = findViewById(R.id.preview)
         mGraphicOverlay = findViewById(R.id.faceOverlay)
         timerTextView = findViewById(R.id.timerText)
-        
+
         // Initialize buttons
         faceButton = findViewById(R.id.face)
         flashButton = findViewById(R.id.flash)
@@ -106,26 +119,35 @@ class FaceFilterActivity : AppCompatActivity() {
         timerButton = findViewById(R.id.timer)
         switchCameraButton = findViewById(R.id.change)
         zoomSeekBar = findViewById(R.id.seekBarZoom)
+        brightnessSeekBar = findViewById(R.id.seekBarBrightness)
         aspectRatioButton = findViewById(R.id.aspect_ratio_button)
-        
+        colorFilterButton = findViewById(R.id.color_filter_button)
+        zoomToggleButton = findViewById(R.id.zoom_toggle_button)
+
+        // Hide zoom and brightness seekbars by default
+        zoomSeekBar?.visibility = View.GONE
+        brightnessSeekBar?.visibility = View.GONE
+
         setupUIClickListeners()
         setupFilterButtons()
     }
 
     private fun setupZoomGesture() {
-        scaleGestureDetector = ScaleGestureDetector(this, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
-            override fun onScale(detector: ScaleGestureDetector): Boolean {
-                scaleFactor *= detector.scaleFactor
-                scaleFactor = scaleFactor.coerceIn(minZoom, maxZoom)
-                setZoom(scaleFactor)
-                
-                // Update seekbar progress
-                val progress = ((scaleFactor - minZoom) / (maxZoom - minZoom) * 100).toInt()
-                zoomSeekBar?.progress = progress
-                return true
-            }
-        })
-        
+        scaleGestureDetector = ScaleGestureDetector(
+            this,
+            object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                override fun onScale(detector: ScaleGestureDetector): Boolean {
+                    scaleFactor *= detector.scaleFactor
+                    scaleFactor = scaleFactor.coerceIn(minZoom, maxZoom)
+                    setZoom(scaleFactor)
+
+                    // Update seekbar progress
+                    val progress = ((scaleFactor - minZoom) / (maxZoom - minZoom) * 100).toInt()
+                    zoomSeekBar?.progress = progress
+                    return true
+                }
+            })
+
         // Set touch listener to preview
         mPreview?.setOnTouchListener { _, event ->
             scaleGestureDetector?.onTouchEvent(event)
@@ -141,6 +163,8 @@ class FaceFilterActivity : AppCompatActivity() {
         timerButton?.setOnClickListener { showTimerDialog() }
         switchCameraButton?.setOnClickListener { switchCamera() }
         aspectRatioButton?.setOnClickListener { showAspectRatioDialog() }
+        colorFilterButton?.setOnClickListener { showColorFilterDialog() }
+        zoomToggleButton?.setOnClickListener { toggleZoomVisibility() }
 
         zoomSeekBar?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -154,6 +178,18 @@ class FaceFilterActivity : AppCompatActivity() {
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
+
+        brightnessSeekBar?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    brightness = (progress - 50) / 50f // Convert 0-100 to -1.0 to 1.0
+                    setBrightness(brightness)
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
     }
 
     private fun setupFilterButtons() {
@@ -161,7 +197,8 @@ class FaceFilterActivity : AppCompatActivity() {
             R.id.no_filter to 0, R.id.hair to 1, R.id.op to 2, R.id.snap to 3,
             R.id.glasses2 to 4, R.id.glasses3 to 5, R.id.glasses4 to 6, R.id.glasses5 to 7,
             R.id.mask2 to 8, R.id.mask3 to 9, R.id.dog to 10, R.id.cat2 to 11,
-            R.id.hat to 12, R.id.hat2 to 13
+            R.id.hat to 12, R.id.hat2 to 13, R.id.spiderman to 14, R.id.songoku to 15,
+            R.id.ronaldo to 16
         )
 
         filterButtons.forEach { (buttonId, filterType) ->
@@ -174,29 +211,29 @@ class FaceFilterActivity : AppCompatActivity() {
     private fun toggleFilterVisibility() {
         val scrollView = findViewById<View>(R.id.scrollView)
         val isVisible = scrollView.visibility == View.VISIBLE
-        
+
         scrollView.visibility = if (isVisible) View.GONE else View.VISIBLE
-        
+
         val iconResource = if (isVisible) R.drawable.face else R.drawable.face_select
         faceButton?.setImageResource(iconResource)
     }
 
     @SuppressLint("SuspiciousIndentation")
     private fun selectFilter(filterType: Int) {
-        findViewById<View>(FILTER_BUTTON_IDS[currentFilterType])?.background = 
+        findViewById<View>(FILTER_BUTTON_IDS[currentFilterType])?.background =
             ContextCompat.getDrawable(this, R.drawable.round_background)
-        
+
         currentFilterType = filterType
-        
-        findViewById<View>(FILTER_BUTTON_IDS[currentFilterType])?.background = 
+
+        findViewById<View>(FILTER_BUTTON_IDS[currentFilterType])?.background =
             ContextCompat.getDrawable(this, R.drawable.round_background_select)
-        
-                refreshFaceDetection()
-            }
+
+        refreshFaceDetection()
+    }
 
     private fun toggleFlash() {
         isFlashEnabled = !isFlashEnabled
-        
+
         val tintColor = if (isFlashEnabled) Color.YELLOW else Color.WHITE
         flashButton?.setColorFilter(tintColor)
 
@@ -220,7 +257,7 @@ class FaceFilterActivity : AppCompatActivity() {
             }
         }
     }
-    
+
     private fun getCamera(cameraSource: CameraSource): Camera? {
         val fields = CameraSource::class.java.declaredFields
         for (field in fields) {
@@ -237,16 +274,15 @@ class FaceFilterActivity : AppCompatActivity() {
     }
 
     private fun toggleGrid() {
-        isGridEnabled = !isGridEnabled
-        val tintColor = if (isGridEnabled) Color.YELLOW else Color.WHITE
-        gridButton?.setColorFilter(tintColor)
-        mGraphicOverlay?.setGridEnabled(isGridEnabled)
+        // Grid functionality disabled as requested
+        // Keep the button but make it inactive
+        gridButton?.alpha = 0.5f
     }
 
     private fun showTimerDialog() {
         val timerOptions = arrayOf("Off", "3s", "5s", "10s")
         val timerValues = intArrayOf(0, 3, 5, 10)
-        
+
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.timer_title))
             .setItems(timerOptions) { _, which ->
@@ -260,7 +296,7 @@ class FaceFilterActivity : AppCompatActivity() {
         val tintColor = if (currentTimerSeconds > 0) Color.YELLOW else Color.WHITE
         timerButton?.setColorFilter(tintColor)
     }
-    
+
     private fun switchCamera() {
         Log.d(TAG, "Switching camera")
         mPreview?.stop()
@@ -287,7 +323,7 @@ class FaceFilterActivity : AppCompatActivity() {
 
     private fun startTimer() {
         timerTextView?.visibility = View.VISIBLE
-        
+
         countDownTimer = object : CountDownTimer((currentTimerSeconds * 1000).toLong(), 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 timerTextView?.text = (millisUntilFinished / 1000 + 1).toString()
@@ -357,8 +393,14 @@ class FaceFilterActivity : AppCompatActivity() {
                 return@runOnUiThread
             }
             try {
-                val intent = Intent(this@FaceFilterActivity, com.example.camera.ui.preview.PreviewActivity::class.java).apply {
-                    putExtra(com.example.camera.ui.preview.PreviewActivity.EXTRA_IMAGE_PATH, imageFile.absolutePath)
+                val intent = Intent(
+                    this@FaceFilterActivity,
+                    com.example.camera.ui.preview.PreviewActivity::class.java
+                ).apply {
+                    putExtra(
+                        com.example.camera.ui.preview.PreviewActivity.EXTRA_IMAGE_PATH,
+                        imageFile.absolutePath
+                    )
                 }
                 Log.d(TAG, "Navigating to PreviewActivity with path: ${imageFile.absolutePath}")
                 startActivity(intent)
@@ -372,48 +414,43 @@ class FaceFilterActivity : AppCompatActivity() {
     private fun processCapturedImage(bytes: ByteArray): Bitmap {
         val decodedBitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
             ?: throw IOException("Failed to decode byte array.")
-        
+
         val rotation = if (cameraFacing == CameraSource.CAMERA_FACING_FRONT) 270f else 90f
-        val matrix = Matrix().apply { 
+        val matrix = Matrix().apply {
             postRotate(rotation)
             if (cameraFacing == CameraSource.CAMERA_FACING_FRONT) {
                 // Mirror the image for front camera
                 postScale(-1f, 1f, decodedBitmap.width / 2f, decodedBitmap.height / 2f)
             }
         }
-        
-        val rotatedBitmap = Bitmap.createBitmap(decodedBitmap, 0, 0, decodedBitmap.width, decodedBitmap.height, matrix, false)
+
+        val rotatedBitmap = Bitmap.createBitmap(
+            decodedBitmap,
+            0,
+            0,
+            decodedBitmap.width,
+            decodedBitmap.height,
+            matrix,
+            false
+        )
         return resizeBitmap(rotatedBitmap, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT)
     }
 
     private fun resizeBitmap(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
-        if (maxWidth <= 0 || maxHeight <= 0) return bitmap
-        
+        if (bitmap.width <= maxWidth && bitmap.height <= maxHeight) {
+            return bitmap // No resizing needed if it's already within bounds
+        }
+
         val width = bitmap.width
         val height = bitmap.height
+        val ratioBitmap = width.toFloat() / height.toFloat()
 
-        val finalWidth: Int
-        val finalHeight: Int
+        var finalWidth = maxWidth
+        var finalHeight = (finalWidth / ratioBitmap).toInt()
 
-        if (width.toFloat() / height.toFloat() == currentAspectRatio.ratio) {
-            // Aspect ratio is already correct, just scale down if needed
-            if (width > maxWidth || height > maxHeight) {
-                val widthRatio = maxWidth.toFloat() / width.toFloat()
-                val heightRatio = maxHeight.toFloat() / height.toFloat()
-                val ratio = minOf(widthRatio, heightRatio)
-                finalWidth = (width * ratio).toInt()
-                finalHeight = (height * ratio).toInt()
-            } else {
-                finalWidth = width
-                finalHeight = height
-            }
-        } else {
-             // Scale to fit max dimensions while maintaining original aspect ratio
-            val ratioBitmap = width.toFloat() / height.toFloat()
-            val ratioMax = maxWidth.toFloat() / maxHeight.toFloat()
-
-            finalWidth = if (ratioMax > ratioBitmap) (maxHeight * ratioBitmap).toInt() else maxWidth
-            finalHeight = if (ratioMax > ratioBitmap) maxHeight else (maxWidth / ratioBitmap).toInt()
+        if (finalHeight > maxHeight) {
+            finalHeight = maxHeight
+            finalWidth = (finalHeight * ratioBitmap).toInt()
         }
 
         return Bitmap.createScaledBitmap(bitmap, finalWidth, finalHeight, true)
@@ -436,11 +473,18 @@ class FaceFilterActivity : AppCompatActivity() {
     }
 
     private fun getImageStorageFolder(): File {
-        return File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "FaceFilter")
+        return File(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+            "FaceFilter"
+        )
     }
 
     private fun checkCameraPermission() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             Log.d(TAG, "Camera permission granted, creating camera source")
             createCameraSource()
         } else {
@@ -451,15 +495,29 @@ class FaceFilterActivity : AppCompatActivity() {
 
     private fun requestCameraPermission() {
         val permissions = arrayOf(Manifest.permission.CAMERA)
-        if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+        if (!ActivityCompat.shouldShowRequestPermissionRationale(
+                this,
+                Manifest.permission.CAMERA
+            )
+        ) {
             ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_CAMERA_PERM)
             return
         }
-        Snackbar.make(mGraphicOverlay!!, R.string.permission_camera_rationale, Snackbar.LENGTH_INDEFINITE)
-            .setAction(R.string.ok) { ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_CAMERA_PERM) }
+        Snackbar.make(
+            mGraphicOverlay!!,
+            R.string.permission_camera_rationale,
+            Snackbar.LENGTH_INDEFINITE
+        )
+            .setAction(R.string.ok) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    permissions,
+                    RC_HANDLE_CAMERA_PERM
+                )
+            }
             .show()
     }
-    
+
     private fun setZoom(scale: Float) {
         mCameraSource?.let { source ->
             val camera = getCamera(source)
@@ -468,14 +526,15 @@ class FaceFilterActivity : AppCompatActivity() {
                     val params = it.parameters
                     if (params.isZoomSupported) {
                         val maxCameraZoom = params.maxZoom
-                        val zoom = ((scale - minZoom) / (maxZoom - minZoom) * maxCameraZoom).toInt().coerceIn(0, maxCameraZoom)
+                        val zoom = ((scale - minZoom) / (maxZoom - minZoom) * maxCameraZoom).toInt()
+                            .coerceIn(0, maxCameraZoom)
                         if (params.zoom != zoom) {
                             params.zoom = zoom
                             it.parameters = params
                             Log.d(TAG, "Zoom set to $zoom (scale $scale)")
                         }
                     }
-                } catch(e: Exception) {
+                } catch (e: Exception) {
                     Log.e(TAG, "Failed to set zoom", e)
                 }
             } ?: Log.w(TAG, "Could not get camera for zoom")
@@ -492,16 +551,13 @@ class FaceFilterActivity : AppCompatActivity() {
             setAspectRatio(AspectRatio.RATIO_4_3)
             dialog.dismiss()
         }
-        dialogView.findViewById<TextView>(R.id.aspectRatio169).setOnClickListener {
-            setAspectRatio(AspectRatio.RATIO_16_9)
-            dialog.dismiss()
-        }
         dialogView.findViewById<TextView>(R.id.aspectRatio11).setOnClickListener {
             setAspectRatio(AspectRatio.RATIO_1_1)
             dialog.dismiss()
         }
-        dialogView.findViewById<TextView>(R.id.aspectRatio34).setOnClickListener {
-            setAspectRatio(AspectRatio.RATIO_3_4)
+
+        dialogView.findViewById<TextView>(R.id.aspectRatioFull).setOnClickListener {
+            setAspectRatio(AspectRatio.FULL)
             dialog.dismiss()
         }
 
@@ -515,7 +571,7 @@ class FaceFilterActivity : AppCompatActivity() {
         currentAspectRatio = aspectRatio
         Log.d(TAG, "Setting aspect ratio to: ${aspectRatio.ratio}")
 
-        mPreview?.setAspectRatio(aspectRatio.ratio)
+        mPreview?.setAspectRatio(if (aspectRatio == AspectRatio.FULL) -1f else aspectRatio.ratio)
 
         // Restart camera with new settings
         mPreview?.stop()
@@ -527,16 +583,6 @@ class FaceFilterActivity : AppCompatActivity() {
 
     private fun createCameraSource() {
         Log.d(TAG, "Creating camera source for facing: $cameraFacing")
-
-        val previewSize: Camera.Size? = try {
-            val tempCamera = Camera.open(if (cameraFacing == CameraSource.CAMERA_FACING_FRONT) Camera.CameraInfo.CAMERA_FACING_FRONT else Camera.CameraInfo.CAMERA_FACING_BACK)
-            val bestSize = findBestPreviewSize(tempCamera, currentAspectRatio.ratio)
-            tempCamera.release()
-            bestSize
-        } catch (e: Exception) {
-            Log.e(TAG, "Could not open camera to get preview sizes", e)
-            null
-        }
 
         val detector = FaceDetector.Builder(applicationContext)
             .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
@@ -554,22 +600,49 @@ class FaceFilterActivity : AppCompatActivity() {
             return
         }
 
-        val builder = CameraSource.Builder(applicationContext, detector)
-            .setFacing(cameraFacing)
-            .setAutoFocusEnabled(true)
-            .setRequestedFps(PREVIEW_FPS)
-
-        if (previewSize != null) {
-            Log.d(TAG, "Using preview size: ${previewSize.width}x${previewSize.height}")
-            builder.setRequestedPreviewSize(previewSize.width, previewSize.height)
+        val targetRatio = if (currentAspectRatio == AspectRatio.FULL) {
+            getScreenAspectRatio()
         } else {
-            Log.d(TAG, "Using default preview size.")
-            builder.setRequestedPreviewSize(PREVIEW_WIDTH, PREVIEW_HEIGHT)
+            currentAspectRatio.ratio
         }
 
-        mCameraSource = builder.build()
-        
-            Log.d(TAG, "Camera source created successfully")
+        val tempCamera = try {
+            Camera.open(if (cameraFacing == CameraSource.CAMERA_FACING_FRONT) Camera.CameraInfo.CAMERA_FACING_FRONT else Camera.CameraInfo.CAMERA_FACING_BACK)
+        } catch (e: Exception) {
+            Log.e(TAG, "Could not open temporary camera", e)
+            showErrorMessage("Could not configure camera.")
+            return
+        }
+
+        try {
+            val params = tempCamera.parameters
+            val bestPreviewSize = findBestSize(params.supportedPreviewSizes, targetRatio)
+            val bestPictureSize = findBestSize(params.supportedPictureSizes, targetRatio)
+
+            val builder = CameraSource.Builder(applicationContext, detector)
+                .setFacing(cameraFacing)
+                .setAutoFocusEnabled(true)
+                .setRequestedFps(PREVIEW_FPS)
+                .setRequestedPreviewSize(bestPreviewSize.width, bestPreviewSize.height)
+
+            mCameraSource = builder.build()
+
+            // Set picture size directly on the camera instance
+            getCamera(mCameraSource!!)?.let { camera ->
+                val camParams = camera.parameters
+                camParams.setPictureSize(bestPictureSize.width, bestPictureSize.height)
+                camera.parameters = camParams
+                Log.d(TAG, "Set picture size to: ${bestPictureSize.width}x${bestPictureSize.height}")
+            }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to create camera source or set parameters.", e)
+            showErrorMessage("Failed to setup camera.")
+        } finally {
+            tempCamera.release()
+        }
+
+        Log.d(TAG, "Camera source created successfully")
     }
 
     private fun handleDetectorNotOperational() {
@@ -586,7 +659,11 @@ class FaceFilterActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         Log.d(TAG, "onResume called")
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             if (mCameraSource == null) createCameraSource()
             startCameraSource()
         } else {
@@ -608,12 +685,16 @@ class FaceFilterActivity : AppCompatActivity() {
         countDownTimer?.cancel()
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == RC_HANDLE_CAMERA_PERM) {
-        if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "Camera permission granted - creating camera source")
-            createCameraSource()
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "Camera permission granted - creating camera source")
+                createCameraSource()
             } else {
                 Log.e(TAG, "Permission not granted")
                 showPermissionDeniedDialog()
@@ -631,7 +712,8 @@ class FaceFilterActivity : AppCompatActivity() {
 
     private fun startCameraSource() {
         Log.d(TAG, "Starting camera source")
-        val code = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(applicationContext)
+        val code =
+            GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(applicationContext)
         if (code != ConnectionResult.SUCCESS) {
             GoogleApiAvailability.getInstance().getErrorDialog(this, code, RC_HANDLE_GMS)?.show()
             return
@@ -667,27 +749,98 @@ class FaceFilterActivity : AppCompatActivity() {
                 faceGraphic.updateFace(it, currentFilterType)
             }
         }
+
         override fun onMissing(detections: Detector.Detections<Face?>) = overlay.remove(faceGraphic)
         override fun onDone() = overlay.remove(faceGraphic)
     }
 
-    private fun findBestPreviewSize(camera: Camera, targetRatio: Float): Camera.Size {
-        val supportedSizes = camera.parameters.supportedPreviewSizes
+    private fun getScreenAspectRatio(): Float {
+        val displayMetrics = resources.displayMetrics
+        // Return a ratio that matches camera sensor orientation (width > height)
+        return if (displayMetrics.widthPixels > displayMetrics.heightPixels) {
+            displayMetrics.widthPixels.toFloat() / displayMetrics.heightPixels.toFloat()
+        } else {
+            displayMetrics.heightPixels.toFloat() / displayMetrics.widthPixels.toFloat()
+        }
+    }
+
+    private fun findBestSize(supportedSizes: List<Camera.Size>, targetRatio: Float): Camera.Size {
         var bestSize = supportedSizes[0]
-        var bestDiff = abs((bestSize.width.toFloat() / bestSize.height.toFloat()) - targetRatio)
+        var minDiff = Float.MAX_VALUE
 
         for (size in supportedSizes) {
             val ratio = size.width.toFloat() / size.height.toFloat()
             val diff = abs(ratio - targetRatio)
-            if (diff < bestDiff) {
+
+            if (diff < minDiff) {
                 bestSize = size
-                bestDiff = diff
-            } else if (diff == bestDiff && size.width > bestSize.width) {
-                // Prefer larger sizes for better quality
+                minDiff = diff
+            } else if (diff == minDiff && size.width > bestSize.width) {
+                // If diff is the same, prefer the larger size for better quality
                 bestSize = size
             }
         }
+        Log.d(TAG, "Best size for ratio $targetRatio is ${bestSize.width}x${bestSize.height}")
         return bestSize
+    }
+
+    private fun toggleZoomVisibility() {
+        isZoomVisible = !isZoomVisible
+        zoomSeekBar?.visibility = if (isZoomVisible) View.VISIBLE else View.GONE
+        brightnessSeekBar?.visibility = if (isZoomVisible) View.VISIBLE else View.GONE
+        
+        val tintColor = if (isZoomVisible) Color.YELLOW else Color.WHITE
+        zoomToggleButton?.setColorFilter(tintColor)
+    }
+
+    private fun showColorFilterDialog() {
+        val colorFilters = arrayOf("Normal", "Black & White", "Sepia", "Vintage", "Cool", "Warm")
+        
+        Log.d(TAG, "Showing color filter dialog")
+        
+        AlertDialog.Builder(this)
+            .setTitle("Color Filter")
+            .setItems(colorFilters) { _, which ->
+                currentColorFilter = ColorFilter.values()[which]
+                Log.d(TAG, "Selected color filter: $currentColorFilter")
+                updateColorFilterButton()
+                applyColorFilter()
+            }
+            .show()
+    }
+
+    private fun updateColorFilterButton() {
+        val tintColor = if (currentColorFilter != ColorFilter.NORMAL) Color.YELLOW else Color.WHITE
+        colorFilterButton?.setColorFilter(tintColor)
+        Log.d(TAG, "Updated color filter button, tint: ${if (currentColorFilter != ColorFilter.NORMAL) "YELLOW" else "WHITE"}")
+    }
+
+    private fun applyColorFilter() {
+        Log.d(TAG, "Applying color filter: $currentColorFilter")
+        mPreview?.setColorFilter(currentColorFilter.toString())
+        Log.d(TAG, "Color filter applied to preview")
+    }
+
+    private fun setBrightness(brightness: Float) {
+        mCameraSource?.let { source ->
+            try {
+                val camera = getCamera(source)
+                camera?.let {
+                    val params = it.parameters
+                    // Exposure compensation range is typically -4 to +4
+                    val exposureRange = params.maxExposureCompensation - params.minExposureCompensation
+                    if (exposureRange > 0) {
+                        val exposureValue = (brightness * exposureRange / 2).toInt()
+                            .coerceIn(params.minExposureCompensation, params.maxExposureCompensation)
+                        params.exposureCompensation = exposureValue
+                        it.parameters = params
+                        Log.d(TAG, "Brightness set to $brightness (exposure: $exposureValue)")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to set brightness", e)
+            }
+        }
     }
 
     companion object {
@@ -706,7 +859,9 @@ class FaceFilterActivity : AppCompatActivity() {
             R.id.no_filter, R.id.hair, R.id.op, R.id.snap,
             R.id.glasses2, R.id.glasses3, R.id.glasses4, R.id.glasses5,
             R.id.mask2, R.id.mask3, R.id.dog, R.id.cat2,
-            R.id.hat, R.id.hat2
+            R.id.hat, R.id.hat2, R.id.spiderman, R.id.songoku,
+            R.id.ronaldo
         )
     }
 }
+

@@ -8,14 +8,6 @@
     android:background="@color/app_background"
     tools:context=".ui.language.LanguageActivity">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        app:layout_constraintTop_toTopOf="parent"
-        app:navigationIcon="@drawable/ic_arrow_left"
-        app:title="@string/language"
-        app:titleTextColor="@android:color/white" />
 
     <TextView
         android:id="@+id/tvLanguageTitle"
@@ -24,11 +16,11 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:text="@string/language"
-        android:textColor="@android:color/white"
+        android:textColor="@color/title_text"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tvLanguageDescription"
@@ -37,8 +29,8 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
-        android:text="Select your preferred language"
-        android:textColor="@android:color/white"
+        android:text="@string/select_your_preferred_language"
+        android:textColor="@color/label_text"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

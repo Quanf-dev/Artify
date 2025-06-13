@@ -8,10 +8,8 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
-import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -189,12 +187,9 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
             it.scaleIn()
             originalBitmap?.let {
                 currentImageBitmap = it.copy(it.config!!, true)
+                binding.stickerView.clearSticker()
                 binding.editorView.setImageBitmap(currentImageBitmap)
             }
-        }
-
-        toolbarBinding.root.setOnClickListener {
-            finish() // Return to HomeActivity
         }
     }
 

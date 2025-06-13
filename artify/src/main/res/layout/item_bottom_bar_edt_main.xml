@@ -5,7 +5,7 @@
     android:layout_height="?attr/actionBarSize"
     android:fillViewport="true"
     android:id="@+id/filterBottomMenu"
-
+    android:background="@color/toolbar_edit_color"
     android:scrollbars="none">
 
 <LinearLayout

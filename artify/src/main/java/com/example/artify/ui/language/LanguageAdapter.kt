@@ -27,27 +27,27 @@ class LanguageAdapter(
 
     override fun getItemCount(): Int = languages.size
 
-    fun updateLanguages(updatedLanguages: List<Language>) {
-        languages = updatedLanguages
-        notifyDataSetChanged()
-    }
 
     inner class LanguageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val containerView: LinearGradientBorder = itemView.findViewById(R.id.languageItemContainer)
+        private val containerView: LinearGradientBorder =
+            itemView.findViewById(R.id.languageItemContainer)
         private val flagImageView: ImageView = itemView.findViewById(R.id.ivLanguageFlag)
         private val languageNameTextView: TextView = itemView.findViewById(R.id.tvLanguageName)
-        private val selectedIndicator: ImageView = itemView.findViewById(R.id.ivLanguageSelected)
 
         fun bind(language: Language) {
             // Set language name from resource
             languageNameTextView.setText(language.nameResId)
-            
+
             // Set flag image
             flagImageView.setImageResource(language.flagResId)
-            
+
             // Show/hide selected indicator
-            selectedIndicator.visibility = if (language.isSelected) View.VISIBLE else View.GONE
-            
+            if (language.isSelected) {
+                containerView.isSelected = true
+            }else{
+                containerView.isSelected = false
+            }
+
             // Set click listener
             containerView.setOnClickListener {
                 onLanguageSelected(language)

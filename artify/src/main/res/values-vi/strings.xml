@@ -168,4 +168,10 @@
     <string name="privacy_policy">Chính sách bảo mật</string>
     <string name="about_artify">Về Artify</string>
     <string name="log_out">Đăng xuất</string>
+
+    <string name="select_your_preferred_language">Chọn ngôn ngữ bạn muốn</string>
+    <string name="english">Tiếng Anh</string>
+    <string name="selected_language">Ngôn ngữ đã chọn</string>
+    <string name="ai_logo_maker">Trình tạo Logo AI</string>
+    <string name="ai_action_figure">Nhân vật hành động AI</string>
 </resources> 

@@ -4,6 +4,8 @@
     android:layout_height="?attr/actionBarSize"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:paddingHorizontal="16dp"
+    android:background="@color/toolbar_edit_color"
+
     >
 
     <!-- Icon bên trái -->

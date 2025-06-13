@@ -1,15 +1,13 @@
 package com.example.camera.filter
 
-import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.graphics.Color
 import android.util.AttributeSet
 import android.util.Log
-import android.view.MotionEvent
-import android.view.ScaleGestureDetector
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.vision.CameraSource
@@ -18,48 +16,20 @@ import java.io.IOException
 class CameraSourcePreview(context: Context, attrs: AttributeSet?) : ViewGroup(context, attrs) {
     private val tag = "CameraSourcePreview"
     private val surfaceView: SurfaceView
-    private var isStartRequested: Boolean = false
-    private var isSurfaceAvailable: Boolean = false
+    private var startRequested = false
+    private var surfaceAvailable = false
     private var cameraSource: CameraSource? = null
     private var overlay: GraphicOverlay? = null
-    private var aspectRatio: Float = 4f / 3f
-    
-    // Zoom functionality
-    private var scaleGestureDetector: ScaleGestureDetector? = null
-    private var scaleFactor: Float = 1.0f
-    private val maxZoom: Float = 3.0f
-    private val minZoom: Float = 1.0f
+    private var aspectRatio = 1.0f
+    private var colorFilterOverlay: ColorFilterOverlay
 
     init {
         surfaceView = SurfaceView(context)
         surfaceView.holder.addCallback(SurfaceCallback())
         addView(surfaceView)
         
-        setupZoomGesture()
-    }
-    
-    private fun setupZoomGesture() {
-        scaleGestureDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
-            override fun onScale(detector: ScaleGestureDetector): Boolean {
-                scaleFactor *= detector.scaleFactor
-                scaleFactor = scaleFactor.coerceIn(minZoom, maxZoom)
-                
-                // Apply zoom - this would need camera API support
-                Log.d(tag, "Zoom factor: $scaleFactor")
-                return true
-            }
-        })
-    }
-    
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        scaleGestureDetector?.onTouchEvent(event)
-        return true
-    }
-
-    fun setAspectRatio(ratio: Float) {
-        if (ratio <= 0) return
-        aspectRatio = ratio
-        requestLayout() // Force a re-layout
+        colorFilterOverlay = ColorFilterOverlay(context)
+        addView(colorFilterOverlay)
     }
 
     @Throws(IOException::class)
@@ -68,9 +38,9 @@ class CameraSourcePreview(context: Context, attrs: AttributeSet?) : ViewGroup(co
             stop()
             return
         }
-
+        
         this.cameraSource = cameraSource
-        isStartRequested = true
+        startRequested = true
         startIfReady()
     }
 
@@ -89,49 +59,98 @@ class CameraSourcePreview(context: Context, attrs: AttributeSet?) : ViewGroup(co
         cameraSource = null
     }
 
+    fun setAspectRatio(ratio: Float) {
+        aspectRatio = ratio
+        requestLayout()
+    }
+
+    fun setColorFilter(filter: Any?) {
+        colorFilterOverlay.applyFilter(filter)
+    }
+
     @Throws(IOException::class)
     private fun startIfReady() {
-        if (isStartRequested && isSurfaceAvailable) {
+        if (startRequested && surfaceAvailable) {
             if (ActivityCompat.checkSelfPermission(
                     context,
-                    Manifest.permission.CAMERA
-                ) != PackageManager.PERMISSION_GRANTED
+                    android.Manifest.permission.CAMERA
+                ) != android.content.pm.PackageManager.PERMISSION_GRANTED
             ) {
                 return
             }
             
             try {
-                Log.d(tag, "Starting camera source")
                 cameraSource?.start(surfaceView.holder)
                 
-                cameraSource?.let { source ->
-                    val size = source.previewSize
-                    val min = kotlin.math.min(size.width, size.height)
-                    val max = kotlin.math.max(size.width, size.height)
+                if (overlay != null) {
+                    val size = cameraSource!!.previewSize
+                    val min = Math.min(size.width, size.height)
+                    val max = Math.max(size.width, size.height)
                     
-                    overlay?.let { overlay ->
-                        if (isPortraitMode) {
-                            // Swap width and height sizes when in portrait
-                            overlay.setCameraInfo(min, max, source.cameraFacing)
-                        } else {
-                            overlay.setCameraInfo(max, min, source.cameraFacing)
-                        }
-                        overlay.clear()
+                    if (isPortraitMode) {
+                        overlay!!.setCameraInfo(min, max, cameraSource!!.cameraFacing)
+                    } else {
+                        overlay!!.setCameraInfo(max, min, cameraSource!!.cameraFacing)
                     }
+                    overlay!!.clear()
                 }
                 
-                isStartRequested = false
-                Log.d(tag, "Camera source started successfully")
+                startRequested = false
             } catch (e: Exception) {
                 Log.e(tag, "Could not start camera source.", e)
+                cameraSource?.release()
+                cameraSource = null
             }
+        }
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val width = MeasureSpec.getSize(widthMeasureSpec)
+        val height = MeasureSpec.getSize(heightMeasureSpec)
+        
+        if (aspectRatio <= 0) {
+            setMeasuredDimension(width, height)
+        } else {
+            var previewWidth = width
+            var previewHeight = (width / aspectRatio).toInt()
+            
+            if (previewHeight > height) {
+                previewHeight = height
+                previewWidth = (height * aspectRatio).toInt()
+            }
+            
+            setMeasuredDimension(previewWidth, previewHeight)
+        }
+        
+        for (i in 0 until childCount) {
+            getChildAt(i).measure(
+                MeasureSpec.makeMeasureSpec(measuredWidth, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(measuredHeight, MeasureSpec.EXACTLY)
+            )
+        }
+    }
+
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        val width = right - left
+        val height = bottom - top
+        
+        for (i in 0 until childCount) {
+            val child = getChildAt(i)
+            val offsetX = (width - child.measuredWidth) / 2
+            val offsetY = (height - child.measuredHeight) / 2
+            child.layout(offsetX, offsetY, offsetX + child.measuredWidth, offsetY + child.measuredHeight)
+        }
+        
+        try {
+            startIfReady()
+        } catch (e: IOException) {
+            Log.e(tag, "Could not start camera source.", e)
         }
     }
 
     private inner class SurfaceCallback : SurfaceHolder.Callback {
         override fun surfaceCreated(holder: SurfaceHolder) {
-            Log.d(tag, "Surface created")
-            isSurfaceAvailable = true
+            surfaceAvailable = true
             try {
                 startIfReady()
             } catch (e: IOException) {
@@ -140,49 +159,52 @@ class CameraSourcePreview(context: Context, attrs: AttributeSet?) : ViewGroup(co
         }
 
         override fun surfaceDestroyed(holder: SurfaceHolder) {
-            Log.d(tag, "Surface destroyed")
-            isSurfaceAvailable = false
+            surfaceAvailable = false
         }
 
-        override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-            Log.d(tag, "Surface changed: $width x $height")
-            // No specific action needed
-        }
-    }
-
-    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
-        val parentWidth = (right - left)
-        val parentHeight = (bottom - top)
-
-        var previewWidth = parentWidth
-        var previewHeight = (previewWidth / aspectRatio).toInt()
-
-        if (previewHeight > parentHeight) {
-            previewHeight = parentHeight
-            previewWidth = (previewHeight * aspectRatio).toInt()
-        }
-
-        val childLeft = (parentWidth - previewWidth) / 2
-        val childTop = (parentHeight - previewHeight) / 2
-        val childRight = childLeft + previewWidth
-        val childBottom = childTop + previewHeight
-
-        Log.d(tag, "Layout preview to: $childLeft, $childTop, $childRight, $childBottom")
-
-        for (i in 0 until childCount) {
-            getChildAt(i).layout(childLeft, childTop, childRight, childBottom)
-        }
-
-        try {
-            startIfReady()
-        } catch (e: IOException) {
-            Log.e(tag, "Could not start camera source.", e)
-        }
+        override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {}
     }
 
     private val isPortraitMode: Boolean
-        get() {
-            val orientation = context.resources.configuration.orientation
-            return orientation == Configuration.ORIENTATION_PORTRAIT
+        get() = context.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+
+    private inner class ColorFilterOverlay(context: Context) : View(context) {
+        init {
+            visibility = GONE
         }
+        
+        fun applyFilter(filter: Any?) {
+            val filterStr = filter?.toString() ?: "NORMAL"
+            
+            when (filterStr) {
+                "BLACK_WHITE" -> {
+                    setBackgroundColor(Color.argb(102, 0, 0, 0))
+                    visibility = VISIBLE
+                }
+                "SEPIA" -> {
+                    setBackgroundColor(Color.argb(102, 210, 105, 30))
+                    visibility = VISIBLE
+                }
+                "VINTAGE" -> {
+                    setBackgroundColor(Color.argb(102, 218, 165, 32))
+                    visibility = VISIBLE
+                }
+                "COOL" -> {
+                    setBackgroundColor(Color.argb(102, 65, 105, 225))
+                    visibility = VISIBLE
+                }
+                "WARM" -> {
+                    setBackgroundColor(Color.argb(102, 255, 99, 71))
+                    visibility = VISIBLE
+                }
+                else -> {
+                    setBackgroundColor(Color.TRANSPARENT)
+                    visibility = GONE
+                }
+            }
+            
+            bringToFront()
+        }
+    }
 }
+

@@ -35,19 +35,6 @@
             android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/aspectRatio169"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?android:attr/selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:padding="@dimen/spacing_medium"
-            android:text="@string/aspect_ratio_16_9"
-            android:textColor="@android:color/white"
-            android:textSize="16sp" />
-
-        <TextView
             android:id="@+id/aspectRatio11"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -61,7 +48,7 @@
             android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/aspectRatio34"
+            android:id="@+id/aspectRatioFull"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?android:attr/selectableItemBackground"
@@ -69,7 +56,7 @@
             android:focusable="true"
             android:gravity="center"
             android:padding="@dimen/spacing_medium"
-            android:text="@string/aspect_ratio_3_4"
+            android:text="@string/aspect_ratio_full"
             android:textColor="@android:color/white"
             android:textSize="16sp" />
 

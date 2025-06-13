@@ -17,7 +17,8 @@ package com.example.camera.filter
 
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
@@ -56,15 +57,11 @@ class GraphicOverlay(context: Context?, attrs: AttributeSet?) : View(context, at
     private var mHeightScaleFactor = 1.0f
     private var mFacing = CameraSource.CAMERA_FACING_BACK
     private val mGraphics: MutableSet<Graphic> = HashSet<Graphic>()
-
-    // Grid functionality
     private var isGridEnabled: Boolean = false
-    private val gridPaint: Paint = Paint().apply {
-        color = Color.WHITE
-        alpha = 128
-        strokeWidth = 2f
-        style = Paint.Style.STROKE
-    }
+    
+    // Color filter support
+    private var colorFilterPaint: Paint? = null
+    private var currentColorFilter: Any? = null
 
     /**
      * Base class for a custom graphics object to be rendered within the graphic overlay.  Subclass
@@ -174,11 +171,83 @@ class GraphicOverlay(context: Context?, attrs: AttributeSet?) : View(context, at
     }
 
     /**
-     * Enable or disable grid lines overlay
+     * Enables or disables grid display (disabled as requested)
      */
     fun setGridEnabled(enabled: Boolean) {
-        isGridEnabled = enabled
+        // Grid functionality disabled as requested
+    }
+
+    /**
+     * Sets color filter for the overlay
+     */
+    fun setColorFilter(colorFilter: Any?) {
+        currentColorFilter = colorFilter
+        colorFilterPaint = when (colorFilter.toString()) {
+            "BLACK_WHITE" -> createBlackWhiteFilter()
+            "SEPIA" -> createSepiaFilter()
+            "VINTAGE" -> createVintageFilter()
+            "COOL" -> createCoolFilter()
+            "WARM" -> createWarmFilter()
+            else -> null
+        }
         postInvalidate()
+    }
+
+    private fun createBlackWhiteFilter(): Paint {
+        val colorMatrix = ColorMatrix().apply {
+            setSaturation(0f) // Remove all color saturation
+        }
+        return Paint().apply {
+            colorFilter = ColorMatrixColorFilter(colorMatrix)
+        }
+    }
+
+    private fun createSepiaFilter(): Paint {
+        val colorMatrix = ColorMatrix(floatArrayOf(
+            0.393f, 0.769f, 0.189f, 0f, 0f,
+            0.349f, 0.686f, 0.168f, 0f, 0f,
+            0.272f, 0.534f, 0.131f, 0f, 0f,
+            0f, 0f, 0f, 1f, 0f
+        ))
+        return Paint().apply {
+            colorFilter = ColorMatrixColorFilter(colorMatrix)
+        }
+    }
+
+    private fun createVintageFilter(): Paint {
+        val colorMatrix = ColorMatrix(floatArrayOf(
+            0.6f, 0.3f, 0.1f, 0f, 30f,
+            0.2f, 0.7f, 0.1f, 0f, 10f,
+            0.2f, 0.3f, 0.5f, 0f, 20f,
+            0f, 0f, 0f, 1f, 0f
+        ))
+        return Paint().apply {
+            colorFilter = ColorMatrixColorFilter(colorMatrix)
+        }
+    }
+
+    private fun createCoolFilter(): Paint {
+        val colorMatrix = ColorMatrix(floatArrayOf(
+            0.8f, 0.2f, 0.2f, 0f, 0f,
+            0.1f, 0.8f, 0.1f, 0f, 0f,
+            0.2f, 0.3f, 1.2f, 0f, 0f,
+            0f, 0f, 0f, 1f, 0f
+        ))
+        return Paint().apply {
+            colorFilter = ColorMatrixColorFilter(colorMatrix)
+        }
+    }
+
+    private fun createWarmFilter(): Paint {
+        val colorMatrix = ColorMatrix(floatArrayOf(
+            1.2f, 0.1f, 0.1f, 0f, 0f,
+            0.1f, 1.1f, 0.1f, 0f, 0f,
+            0.1f, 0.1f, 0.8f, 0f, 0f,
+            0f, 0f, 0f, 1f, 0f
+        ))
+        return Paint().apply {
+            colorFilter = ColorMatrixColorFilter(colorMatrix)
+        }
     }
 
     /**
@@ -194,38 +263,17 @@ class GraphicOverlay(context: Context?, attrs: AttributeSet?) : View(context, at
             }
             
             // Clear the canvas first to prevent artifacts
-            canvas.drawColor(Color.TRANSPARENT, android.graphics.PorterDuff.Mode.CLEAR)
+            canvas.drawColor(android.graphics.Color.TRANSPARENT, android.graphics.PorterDuff.Mode.CLEAR)
             
-            // Draw grid lines if enabled
-            if (isGridEnabled) {
-                drawGrid(canvas)
-            }
+            // Save canvas state for color filter
+            val saveCount = canvas.saveLayer(0f, 0f, width.toFloat(), height.toFloat(), colorFilterPaint)
             
             for (graphic in mGraphics) {
                 graphic.draw(canvas)
             }
+            
+            // Restore canvas state
+            canvas.restoreToCount(saveCount)
         }
-    }
-    
-    /**
-     * Draw grid lines (rule of thirds)
-     */
-    private fun drawGrid(canvas: Canvas) {
-        val viewWidth = width.toFloat()
-        val viewHeight = height.toFloat()
-        
-        // Vertical lines (divide into thirds)
-        val verticalLine1 = viewWidth / 3f
-        val verticalLine2 = viewWidth * 2f / 3f
-        
-        canvas.drawLine(verticalLine1, 0f, verticalLine1, viewHeight, gridPaint)
-        canvas.drawLine(verticalLine2, 0f, verticalLine2, viewHeight, gridPaint)
-        
-        // Horizontal lines (divide into thirds)
-        val horizontalLine1 = viewHeight / 3f
-        val horizontalLine2 = viewHeight * 2f / 3f
-        
-        canvas.drawLine(0f, horizontalLine1, viewWidth, horizontalLine1, gridPaint)
-        canvas.drawLine(0f, horizontalLine2, viewWidth, horizontalLine2, gridPaint)
     }
 }
