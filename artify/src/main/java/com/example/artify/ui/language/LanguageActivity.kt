@@ -37,9 +37,9 @@ class LanguageActivity : BaseActivity<ActivityLanguageBinding>() {
     private fun setupLanguages() {
         val currentLanguageCode = LocaleHelper.getSavedLanguage(this)
         languages.apply {
-            add(Language("en", R.string.language_english, R.drawable.ic_flag_en, isSelected = currentLanguageCode == "en"))
-            add(Language("vi", R.string.language_vietnamese, R.drawable.ic_flag_vi, isSelected = currentLanguageCode == "vi"))
-            add(Language("es", R.string.language_spanish, R.drawable.ic_flag_es, isSelected = currentLanguageCode == "es"))
+            add(Language("en", R.string.language_english, R.drawable.image358, isSelected = currentLanguageCode == "en"))
+            add(Language("vi", R.string.language_vietnamese, R.drawable.vietnam, isSelected = currentLanguageCode == "vi"))
+            add(Language("es", R.string.language_spanish, R.drawable.image35856756, isSelected = currentLanguageCode == "es"))
         }
     }
     private fun changeLanguage(language: Language) {
@@ -51,7 +51,6 @@ class LanguageActivity : BaseActivity<ActivityLanguageBinding>() {
         languages.forEach { it.isSelected = it.code == language.code }
         adapter.notifyDataSetChanged()
         updateUI()
-        Toast.makeText(this, getString(R.string.language_changed), Toast.LENGTH_SHORT).show()
     }
 
     private fun updateUI() {

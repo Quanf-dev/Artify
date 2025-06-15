@@ -50,7 +50,7 @@ import com.google.android.gms.vision.CameraSource
  */
 class GraphicOverlay(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
     private val TAG = "GraphicOverlay"
-    private val mLock = Any()
+    val mLock = Any()
     private var mPreviewWidth = 0
     private var mWidthScaleFactor = 1.0f
     private var mPreviewHeight = 0
@@ -275,5 +275,35 @@ class GraphicOverlay(context: Context?, attrs: AttributeSet?) : View(context, at
             // Restore canvas state
             canvas.restoreToCount(saveCount)
         }
+    }
+
+    /**
+     * Gets all graphics in the overlay for external use
+     */
+    fun getGraphics(): Set<Graphic> {
+        synchronized(mLock) {
+            return HashSet(mGraphics)
+        }
+    }
+    
+    /**
+     * Gets the width scale factor
+     */
+    fun getWidthScaleFactor(): Float {
+        return mWidthScaleFactor
+    }
+    
+    /**
+     * Gets the height scale factor
+     */
+    fun getHeightScaleFactor(): Float {
+        return mHeightScaleFactor
+    }
+    
+    /**
+     * Gets the camera facing
+     */
+    fun getCameraFacing(): Int {
+        return mFacing
     }
 }

@@ -64,24 +64,23 @@ class ToyFigureActivity : BaseActivity<ActivityToyFigureBinding>() {
             val occupation = binding.occupationEditText.text.toString().trim()
             val accessories = binding.accessoriesEditText.text.toString().trim()
             val clothing = binding.clothingEditText.text.toString().trim()
-            
+
             if (name.isEmpty() || occupation.isEmpty() || accessories.isEmpty() || clothing.isEmpty()) {
                 showErrorMessage("Please fill all fields")
                 return@setOnClickListener
             }
-            
+
             if (originalBitmap == null) {
                 showErrorMessage("Please select an image")
                 return@setOnClickListener
             }
-            
+
             val prompt = "Create a cartoon-style full-figure toy model of the character in the image below, displayed inside colorful plastic blister packaging. " +
                     "At the top of the toy box, the name of the toy is written as '$name', and underneath it, their job title '$occupation' is shown — both on two separate lines in bold, fun fonts." +
                     "The character stands cheerfully in the center of the package, with a big, confident smile. " +
                     "Surrounding them are cute, oversized accessories representing their profession: $accessories, each drawn in a playful, exaggerated style. " +
-                    "The character is wearing $clothing, designed with bold lines, bright colors, and a youthful cartoon flair." +
-                    "The blister packaging itself features a modern, vibrant design — full of energetic patterns and colors that reflect the dynamic and creative work lifestyle of today's youth." +
-                    "Photorealistic rendering, studio lightning, clear focus on the packaging and figure."
+                    "The character is wearing $clothing, designed with bold lines, bright colors, and a youthful cartoon flair."
+
 
             originalBitmap?.let {
                 viewModel.generateToyFigure(it, prompt)

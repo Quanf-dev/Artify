@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     
     <!-- Camera Permissions -->
     <uses-permission android:name="android.permission.CAMERA" />
@@ -26,34 +27,24 @@
             android:value="@integer/google_play_services_version"/>
 
         <activity
+            android:name=".ui.preview.PreviewActivity"
+            android:exported="false" />
+
+
+        <activity
             android:name=".filter.FaceFilterActivity"
             android:exported="false" />
         
-        <!-- Camera Activity có thể được gọi từ Intent -->
-        <activity
-            android:name=".ui.CameraActivity"
-            android:exported="true"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.NoActionBar">
-            
-            <!-- Intent filters để có thể gọi từ ngoài -->
-            <intent-filter>
-                <action android:name="com.example.camera.OPEN_CAMERA" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            
-            <intent-filter>
-                <action android:name="com.example.camera.CAPTURE_PHOTO" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            
-            <!-- Để có thể gọi như một camera app -->
-            <intent-filter>
-                <action android:name="android.media.action.IMAGE_CAPTURE" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            
-        </activity>
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.camera.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true"
+            tools:replace="android:authorities">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
     
 </manifest>

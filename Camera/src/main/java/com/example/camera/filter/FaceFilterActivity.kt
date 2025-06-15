@@ -8,8 +8,12 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.Matrix
+import android.graphics.Paint
 import android.hardware.Camera
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -34,9 +38,11 @@ import com.google.android.gms.vision.Tracker
 import com.google.android.gms.vision.face.Face
 import com.google.android.gms.vision.face.FaceDetector
 import com.google.android.material.snackbar.Snackbar
+import com.iammert.library.cameravideobuttonlib.CameraVideoButton
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.util.ArrayList
 import kotlin.math.abs
 
 class FaceFilterActivity : AppCompatActivity() {
@@ -67,7 +73,6 @@ class FaceFilterActivity : AppCompatActivity() {
     private var currentFilterType: Int = 0
     private var currentColorFilter: ColorFilter = ColorFilter.NORMAL
     private var isFlashEnabled: Boolean = false
-    private var isGridEnabled: Boolean = false
     private var isZoomVisible: Boolean = false
     private var currentTimerSeconds: Int = 0
     private var cameraFacing: Int = CameraSource.CAMERA_FACING_FRONT
@@ -87,8 +92,7 @@ class FaceFilterActivity : AppCompatActivity() {
     // UI elements
     private var faceButton: ImageButton? = null
     private var flashButton: ImageButton? = null
-    private var cameraButton: ImageButton? = null
-    private var gridButton: ImageButton? = null
+    private var cameraButton: CameraVideoButton? = null
     private var timerButton: ImageButton? = null
     private var switchCameraButton: ImageButton? = null
     private var zoomSeekBar: SeekBar? = null
@@ -96,6 +100,9 @@ class FaceFilterActivity : AppCompatActivity() {
     private var aspectRatioButton: ImageButton? = null
     private var colorFilterButton: ImageButton? = null
     private var zoomToggleButton: ImageButton? = null
+    
+    // List to store captured image paths
+    private val capturedImagePaths: ArrayList<String> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -115,7 +122,6 @@ class FaceFilterActivity : AppCompatActivity() {
         faceButton = findViewById(R.id.face)
         flashButton = findViewById(R.id.flash)
         cameraButton = findViewById(R.id.camera)
-        gridButton = findViewById(R.id.grid)
         timerButton = findViewById(R.id.timer)
         switchCameraButton = findViewById(R.id.change)
         zoomSeekBar = findViewById(R.id.seekBarZoom)
@@ -158,8 +164,34 @@ class FaceFilterActivity : AppCompatActivity() {
     private fun setupUIClickListeners() {
         faceButton?.setOnClickListener { toggleFilterVisibility() }
         flashButton?.setOnClickListener { toggleFlash() }
-        cameraButton?.setOnClickListener { capturePhoto() }
-        gridButton?.setOnClickListener { toggleGrid() }
+        
+        // Cấu hình CameraVideoButton
+        cameraButton?.apply {
+            enablePhotoTaking(true)
+            enableVideoRecording(false) // Tạm thời tắt chức năng quay video
+            
+            actionListener = object : com.iammert.library.cameravideobuttonlib.CameraVideoButton.ActionListener {
+                override fun onStartRecord() {
+                    Log.d(TAG, "onStartRecord called")
+                    // Không xử lý quay video trong phiên bản này
+                }
+
+                override fun onEndRecord() {
+                    Log.d(TAG, "onEndRecord called")
+                    // Không xử lý quay video trong phiên bản này
+                }
+
+                override fun onDurationTooShortError() {
+                    Log.d(TAG, "onDurationTooShortError called")
+                }
+
+                override fun onSingleTap() {
+                    Log.d(TAG, "onSingleTap called - taking photo")
+                    capturePhoto()
+                }
+            }
+        }
+        
         timerButton?.setOnClickListener { showTimerDialog() }
         switchCameraButton?.setOnClickListener { switchCamera() }
         aspectRatioButton?.setOnClickListener { showAspectRatioDialog() }
@@ -273,12 +305,6 @@ class FaceFilterActivity : AppCompatActivity() {
         return null
     }
 
-    private fun toggleGrid() {
-        // Grid functionality disabled as requested
-        // Keep the button but make it inactive
-        gridButton?.alpha = 0.5f
-    }
-
     private fun showTimerDialog() {
         val timerOptions = arrayOf("Off", "3s", "5s", "10s")
         val timerValues = intArrayOf(0, 3, 5, 10)
@@ -349,6 +375,10 @@ class FaceFilterActivity : AppCompatActivity() {
                 runOnUiThread { showErrorMessage("Camera is not available") }
                 return
             }
+            
+            Log.d(TAG, "Taking photo with filter type: $currentFilterType, color filter: $currentColorFilter")
+            
+            // Chụp ảnh từ camera
             mCameraSource?.takePicture(null, object : CameraSource.PictureCallback {
                 override fun onPictureTaken(bytes: ByteArray?) {
                     if (bytes == null || bytes.isEmpty()) {
@@ -357,14 +387,26 @@ class FaceFilterActivity : AppCompatActivity() {
                         return
                     }
                     try {
-                        val bitmap = try {
+                        Log.d(TAG, "Photo captured, processing image...")
+                        
+                        // Xử lý ảnh từ camera
+                        val cameraBitmap = try {
                             processCapturedImage(bytes)
                         } catch (e: Exception) {
                             Log.e(TAG, "Bitmap decode failed", e)
                             runOnUiThread { showErrorMessage("Failed to decode image: ${e.message}") }
                             return
                         }
-                        saveBitmapToCacheAndPreview(bitmap)
+                        
+                        Log.d(TAG, "Camera bitmap processed: ${cameraBitmap.width}x${cameraBitmap.height}")
+                        
+                        // Tạo bitmap kết hợp với overlay
+                        val finalBitmap = createFinalImageWithOverlay(cameraBitmap)
+                        
+                        Log.d(TAG, "Final bitmap created: ${finalBitmap.width}x${finalBitmap.height}")
+                        
+                        // Lưu và hiển thị ảnh
+                        saveBitmapToCacheAndPreview(finalBitmap)
                     } catch (e: Exception) {
                         Log.e(TAG, "Error processing captured image", e)
                         runOnUiThread { showErrorMessage("Failed to save photo: ${e.message}") }
@@ -374,6 +416,175 @@ class FaceFilterActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e(TAG, "takePicture failed", e)
             runOnUiThread { showErrorMessage("Camera error: ${e.message}") }
+        }
+    }
+    
+    /**
+     * Tạo bitmap cuối cùng kết hợp ảnh từ camera với các filter và mask từ GraphicOverlay
+     */
+    private fun createFinalImageWithOverlay(cameraBitmap: Bitmap): Bitmap {
+        Log.d(TAG, "Creating final image with overlay")
+        
+        try {
+            // Tạo bitmap mới với kích thước của ảnh camera
+            val resultBitmap = Bitmap.createBitmap(
+                cameraBitmap.width, 
+                cameraBitmap.height, 
+                Bitmap.Config.ARGB_8888
+            )
+            
+            // Tạo canvas để vẽ
+            val canvas = Canvas(resultBitmap)
+            
+            // Vẽ ảnh camera làm nền
+            canvas.drawBitmap(cameraBitmap, 0f, 0f, null)
+            
+            // Áp dụng color filter nếu có
+            if (currentColorFilter != ColorFilter.NORMAL) {
+                val paint = Paint()
+                val colorMatrix = when (currentColorFilter) {
+                    ColorFilter.BLACK_WHITE -> {
+                        ColorMatrix().apply { setSaturation(0f) }
+                    }
+                    ColorFilter.SEPIA -> {
+                        ColorMatrix(floatArrayOf(
+                            0.393f, 0.769f, 0.189f, 0f, 0f,
+                            0.349f, 0.686f, 0.168f, 0f, 0f,
+                            0.272f, 0.534f, 0.131f, 0f, 0f,
+                            0f, 0f, 0f, 1f, 0f
+                        ))
+                    }
+                    ColorFilter.VINTAGE -> {
+                        ColorMatrix(floatArrayOf(
+                            0.6f, 0.3f, 0.1f, 0f, 30f,
+                            0.2f, 0.7f, 0.1f, 0f, 10f,
+                            0.2f, 0.3f, 0.5f, 0f, 20f,
+                            0f, 0f, 0f, 1f, 0f
+                        ))
+                    }
+                    ColorFilter.COOL -> {
+                        ColorMatrix(floatArrayOf(
+                            0.8f, 0.2f, 0.2f, 0f, 0f,
+                            0.1f, 0.8f, 0.1f, 0f, 0f,
+                            0.2f, 0.3f, 1.2f, 0f, 0f,
+                            0f, 0f, 0f, 1f, 0f
+                        ))
+                    }
+                    ColorFilter.WARM -> {
+                        ColorMatrix(floatArrayOf(
+                            1.2f, 0.1f, 0.1f, 0f, 0f,
+                            0.1f, 1.1f, 0.1f, 0f, 0f,
+                            0.1f, 0.1f, 0.8f, 0f, 0f,
+                            0f, 0f, 0f, 1f, 0f
+                        ))
+                    }
+                    else -> ColorMatrix()
+                }
+                
+                paint.colorFilter = ColorMatrixColorFilter(colorMatrix)
+                
+                // Vẽ lại bitmap với filter
+                val filteredBitmap = Bitmap.createBitmap(
+                    cameraBitmap.width,
+                    cameraBitmap.height,
+                    Bitmap.Config.ARGB_8888
+                )
+                val filteredCanvas = Canvas(filteredBitmap)
+                filteredCanvas.drawBitmap(cameraBitmap, 0f, 0f, paint)
+                
+                // Xóa canvas và vẽ lại bitmap đã lọc
+                canvas.drawColor(Color.TRANSPARENT, android.graphics.PorterDuff.Mode.CLEAR)
+                canvas.drawBitmap(filteredBitmap, 0f, 0f, null)
+                
+                Log.d(TAG, "Applied color filter: $currentColorFilter")
+            }
+            
+            // Vẽ các graphic từ overlay lên canvas
+            drawGraphicsOnCanvas(canvas, cameraBitmap.width, cameraBitmap.height)
+            
+            // Thêm watermark
+            addWatermark(canvas, cameraBitmap.width, cameraBitmap.height)
+            
+            Log.d(TAG, "Final image created successfully: ${resultBitmap.width}x${resultBitmap.height}")
+            return resultBitmap
+        } catch (e: Exception) {
+            Log.e(TAG, "Error creating final image: ${e.message}", e)
+            // Nếu có lỗi, trả về ảnh gốc từ camera
+            return cameraBitmap
+        }
+    }
+    
+    /**
+     * Thêm watermark vào ảnh
+     */
+    private fun addWatermark(canvas: Canvas, width: Int, height: Int) {
+        try {
+            val paint = Paint().apply {
+                color = Color.WHITE
+                alpha = 100 // Độ trong suốt
+                textSize = 40f
+                isAntiAlias = true
+            }
+            
+            val watermarkText = "Filter-Inator"
+            val textWidth = paint.measureText(watermarkText)
+            
+            // Vẽ watermark ở góc dưới bên phải
+            canvas.drawText(
+                watermarkText,
+                width - textWidth - 20f,
+                height - 20f,
+                paint
+            )
+            
+            Log.d(TAG, "Added watermark to image")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error adding watermark: ${e.message}", e)
+        }
+    }
+    
+    /**
+     * Vẽ các graphic từ overlay lên canvas
+     */
+    private fun drawGraphicsOnCanvas(canvas: Canvas, width: Int, height: Int) {
+        if (mGraphicOverlay == null) {
+            Log.e(TAG, "GraphicOverlay is null")
+            return
+        }
+        
+        try {
+            // Tính toán tỉ lệ giữa bitmap và overlay
+            val overlayWidth = mGraphicOverlay!!.width.toFloat()
+            val overlayHeight = mGraphicOverlay!!.height.toFloat()
+            
+            val scaleX = width.toFloat() / overlayWidth
+            val scaleY = height.toFloat() / overlayHeight
+            
+            // Lưu trạng thái canvas
+            canvas.save()
+            
+            // Scale canvas để phù hợp với kích thước bitmap
+            canvas.scale(scaleX, scaleY)
+            
+            // Vẽ tất cả các graphic từ overlay
+            synchronized(mGraphicOverlay!!.mLock) {
+                val graphics = mGraphicOverlay!!.getGraphics()
+                for (graphic in graphics) {
+                    graphic.draw(canvas)
+                }
+                
+                // Thêm TextGraphic nếu cần
+                val textGraphic = TextGraphic(mGraphicOverlay)
+                textGraphic.updateText() // Cập nhật thời gian hiện tại
+                textGraphic.draw(canvas) // Vẽ lên canvas
+                
+                Log.d(TAG, "Drew ${graphics.size} graphics on canvas")
+            }
+            
+            // Khôi phục trạng thái canvas
+            canvas.restore()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error drawing graphics on canvas: ${e.message}", e)
         }
     }
 
@@ -392,6 +603,10 @@ class FaceFilterActivity : AppCompatActivity() {
                 showErrorMessage("Image file not saved correctly")
                 return@runOnUiThread
             }
+            
+            // Add the image path to our list
+            capturedImagePaths.add(imageFile.absolutePath)
+            
             try {
                 val intent = Intent(
                     this@FaceFilterActivity,
@@ -401,8 +616,18 @@ class FaceFilterActivity : AppCompatActivity() {
                         com.example.camera.ui.preview.PreviewActivity.EXTRA_IMAGE_PATH,
                         imageFile.absolutePath
                     )
+                    // Pass the array of all captured image paths
+                    putStringArrayListExtra(
+                        com.example.camera.ui.preview.PreviewActivity.EXTRA_IMAGE_PATHS,
+                        capturedImagePaths
+                    )
+                    // Pass the current position in the array
+                    putExtra(
+                        com.example.camera.ui.preview.PreviewActivity.EXTRA_CURRENT_POSITION,
+                        capturedImagePaths.size - 1
+                    )
                 }
-                Log.d(TAG, "Navigating to PreviewActivity with path: ${imageFile.absolutePath}")
+                Log.d(TAG, "Navigating to PreviewActivity with paths: ${capturedImagePaths.size} images")
                 startActivity(intent)
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to navigate to preview", e)
@@ -415,15 +640,19 @@ class FaceFilterActivity : AppCompatActivity() {
         val decodedBitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
             ?: throw IOException("Failed to decode byte array.")
 
+        // Tính toán góc xoay dựa trên hướng camera
         val rotation = if (cameraFacing == CameraSource.CAMERA_FACING_FRONT) 270f else 90f
+        
+        // Tạo matrix cho việc xoay và lật ảnh
         val matrix = Matrix().apply {
             postRotate(rotation)
             if (cameraFacing == CameraSource.CAMERA_FACING_FRONT) {
-                // Mirror the image for front camera
+                // Lật ảnh ngang cho camera trước
                 postScale(-1f, 1f, decodedBitmap.width / 2f, decodedBitmap.height / 2f)
             }
         }
 
+        // Xoay ảnh theo góc đã tính
         val rotatedBitmap = Bitmap.createBitmap(
             decodedBitmap,
             0,
@@ -433,7 +662,38 @@ class FaceFilterActivity : AppCompatActivity() {
             matrix,
             false
         )
-        return resizeBitmap(rotatedBitmap, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT)
+
+        // Cắt ảnh theo tỉ lệ đã chọn nếu cần
+        val finalBitmap = when (currentAspectRatio) {
+            AspectRatio.RATIO_4_3 -> cropToAspectRatio(rotatedBitmap, 4f / 3f)
+            AspectRatio.RATIO_1_1 -> cropToAspectRatio(rotatedBitmap, 1f)
+            AspectRatio.FULL -> rotatedBitmap // Giữ nguyên nếu là full
+        }
+
+        // Giới hạn kích thước ảnh nếu cần
+        return resizeBitmap(finalBitmap, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT)
+    }
+
+    // Hàm mới để cắt ảnh theo tỉ lệ
+    private fun cropToAspectRatio(bitmap: Bitmap, targetRatio: Float): Bitmap {
+        val width = bitmap.width
+        val height = bitmap.height
+        val currentRatio = width.toFloat() / height.toFloat()
+
+        return if (abs(currentRatio - targetRatio) < 0.01f) {
+            // Tỉ lệ hiện tại đã gần đúng, không cần cắt
+            bitmap
+        } else if (currentRatio > targetRatio) {
+            // Ảnh quá rộng, cần cắt chiều rộng
+            val newWidth = (height * targetRatio).toInt()
+            val x = (width - newWidth) / 2
+            Bitmap.createBitmap(bitmap, x, 0, newWidth, height)
+        } else {
+            // Ảnh quá cao, cần cắt chiều cao
+            val newHeight = (width / targetRatio).toInt()
+            val y = (height - newHeight) / 2
+            Bitmap.createBitmap(bitmap, 0, y, width, newHeight)
+        }
     }
 
     private fun resizeBitmap(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
@@ -462,14 +722,36 @@ class FaceFilterActivity : AppCompatActivity() {
             val created = cachePath.mkdirs()
             Log.d(TAG, "Cache dir created: $created at ${cachePath.absolutePath}")
         }
-        val file = File(cachePath, "captured_image_${System.currentTimeMillis()}.jpg")
-        FileOutputStream(file).use { out ->
-            val success = bitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, out)
-            Log.d(TAG, "Bitmap compress success: $success, file: ${file.absolutePath}")
-            if (!success) throw IOException("Bitmap compress failed")
+        
+        // Tạo tên file với timestamp để tránh trùng lặp
+        val timestamp = System.currentTimeMillis()
+        val filename = "captured_image_$timestamp.jpg"
+        val file = File(cachePath, filename)
+        
+        try {
+            FileOutputStream(file).use { out ->
+                // Sử dụng chất lượng cao hơn (95) để đảm bảo ảnh rõ nét
+                val success = bitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, out)
+                Log.d(TAG, "Bitmap compress success: $success, file: ${file.absolutePath}, size: ${file.length()} bytes")
+                
+                if (!success) {
+                    throw IOException("Bitmap compress failed")
+                }
+                
+                // Đảm bảo dữ liệu được ghi xuống đĩa
+                out.flush()
+            }
+            
+            if (!file.exists() || file.length() == 0L) {
+                throw IOException("File not written: ${file.absolutePath}")
+            }
+            
+            Log.d(TAG, "Image saved successfully: ${file.absolutePath}, size: ${file.length()} bytes, dimensions: ${bitmap.width}x${bitmap.height}")
+            return file
+        } catch (e: Exception) {
+            Log.e(TAG, "Error saving image to cache: ${e.message}", e)
+            throw e
         }
-        if (!file.exists() || file.length() == 0L) throw IOException("File not written: ${file.absolutePath}")
-        return file
     }
 
     private fun getImageStorageFolder(): File {

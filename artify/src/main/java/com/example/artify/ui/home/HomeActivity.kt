@@ -26,6 +26,8 @@ import androidx.appcompat.app.AlertDialog
 import com.example.artify.ui.setting.SettingActivity
 import com.example.camera.filter.FaceFilterActivity
 import com.example.common.base.BaseActivity
+import com.example.imageaigen.ui.logo.LogoMakerActivity
+import com.example.imageaigen.ui.toyfigure.ToyFigureActivity
 
 class HomeActivity : BaseActivity<ActivityHomeBinding>() {
 
@@ -74,6 +76,12 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>() {
         }
         binding.frmCartoonGen.setOnClickListener{
             this.navigate(CartoonifyActivity::class.java)
+        }
+        binding.frmLogo?.setOnClickListener{
+            this.navigate(LogoMakerActivity::class.java)
+        }
+        binding.frmActionFig?.setOnClickListener{
+            this.navigate(ToyFigureActivity::class.java)
         }
         binding.frmCamera?.setOnClickListener{
             requestCameraPermissions()

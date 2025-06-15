@@ -101,6 +101,9 @@ dependencies {
     implementation ("com.google.android.material:material:1.11.0")
     implementation ("com.google.android.gms:play-services-vision:9.4.0+")
 
+    implementation ("com.github.iammert:CameraVideoButton:0.2")
+
+
     //common
     implementation(project(":Common"))
 

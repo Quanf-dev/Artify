@@ -19,7 +19,7 @@ class LogoMakerViewModel(application: Application) : AndroidViewModel(applicatio
     fun generateLogo(prompt: String) {
         _isLoading.value = true
         viewModelScope.launch {
-            val result = repository.generateImagesFromText(prompt)
+            val result = repository.generateAnimeImages(prompt)
             _images.postValue(result)
             _isLoading.postValue(false)
         }
