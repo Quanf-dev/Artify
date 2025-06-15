@@ -35,6 +35,7 @@ class PreviewActivity : AppCompatActivity() {
         imagePaths = intent.getStringArrayListExtra(EXTRA_IMAGE_PATHS) ?: ArrayList()
         val currentPosition = intent.getIntExtra(EXTRA_CURRENT_POSITION, 0)
         
+
         // If no paths are provided, use the single image path
         if (imagePaths.isEmpty()) {
             val singleImagePath = intent.getStringExtra(EXTRA_IMAGE_PATH)
@@ -43,7 +44,7 @@ class PreviewActivity : AppCompatActivity() {
             }
         }
 
-        // Set up adapter and ViewPager
+        // Initialize adapter
         imageAdapter = ImagePagerAdapter(this, imagePaths)
         viewPager.adapter = imageAdapter
         

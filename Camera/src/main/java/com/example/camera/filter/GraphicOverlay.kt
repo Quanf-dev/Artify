@@ -61,7 +61,6 @@ class GraphicOverlay(context: Context?, attrs: AttributeSet?) : View(context, at
     
     // Color filter support
     private var colorFilterPaint: Paint? = null
-    private var currentColorFilter: Any? = null
 
     /**
      * Base class for a custom graphics object to be rendered within the graphic overlay.  Subclass
@@ -180,75 +179,6 @@ class GraphicOverlay(context: Context?, attrs: AttributeSet?) : View(context, at
     /**
      * Sets color filter for the overlay
      */
-    fun setColorFilter(colorFilter: Any?) {
-        currentColorFilter = colorFilter
-        colorFilterPaint = when (colorFilter.toString()) {
-            "BLACK_WHITE" -> createBlackWhiteFilter()
-            "SEPIA" -> createSepiaFilter()
-            "VINTAGE" -> createVintageFilter()
-            "COOL" -> createCoolFilter()
-            "WARM" -> createWarmFilter()
-            else -> null
-        }
-        postInvalidate()
-    }
-
-    private fun createBlackWhiteFilter(): Paint {
-        val colorMatrix = ColorMatrix().apply {
-            setSaturation(0f) // Remove all color saturation
-        }
-        return Paint().apply {
-            colorFilter = ColorMatrixColorFilter(colorMatrix)
-        }
-    }
-
-    private fun createSepiaFilter(): Paint {
-        val colorMatrix = ColorMatrix(floatArrayOf(
-            0.393f, 0.769f, 0.189f, 0f, 0f,
-            0.349f, 0.686f, 0.168f, 0f, 0f,
-            0.272f, 0.534f, 0.131f, 0f, 0f,
-            0f, 0f, 0f, 1f, 0f
-        ))
-        return Paint().apply {
-            colorFilter = ColorMatrixColorFilter(colorMatrix)
-        }
-    }
-
-    private fun createVintageFilter(): Paint {
-        val colorMatrix = ColorMatrix(floatArrayOf(
-            0.6f, 0.3f, 0.1f, 0f, 30f,
-            0.2f, 0.7f, 0.1f, 0f, 10f,
-            0.2f, 0.3f, 0.5f, 0f, 20f,
-            0f, 0f, 0f, 1f, 0f
-        ))
-        return Paint().apply {
-            colorFilter = ColorMatrixColorFilter(colorMatrix)
-        }
-    }
-
-    private fun createCoolFilter(): Paint {
-        val colorMatrix = ColorMatrix(floatArrayOf(
-            0.8f, 0.2f, 0.2f, 0f, 0f,
-            0.1f, 0.8f, 0.1f, 0f, 0f,
-            0.2f, 0.3f, 1.2f, 0f, 0f,
-            0f, 0f, 0f, 1f, 0f
-        ))
-        return Paint().apply {
-            colorFilter = ColorMatrixColorFilter(colorMatrix)
-        }
-    }
-
-    private fun createWarmFilter(): Paint {
-        val colorMatrix = ColorMatrix(floatArrayOf(
-            1.2f, 0.1f, 0.1f, 0f, 0f,
-            0.1f, 1.1f, 0.1f, 0f, 0f,
-            0.1f, 0.1f, 0.8f, 0f, 0f,
-            0f, 0f, 0f, 1f, 0f
-        ))
-        return Paint().apply {
-            colorFilter = ColorMatrixColorFilter(colorMatrix)
-        }
-    }
 
     /**
      * Draws the overlay with its associated graphic objects.
@@ -262,18 +192,20 @@ class GraphicOverlay(context: Context?, attrs: AttributeSet?) : View(context, at
                 mHeightScaleFactor = height.toFloat() / mPreviewHeight.toFloat()
             }
             
-            // Clear the canvas first to prevent artifacts
-            canvas.drawColor(android.graphics.Color.TRANSPARENT, android.graphics.PorterDuff.Mode.CLEAR)
+            // Save canvas state
+            val saveCount = canvas.save()
             
-            // Save canvas state for color filter
-            val saveCount = canvas.saveLayer(0f, 0f, width.toFloat(), height.toFloat(), colorFilterPaint)
-            
-            for (graphic in mGraphics) {
-                graphic.draw(canvas)
+            try {
+                // Draw graphics first
+                for (graphic in mGraphics) {
+                    graphic.draw(canvas)
+                }
+                
+
+            } finally {
+                // Restore canvas state
+                canvas.restoreToCount(saveCount)
             }
-            
-            // Restore canvas state
-            canvas.restoreToCount(saveCount)
         }
     }
 

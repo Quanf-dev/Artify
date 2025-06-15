@@ -49,19 +49,8 @@ class FaceFilterActivity : AppCompatActivity() {
 
     // Aspect ratio definitions
     private enum class AspectRatio(val ratio: Float) {
-        RATIO_4_3(4.0f / 3.0f),    // 1.333... chuẩn camera
         RATIO_1_1(1.0f),           // 1.0
         FULL(-1f)                  // -1f: full screen, sẽ xử lý riêng
-    }
-
-    // Color filter definitions
-    private enum class ColorFilter {
-        NORMAL,
-        BLACK_WHITE,
-        SEPIA,
-        VINTAGE,
-        COOL,
-        WARM
     }
 
     // Camera and detection properties
@@ -71,12 +60,11 @@ class FaceFilterActivity : AppCompatActivity() {
 
     // Filter and camera state
     private var currentFilterType: Int = 0
-    private var currentColorFilter: ColorFilter = ColorFilter.NORMAL
     private var isFlashEnabled: Boolean = false
     private var isZoomVisible: Boolean = false
     private var currentTimerSeconds: Int = 0
     private var cameraFacing: Int = CameraSource.CAMERA_FACING_FRONT
-    private var currentAspectRatio: AspectRatio = AspectRatio.RATIO_4_3
+    private var currentAspectRatio: AspectRatio = AspectRatio.FULL
     private var brightness: Float = 0.0f // -1.0 to 1.0
 
     // Zoom functionality
@@ -98,7 +86,6 @@ class FaceFilterActivity : AppCompatActivity() {
     private var zoomSeekBar: SeekBar? = null
     private var brightnessSeekBar: SeekBar? = null
     private var aspectRatioButton: ImageButton? = null
-    private var colorFilterButton: ImageButton? = null
     private var zoomToggleButton: ImageButton? = null
     
     // List to store captured image paths
@@ -127,7 +114,6 @@ class FaceFilterActivity : AppCompatActivity() {
         zoomSeekBar = findViewById(R.id.seekBarZoom)
         brightnessSeekBar = findViewById(R.id.seekBarBrightness)
         aspectRatioButton = findViewById(R.id.aspect_ratio_button)
-        colorFilterButton = findViewById(R.id.color_filter_button)
         zoomToggleButton = findViewById(R.id.zoom_toggle_button)
 
         // Hide zoom and brightness seekbars by default
@@ -195,7 +181,6 @@ class FaceFilterActivity : AppCompatActivity() {
         timerButton?.setOnClickListener { showTimerDialog() }
         switchCameraButton?.setOnClickListener { switchCamera() }
         aspectRatioButton?.setOnClickListener { showAspectRatioDialog() }
-        colorFilterButton?.setOnClickListener { showColorFilterDialog() }
         zoomToggleButton?.setOnClickListener { toggleZoomVisibility() }
 
         zoomSeekBar?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -376,8 +361,6 @@ class FaceFilterActivity : AppCompatActivity() {
                 return
             }
             
-            Log.d(TAG, "Taking photo with filter type: $currentFilterType, color filter: $currentColorFilter")
-            
             // Chụp ảnh từ camera
             mCameraSource?.takePicture(null, object : CameraSource.PictureCallback {
                 override fun onPictureTaken(bytes: ByteArray?) {
@@ -407,6 +390,7 @@ class FaceFilterActivity : AppCompatActivity() {
                         
                         // Lưu và hiển thị ảnh
                         saveBitmapToCacheAndPreview(finalBitmap)
+                        
                     } catch (e: Exception) {
                         Log.e(TAG, "Error processing captured image", e)
                         runOnUiThread { showErrorMessage("Failed to save photo: ${e.message}") }
@@ -439,71 +423,8 @@ class FaceFilterActivity : AppCompatActivity() {
             // Vẽ ảnh camera làm nền
             canvas.drawBitmap(cameraBitmap, 0f, 0f, null)
             
-            // Áp dụng color filter nếu có
-            if (currentColorFilter != ColorFilter.NORMAL) {
-                val paint = Paint()
-                val colorMatrix = when (currentColorFilter) {
-                    ColorFilter.BLACK_WHITE -> {
-                        ColorMatrix().apply { setSaturation(0f) }
-                    }
-                    ColorFilter.SEPIA -> {
-                        ColorMatrix(floatArrayOf(
-                            0.393f, 0.769f, 0.189f, 0f, 0f,
-                            0.349f, 0.686f, 0.168f, 0f, 0f,
-                            0.272f, 0.534f, 0.131f, 0f, 0f,
-                            0f, 0f, 0f, 1f, 0f
-                        ))
-                    }
-                    ColorFilter.VINTAGE -> {
-                        ColorMatrix(floatArrayOf(
-                            0.6f, 0.3f, 0.1f, 0f, 30f,
-                            0.2f, 0.7f, 0.1f, 0f, 10f,
-                            0.2f, 0.3f, 0.5f, 0f, 20f,
-                            0f, 0f, 0f, 1f, 0f
-                        ))
-                    }
-                    ColorFilter.COOL -> {
-                        ColorMatrix(floatArrayOf(
-                            0.8f, 0.2f, 0.2f, 0f, 0f,
-                            0.1f, 0.8f, 0.1f, 0f, 0f,
-                            0.2f, 0.3f, 1.2f, 0f, 0f,
-                            0f, 0f, 0f, 1f, 0f
-                        ))
-                    }
-                    ColorFilter.WARM -> {
-                        ColorMatrix(floatArrayOf(
-                            1.2f, 0.1f, 0.1f, 0f, 0f,
-                            0.1f, 1.1f, 0.1f, 0f, 0f,
-                            0.1f, 0.1f, 0.8f, 0f, 0f,
-                            0f, 0f, 0f, 1f, 0f
-                        ))
-                    }
-                    else -> ColorMatrix()
-                }
-                
-                paint.colorFilter = ColorMatrixColorFilter(colorMatrix)
-                
-                // Vẽ lại bitmap với filter
-                val filteredBitmap = Bitmap.createBitmap(
-                    cameraBitmap.width,
-                    cameraBitmap.height,
-                    Bitmap.Config.ARGB_8888
-                )
-                val filteredCanvas = Canvas(filteredBitmap)
-                filteredCanvas.drawBitmap(cameraBitmap, 0f, 0f, paint)
-                
-                // Xóa canvas và vẽ lại bitmap đã lọc
-                canvas.drawColor(Color.TRANSPARENT, android.graphics.PorterDuff.Mode.CLEAR)
-                canvas.drawBitmap(filteredBitmap, 0f, 0f, null)
-                
-                Log.d(TAG, "Applied color filter: $currentColorFilter")
-            }
-            
-            // Vẽ các graphic từ overlay lên canvas
-            drawGraphicsOnCanvas(canvas, cameraBitmap.width, cameraBitmap.height)
-            
-            // Thêm watermark
-            addWatermark(canvas, cameraBitmap.width, cameraBitmap.height)
+            // Vẽ face filter overlay nếu có
+            drawFaceFiltersOnBitmap(canvas, cameraBitmap.width, cameraBitmap.height)
             
             Log.d(TAG, "Final image created successfully: ${resultBitmap.width}x${resultBitmap.height}")
             return resultBitmap
@@ -513,78 +434,34 @@ class FaceFilterActivity : AppCompatActivity() {
             return cameraBitmap
         }
     }
-    
-    /**
-     * Thêm watermark vào ảnh
-     */
-    private fun addWatermark(canvas: Canvas, width: Int, height: Int) {
-        try {
-            val paint = Paint().apply {
-                color = Color.WHITE
-                alpha = 100 // Độ trong suốt
-                textSize = 40f
-                isAntiAlias = true
-            }
-            
-            val watermarkText = "Filter-Inator"
-            val textWidth = paint.measureText(watermarkText)
-            
-            // Vẽ watermark ở góc dưới bên phải
-            canvas.drawText(
-                watermarkText,
-                width - textWidth - 20f,
-                height - 20f,
-                paint
-            )
-            
-            Log.d(TAG, "Added watermark to image")
-        } catch (e: Exception) {
-            Log.e(TAG, "Error adding watermark: ${e.message}", e)
-        }
-    }
-    
-    /**
-     * Vẽ các graphic từ overlay lên canvas
-     */
-    private fun drawGraphicsOnCanvas(canvas: Canvas, width: Int, height: Int) {
-        if (mGraphicOverlay == null) {
-            Log.e(TAG, "GraphicOverlay is null")
-            return
-        }
+
+    // Hàm mới để vẽ face filters lên bitmap
+    private fun drawFaceFiltersOnBitmap(canvas: Canvas, imageWidth: Int, imageHeight: Int) {
+        // Chỉ vẽ face filter nếu currentFilterType > 0 (không phải no_filter)
+        if (currentFilterType <= 0) return
         
         try {
-            // Tính toán tỉ lệ giữa bitmap và overlay
-            val overlayWidth = mGraphicOverlay!!.width.toFloat()
-            val overlayHeight = mGraphicOverlay!!.height.toFloat()
-            
-            val scaleX = width.toFloat() / overlayWidth
-            val scaleY = height.toFloat() / overlayHeight
-            
-            // Lưu trạng thái canvas
-            canvas.save()
-            
-            // Scale canvas để phù hợp với kích thước bitmap
-            canvas.scale(scaleX, scaleY)
-            
-            // Vẽ tất cả các graphic từ overlay
-            synchronized(mGraphicOverlay!!.mLock) {
-                val graphics = mGraphicOverlay!!.getGraphics()
+            // Lấy thông tin face từ overlay hiện tại
+            mGraphicOverlay?.let { overlay ->
+                val graphics = overlay.getGraphics()
+                
+                // Tính toán scale factors để map từ overlay coordinates sang image coordinates
+                val scaleX = imageWidth.toFloat() / overlay.width.toFloat()
+                val scaleY = imageHeight.toFloat() / overlay.height.toFloat()
+                
+                // Vẽ từng graphic
                 for (graphic in graphics) {
-                    graphic.draw(canvas)
+                    if (graphic is FaceGraphic) {
+                        // Tạo canvas tạm thời với scale factor
+                        canvas.save()
+                        canvas.scale(scaleX, scaleY)
+                        graphic.draw(canvas)
+                        canvas.restore()
+                    }
                 }
-                
-                // Thêm TextGraphic nếu cần
-                val textGraphic = TextGraphic(mGraphicOverlay)
-                textGraphic.updateText() // Cập nhật thời gian hiện tại
-                textGraphic.draw(canvas) // Vẽ lên canvas
-                
-                Log.d(TAG, "Drew ${graphics.size} graphics on canvas")
             }
-            
-            // Khôi phục trạng thái canvas
-            canvas.restore()
         } catch (e: Exception) {
-            Log.e(TAG, "Error drawing graphics on canvas: ${e.message}", e)
+            Log.e(TAG, "Error drawing face filters on bitmap: ${e.message}", e)
         }
     }
 
@@ -627,7 +504,6 @@ class FaceFilterActivity : AppCompatActivity() {
                         capturedImagePaths.size - 1
                     )
                 }
-                Log.d(TAG, "Navigating to PreviewActivity with paths: ${capturedImagePaths.size} images")
                 startActivity(intent)
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to navigate to preview", e)
@@ -663,19 +539,22 @@ class FaceFilterActivity : AppCompatActivity() {
             false
         )
 
-        // Cắt ảnh theo tỉ lệ đã chọn nếu cần
+        // Cắt ảnh theo tỉ lệ đã chọn để khớp với preview
         val finalBitmap = when (currentAspectRatio) {
-            AspectRatio.RATIO_4_3 -> cropToAspectRatio(rotatedBitmap, 4f / 3f)
-            AspectRatio.RATIO_1_1 -> cropToAspectRatio(rotatedBitmap, 1f)
-            AspectRatio.FULL -> rotatedBitmap // Giữ nguyên nếu là full
+            AspectRatio.RATIO_1_1 -> cropToAspectRatioFromCenter(rotatedBitmap, 1f)
+            AspectRatio.FULL -> {
+                // Cho FULL, cắt theo tỉ lệ của preview để đảm bảo nhất quán
+                val previewRatio = getPreviewAspectRatio()
+                cropToAspectRatioFromCenter(rotatedBitmap, previewRatio)
+            }
         }
 
-        // Giới hạn kích thước ảnh nếu cần
-        return resizeBitmap(finalBitmap, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT)
+        // Giới hạn kích thước ảnh nếu cần nhưng giữ nguyên tỉ lệ
+        return resizeBitmapKeepRatio(finalBitmap, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT)
     }
 
-    // Hàm mới để cắt ảnh theo tỉ lệ
-    private fun cropToAspectRatio(bitmap: Bitmap, targetRatio: Float): Bitmap {
+    // Hàm mới để cắt ảnh từ center theo tỉ lệ chính xác
+    private fun cropToAspectRatioFromCenter(bitmap: Bitmap, targetRatio: Float): Bitmap {
         val width = bitmap.width
         val height = bitmap.height
         val currentRatio = width.toFloat() / height.toFloat()
@@ -684,36 +563,48 @@ class FaceFilterActivity : AppCompatActivity() {
             // Tỉ lệ hiện tại đã gần đúng, không cần cắt
             bitmap
         } else if (currentRatio > targetRatio) {
-            // Ảnh quá rộng, cần cắt chiều rộng
+            // Ảnh quá rộng, cần cắt chiều rộng từ center
             val newWidth = (height * targetRatio).toInt()
             val x = (width - newWidth) / 2
             Bitmap.createBitmap(bitmap, x, 0, newWidth, height)
         } else {
-            // Ảnh quá cao, cần cắt chiều cao
+            // Ảnh quá cao, cần cắt chiều cao từ center
             val newHeight = (width / targetRatio).toInt()
             val y = (height - newHeight) / 2
             Bitmap.createBitmap(bitmap, 0, y, width, newHeight)
         }
     }
 
-    private fun resizeBitmap(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
+    // Hàm mới để resize bitmap nhưng giữ nguyên tỉ lệ
+    private fun resizeBitmapKeepRatio(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
         if (bitmap.width <= maxWidth && bitmap.height <= maxHeight) {
-            return bitmap // No resizing needed if it's already within bounds
+            return bitmap
         }
 
-        val width = bitmap.width
-        val height = bitmap.height
-        val ratioBitmap = width.toFloat() / height.toFloat()
+        val ratio = bitmap.width.toFloat() / bitmap.height.toFloat()
 
         var finalWidth = maxWidth
-        var finalHeight = (finalWidth / ratioBitmap).toInt()
+        var finalHeight = (finalWidth / ratio).toInt()
 
         if (finalHeight > maxHeight) {
             finalHeight = maxHeight
-            finalWidth = (finalHeight * ratioBitmap).toInt()
+            finalWidth = (finalHeight * ratio).toInt()
         }
 
         return Bitmap.createScaledBitmap(bitmap, finalWidth, finalHeight, true)
+    }
+
+    // Hàm mới để lấy aspect ratio của preview
+    private fun getPreviewAspectRatio(): Float {
+        return mPreview?.let { preview ->
+            val previewWidth = preview.width
+            val previewHeight = preview.height
+            if (previewHeight > 0) {
+                previewWidth.toFloat() / previewHeight.toFloat()
+            } else {
+                getScreenAspectRatio()
+            }
+        } ?: getScreenAspectRatio()
     }
 
     private fun saveImageToCache(bitmap: Bitmap): File {
@@ -829,10 +720,6 @@ class FaceFilterActivity : AppCompatActivity() {
             .setView(dialogView)
             .create()
 
-        dialogView.findViewById<TextView>(R.id.aspectRatio43).setOnClickListener {
-            setAspectRatio(AspectRatio.RATIO_4_3)
-            dialog.dismiss()
-        }
         dialogView.findViewById<TextView>(R.id.aspectRatio11).setOnClickListener {
             setAspectRatio(AspectRatio.RATIO_1_1)
             dialog.dismiss()
@@ -853,9 +740,15 @@ class FaceFilterActivity : AppCompatActivity() {
         currentAspectRatio = aspectRatio
         Log.d(TAG, "Setting aspect ratio to: ${aspectRatio.ratio}")
 
-        mPreview?.setAspectRatio(if (aspectRatio == AspectRatio.FULL) -1f else aspectRatio.ratio)
+        // Đặt aspect ratio cho preview
+        val previewRatio = when (aspectRatio) {
+            AspectRatio.FULL -> -1f // Sử dụng full screen
+            else -> aspectRatio.ratio
+        }
+        
+        mPreview?.setAspectRatio(previewRatio)
 
-        // Restart camera with new settings
+        // Restart camera với cài đặt mới
         mPreview?.stop()
         mCameraSource?.release()
         mCameraSource = null
@@ -1075,33 +968,6 @@ class FaceFilterActivity : AppCompatActivity() {
         zoomToggleButton?.setColorFilter(tintColor)
     }
 
-    private fun showColorFilterDialog() {
-        val colorFilters = arrayOf("Normal", "Black & White", "Sepia", "Vintage", "Cool", "Warm")
-        
-        Log.d(TAG, "Showing color filter dialog")
-        
-        AlertDialog.Builder(this)
-            .setTitle("Color Filter")
-            .setItems(colorFilters) { _, which ->
-                currentColorFilter = ColorFilter.values()[which]
-                Log.d(TAG, "Selected color filter: $currentColorFilter")
-                updateColorFilterButton()
-                applyColorFilter()
-            }
-            .show()
-    }
-
-    private fun updateColorFilterButton() {
-        val tintColor = if (currentColorFilter != ColorFilter.NORMAL) Color.YELLOW else Color.WHITE
-        colorFilterButton?.setColorFilter(tintColor)
-        Log.d(TAG, "Updated color filter button, tint: ${if (currentColorFilter != ColorFilter.NORMAL) "YELLOW" else "WHITE"}")
-    }
-
-    private fun applyColorFilter() {
-        Log.d(TAG, "Applying color filter: $currentColorFilter")
-        mPreview?.setColorFilter(currentColorFilter.toString())
-        Log.d(TAG, "Color filter applied to preview")
-    }
 
     private fun setBrightness(brightness: Float) {
         mCameraSource?.let { source ->

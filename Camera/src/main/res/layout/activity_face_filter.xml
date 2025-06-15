@@ -76,25 +76,14 @@
 
         <ImageButton
             android:id="@+id/timer"
-            android:layout_width="40dp"
+            android:layout_width="21dp"
             android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:scaleType="fitCenter"
             app:srcCompat="@android:drawable/ic_menu_recent_history"
             app:tint="#ffffff" />
 
-        <View
-            android:layout_width="16dp"
-            android:layout_height="1dp" />
 
-        <ImageButton
-            android:id="@+id/color_filter_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:scaleType="fitCenter"
-            app:srcCompat="@android:drawable/ic_menu_gallery"
-            app:tint="#ffffff" />
 
     </LinearLayout>
 

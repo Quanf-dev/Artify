@@ -20,16 +20,13 @@ class CameraSourcePreview(context: Context, attrs: AttributeSet?) : ViewGroup(co
     private var surfaceAvailable = false
     private var cameraSource: CameraSource? = null
     private var overlay: GraphicOverlay? = null
-    private var aspectRatio = 1.0f
-    private var colorFilterOverlay: ColorFilterOverlay
+    private var aspectRatio = -1.0f // -1 means full screen, > 0 means specific ratio
 
     init {
         surfaceView = SurfaceView(context)
         surfaceView.holder.addCallback(SurfaceCallback())
         addView(surfaceView)
         
-        colorFilterOverlay = ColorFilterOverlay(context)
-        addView(colorFilterOverlay)
     }
 
     @Throws(IOException::class)
@@ -60,13 +57,11 @@ class CameraSourcePreview(context: Context, attrs: AttributeSet?) : ViewGroup(co
     }
 
     fun setAspectRatio(ratio: Float) {
+        Log.d(tag, "Setting aspect ratio: $ratio")
         aspectRatio = ratio
         requestLayout()
     }
 
-    fun setColorFilter(filter: Any?) {
-        colorFilterOverlay.applyFilter(filter)
-    }
 
     @Throws(IOException::class)
     private fun startIfReady() {
@@ -108,24 +103,35 @@ class CameraSourcePreview(context: Context, attrs: AttributeSet?) : ViewGroup(co
         val width = MeasureSpec.getSize(widthMeasureSpec)
         val height = MeasureSpec.getSize(heightMeasureSpec)
         
-        if (aspectRatio <= 0) {
-            setMeasuredDimension(width, height)
-        } else {
-            var previewWidth = width
-            var previewHeight = (width / aspectRatio).toInt()
+        var previewWidth = width
+        var previewHeight = height
+        
+        if (aspectRatio > 0) {
+            // Tính toán kích thước theo aspect ratio cụ thể
+            val targetRatio = aspectRatio
+            val currentRatio = width.toFloat() / height.toFloat()
             
-            if (previewHeight > height) {
-                previewHeight = height
-                previewWidth = (height * aspectRatio).toInt()
+            if (currentRatio > targetRatio) {
+                // Screen is wider than target ratio, adjust width
+                previewWidth = (height * targetRatio).toInt()
+            } else {
+                // Screen is taller than target ratio, adjust height  
+                previewHeight = (width / targetRatio).toInt()
             }
             
-            setMeasuredDimension(previewWidth, previewHeight)
+            Log.d(tag, "Aspect ratio: $targetRatio, Preview size: ${previewWidth}x${previewHeight}")
+        } else {
+            // Full screen mode
+            Log.d(tag, "Full screen mode: ${previewWidth}x${previewHeight}")
         }
         
+        setMeasuredDimension(previewWidth, previewHeight)
+        
+        // Measure all child views
         for (i in 0 until childCount) {
             getChildAt(i).measure(
-                MeasureSpec.makeMeasureSpec(measuredWidth, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(measuredHeight, MeasureSpec.EXACTLY)
+                MeasureSpec.makeMeasureSpec(previewWidth, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(previewHeight, MeasureSpec.EXACTLY)
             )
         }
     }
@@ -134,11 +140,18 @@ class CameraSourcePreview(context: Context, attrs: AttributeSet?) : ViewGroup(co
         val width = right - left
         val height = bottom - top
         
+        // Center the preview in the available space
+        val parentWidth = (parent as? View)?.width ?: width
+        val parentHeight = (parent as? View)?.height ?: height
+        
+        val offsetX = (parentWidth - width) / 2
+        val offsetY = (parentHeight - height) / 2
+        
+        Log.d(tag, "Layout: ${width}x${height}, offset: (${offsetX}, ${offsetY})")
+        
         for (i in 0 until childCount) {
             val child = getChildAt(i)
-            val offsetX = (width - child.measuredWidth) / 2
-            val offsetY = (height - child.measuredHeight) / 2
-            child.layout(offsetX, offsetY, offsetX + child.measuredWidth, offsetY + child.measuredHeight)
+            child.layout(0, 0, width, height)
         }
         
         try {
@@ -168,43 +181,6 @@ class CameraSourcePreview(context: Context, attrs: AttributeSet?) : ViewGroup(co
     private val isPortraitMode: Boolean
         get() = context.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
-    private inner class ColorFilterOverlay(context: Context) : View(context) {
-        init {
-            visibility = GONE
-        }
-        
-        fun applyFilter(filter: Any?) {
-            val filterStr = filter?.toString() ?: "NORMAL"
-            
-            when (filterStr) {
-                "BLACK_WHITE" -> {
-                    setBackgroundColor(Color.argb(102, 0, 0, 0))
-                    visibility = VISIBLE
-                }
-                "SEPIA" -> {
-                    setBackgroundColor(Color.argb(102, 210, 105, 30))
-                    visibility = VISIBLE
-                }
-                "VINTAGE" -> {
-                    setBackgroundColor(Color.argb(102, 218, 165, 32))
-                    visibility = VISIBLE
-                }
-                "COOL" -> {
-                    setBackgroundColor(Color.argb(102, 65, 105, 225))
-                    visibility = VISIBLE
-                }
-                "WARM" -> {
-                    setBackgroundColor(Color.argb(102, 255, 99, 71))
-                    visibility = VISIBLE
-                }
-                else -> {
-                    setBackgroundColor(Color.TRANSPARENT)
-                    visibility = GONE
-                }
-            }
-            
-            bringToFront()
-        }
-    }
+
 }
 
