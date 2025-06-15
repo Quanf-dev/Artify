@@ -49,7 +49,9 @@ class FilterActivity : BaseEditActivity<ActivityFilterBinding>() {
         val toolbarView = findViewById<android.widget.LinearLayout>(R.id.tbMain)
         toolbarBinding = ItemToolbarEditMainBinding.bind(toolbarView)
 
-        
+        toolbarBinding.btnClose.setOnClickListener{
+            finish()
+        }
         // Ẩn các thành phần UI để chuẩn bị cho animation
 
         // Nhận ảnh đầu vào đồng bộ

@@ -161,7 +161,42 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override fun getCurrentUser(): User? {
-        return firebaseAuth.currentUser?.toUser()
+        val firebaseUser = firebaseAuth.currentUser ?: return null
+        // Note: This method is not suspend, so we can't fetch username from Firestore here
+        // We need to use the synchronous approach and return basic user info
+        return firebaseUser.toUser()
+    }
+
+    // Helper method to get user with username from Firestore (should be called from a coroutine)
+    suspend fun getCurrentUserWithUsername(): User? {
+        val firebaseUser = firebaseAuth.currentUser ?: return null
+        return try {
+            val userSnapshot = firestore.collection(USERS_COLLECTION).document(firebaseUser.uid).get().await()
+            if (userSnapshot.exists()) {
+                val username = userSnapshot.getString(USERNAME_FIELD)
+                // Get photoUrl from Firestore if available, otherwise use Firebase Auth photoUrl
+                val photoUrl = userSnapshot.getString("photoUrl") ?: firebaseUser.photoUrl?.toString()
+                
+                android.util.Log.d("AuthRepository", "Firestore photoUrl: ${userSnapshot.getString("photoUrl")}")
+                android.util.Log.d("AuthRepository", "Firebase Auth photoUrl: ${firebaseUser.photoUrl?.toString()}")
+                android.util.Log.d("AuthRepository", "Final photoUrl: $photoUrl")
+                
+                User(
+                    uid = firebaseUser.uid,
+                    email = firebaseUser.email,
+                    displayName = firebaseUser.displayName,
+                    phoneNumber = firebaseUser.phoneNumber,
+                    photoUrl = photoUrl,
+                    isEmailVerified = firebaseUser.isEmailVerified,
+                    username = username
+                )
+            } else {
+                firebaseUser.toUser()
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("AuthRepository", "Error fetching user data: ${e.message}")
+            firebaseUser.toUser()
+        }
     }
 
     override suspend fun reloadCurrentUser(): FirebaseAuthResult<Unit> {
@@ -292,7 +327,22 @@ class AuthRepositoryImpl @Inject constructor(
 
             if (userSnapshot.exists()) {
                 val username = userSnapshot.getString(USERNAME_FIELD)
-                val user = firebaseUser.toUser(username)
+                // Get photoUrl from Firestore if available, otherwise use Firebase Auth photoUrl
+                val photoUrl = userSnapshot.getString("photoUrl") ?: firebaseUser.photoUrl?.toString()
+                
+                android.util.Log.d("AuthRepository", "fetchUserWithUsername - Firestore photoUrl: ${userSnapshot.getString("photoUrl")}")
+                android.util.Log.d("AuthRepository", "fetchUserWithUsername - Firebase Auth photoUrl: ${firebaseUser.photoUrl?.toString()}")
+                android.util.Log.d("AuthRepository", "fetchUserWithUsername - Final photoUrl: $photoUrl")
+                
+                val user = User(
+                    uid = firebaseUser.uid,
+                    email = firebaseUser.email,
+                    displayName = firebaseUser.displayName,
+                    phoneNumber = firebaseUser.phoneNumber,
+                    photoUrl = photoUrl,
+                    isEmailVerified = firebaseUser.isEmailVerified,
+                    username = username
+                )
                 FirebaseAuthResult.Success(user)
             } else {
                 // User document doesn't exist in Firestore, create it without username yet
@@ -301,6 +351,7 @@ class AuthRepositoryImpl @Inject constructor(
                 FirebaseAuthResult.Success(newUser) // Return user without username, will prompt setup
             }
         } catch (e: Exception) {
+            android.util.Log.e("AuthRepository", "Error in fetchUserWithUsername: ${e.message}")
             FirebaseAuthResult.Error(e)
         }
     }

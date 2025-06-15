@@ -6,10 +6,11 @@
     <string name="lorem_ipsum">Lorem ipsum dolor sit amet consectetur odigisang elit, sed do eiusmod tempor Lorem ipsum dolor sit amet consectetur</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="next">Next</string>
+    <string name="get_started">Get Started</string>
     <string name="facebook_app_id">995758542751417</string>
     <string name="facebook_client_token">0461d43cde94ee7746cfda5e6013e30e</string>
     <string name="fb_login_protocol_scheme">fb995758542751417</string>
-    <string name="welcome_back">Welcome Back !</string>
+    <string name="welcome_back">Welcome Back!</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="forgot_password">Forgot Password?</string>
@@ -53,6 +54,11 @@
     <string name="session_expired">Session Expired</string>
     <string name="error_occurred">An Error Occurred</string>
     <string name="send_an_email_to_reset_the_password">Send an email to reset the password.</string>
+    <string name="email_not_verified_yet">Your email is not verified yet. Please verify your email to continue.</string>
+    <string name="verification_status_update_failed">Could not update verification status from server. If you have already verified your email, you can continue.</string>
+    <string name="continue_anyway">Continue Anyway</string>
+    <string name="continue_without_verification">Continue Without Verification</string>
+    <string name="verification_continue_confirmation">If you have already clicked the verification link in your email but the app cannot detect it, you can continue. Do you confirm that you have verified your email?</string>
 
     <!-- Strings for ForgotPasswordActivity -->
     <string name="forgot_password_art_desc">Forgot password illustration</string>
@@ -92,6 +98,8 @@
     <string name="select_your_avatar">Select Your Avatar</string>
     <string name="avatar_image_description">Avatar image</string>
     <string name="avatar_not_selected_error">Please select an avatar</string>
+    <string name="avatar_selection_required">* Please select an avatar to continue</string>
+    <string name="invalid_avatar_error">Invalid avatar selection</string>
     <string name="user_details_save_error">Failed to save user details</string>
     <string name="pro">PRO</string>
     <string name="edit_photo">Edit Photo</string>
@@ -180,4 +188,11 @@
     <string name="selected_language">Selected language</string>
     <string name="ai_logo_maker">AI Logo\nMaker</string>
     <string name="ai_action_figure">AI Action Figure</string>
+
+    <string name="please_check_your_internet_connection_and_try_again">Please check your internet connection and try again</string>
+    <string name="still_no_internet_connection">Still no internet connection</string>
+    <string name="exit">Exit</string>
+    <string name="retry">Retry</string>
+    <string name="no_internet_connection">No Internet Connection</string>
+
 </resources>

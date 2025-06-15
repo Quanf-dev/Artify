@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import com.example.firebaseauth.model.User
 import com.example.firebaseauth.repository.AuthRepository
+import com.example.firebaseauth.repository.AuthRepositoryImpl
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
@@ -152,6 +153,18 @@ class FirebaseAuthManager @Inject constructor(
 
     // Common
     fun getCurrentUser(): User? {
+        return authRepository.getCurrentUser()
+    }
+
+    // Get current user with username from Firestore
+    suspend fun getCurrentUserWithUsername(): User? {
+        val repo = authRepository as? AuthRepositoryImpl
+        if (repo != null) {
+            return repo.getCurrentUserWithUsername()
+        }
+        
+        // Fallback to basic getCurrentUser if not AuthRepositoryImpl
+        android.util.Log.w("FirebaseAuthManager", "AuthRepository is not AuthRepositoryImpl, using basic getCurrentUser")
         return authRepository.getCurrentUser()
     }
 

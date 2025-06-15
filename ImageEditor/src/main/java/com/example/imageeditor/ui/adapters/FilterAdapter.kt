@@ -9,9 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.imageeditor.R
 import com.example.imageeditor.utils.FilterPreview
 
-/**
- * Adapter for displaying filter previews in a RecyclerView
- */
+
 class FilterAdapter(
     private val filters: List<FilterPreview>,
     private val onFilterSelected: (FilterPreview) -> Unit

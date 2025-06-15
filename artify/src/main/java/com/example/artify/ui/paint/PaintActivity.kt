@@ -73,6 +73,10 @@ class   PaintActivity : BaseEditActivity<ActivityPaintBinding>() {
         binding.paintEditorView.setTool(FreestyleTool())
         updateToolSelection(bottomBinding.llFreeStyle)
 
+        toolbarBinding.btnClose.setOnClickListener{
+            finish()
+        }
+
         // Ưu tiên nhận image_path từ Intent
         getInputBitmap(
             onBitmapReady = { bitmap ->

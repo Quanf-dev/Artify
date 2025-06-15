@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.firebaseauth.FirebaseAuthManager
 import com.example.firebaseauth.FirebaseAuthResult
+import com.example.firebaseauth.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -14,7 +15,7 @@ import javax.inject.Inject
 sealed class PhoneLoginState {
     object Idle : PhoneLoginState()
     object Loading : PhoneLoginState()
-    data class Success(val user: Any) : PhoneLoginState()
+    data class Success(val user: User) : PhoneLoginState()
     data class Error(val message: String) : PhoneLoginState()
     object PhoneVerificationCodeSent : PhoneLoginState()
 }
@@ -63,7 +64,13 @@ class PhoneViewModel @Inject constructor(
                 val result = firebaseAuthManager.verifyPhoneNumberWithCode(currentVerificationId, code)
                 when (result) {
                     is FirebaseAuthResult.Success -> {
-                        _phoneLoginState.value = PhoneLoginState.Success(result.data)
+                        // Fetch user with username after successful phone verification
+                        val currentUser = firebaseAuthManager.getCurrentUserWithUsername()
+                        if (currentUser != null) {
+                            _phoneLoginState.value = PhoneLoginState.Success(currentUser)
+                        } else {
+                            _phoneLoginState.value = PhoneLoginState.Success(result.data)
+                        }
                     }
                     is FirebaseAuthResult.Error -> {
                         _phoneLoginState.value = PhoneLoginState.Error(result.exception.message ?: "Xác thực mã thất bại")

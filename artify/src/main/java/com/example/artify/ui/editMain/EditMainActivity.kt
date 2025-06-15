@@ -109,6 +109,10 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
             }
         )
 
+        toolbarBinding.btnClose.setOnClickListener{
+            finish()
+        }
+
         with(toolbarBinding) {
             ivRedo.visibility = View.GONE
         }

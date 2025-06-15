@@ -4,11 +4,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.artify.ui.home.HomeActivity
+import com.example.artify.ui.setting.SettingActivity
+import com.example.artify.utils.EdgeToEdgeUtils
 import com.example.artify.utils.navigate
 import com.example.common.base.BaseActivity
 import com.example.common.R
@@ -39,7 +42,7 @@ class PostsActivity : BaseActivity<ActivityPostsBinding>() {
         setupRecyclerView()
         setupListeners()
         observeViewModel()
-        setupBottomNavigation()
+        setupFixedBottomNavigation()
     }
 
     private fun setupRecyclerView() {
@@ -64,33 +67,38 @@ class PostsActivity : BaseActivity<ActivityPostsBinding>() {
         }
     }
 
-    private fun setupBottomNavigation() {
+    private fun setupFixedBottomNavigation() {
+        EdgeToEdgeUtils.setupCoordinatorLayoutWithBottomNav(
+            activity = this,
+            coordinatorLayout = binding.layout as CoordinatorLayout,
+            bottomNavigationView = binding.bottomNavigation
+        )
+        
         // Apply animation to bottom navigation appearance
         MainBottomNavigationHelper.animateBottomNavigation(binding.bottomNavigation)
+
         
         binding.bottomNavigation.apply {
             setOnItemSelectedListener { item ->
                 when (item.itemId) {
-                    binding.bottomNavigation.menu.getItem(0).itemId -> {
+                    com.example.artify.R.id.menu_home -> {
                         navigate(HomeActivity::class.java)
                         true
                     }
-
-                    binding.bottomNavigation.menu.getItem(1).itemId -> {
+                    com.example.artify.R.id.menu_social -> {
                         // Social item (current screen)
                         true
                     }
-                    binding.bottomNavigation.menu.getItem(2).itemId -> {
-                        // Settings item (for future)
-                        showMessage("Settings will be available soon")
-                        true
+                    com.example.artify.R.id.menu_settings -> {
+                        navigate(SettingActivity::class.java)
+                        false
                     }
                     else -> false
                 } 
             }
             
             // Set the Social item as selected
-            selectedItemId = binding.bottomNavigation.menu.getItem(1).itemId
+            selectedItemId = com.example.artify.R.id.menu_social
         }
     }
 
@@ -127,9 +135,6 @@ class PostsActivity : BaseActivity<ActivityPostsBinding>() {
         }
     }
 
-    private fun showMessage(message: String) {
-        showSuccessMessage(message)
-    }
 
     override fun onResume() {
         super.onResume()

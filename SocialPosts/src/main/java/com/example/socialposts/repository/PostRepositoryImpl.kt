@@ -1,6 +1,8 @@
 package com.example.socialposts.repository
 
 import android.net.Uri
+import android.util.Log
+import com.example.firebaseauth.FirebaseAuthManager
 import com.example.firebaseauth.model.User
 import com.example.firebaseauth.repository.AuthRepository
 import com.example.socialposts.model.Post
@@ -17,7 +19,8 @@ import javax.inject.Inject
 class PostRepositoryImpl @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val storage: FirebaseStorage,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val authManager: FirebaseAuthManager
 ) : PostRepository {
 
     private val postsCollection = firestore.collection("posts")
@@ -42,7 +45,10 @@ class PostRepositoryImpl @Inject constructor(
     }
 
     override suspend fun createPost(imageUri: Uri, caption: String): Result<Post> = runCatching {
-        val currentUser = authRepository.getCurrentUser() ?: throw IllegalStateException("User not authenticated")
+        // Use getCurrentUserWithUsername to get complete user data including username and photoUrl
+        val currentUser = authManager.getCurrentUserWithUsername() ?: throw IllegalStateException("User not authenticated")
+        
+        Log.d("PostRepository", "Creating post for user: ${currentUser.uid}, username: ${currentUser.username}, photoUrl: ${currentUser.photoUrl}")
         
         // Upload image to Firebase Storage
         val randomId = UUID.randomUUID().toString()
@@ -50,15 +56,14 @@ class PostRepositoryImpl @Inject constructor(
         imageRef.putFile(imageUri).await()
         val imageUrl = imageRef.downloadUrl.await().toString()
 
-        // Create post in Firestore
+        // Create post in Firestore with current user's information
         val post = Post(
-            avatarUrl = "https://ia903406.us.archive.org/5/items/49_20210404/15.png",
+            avatarUrl = currentUser.photoUrl ?: "https://ia903406.us.archive.org/5/items/49_20210404/15.png",
             caption = caption,
             imageUrl = imageUrl,
-            // Sample user IDs as per requirement
-            likedBy = listOf("bD09r0l0jCcc6KePd3tM1yBBodH3", "NOFkgbhwjGZK6zQc0XwfmW4zTFl1", "RoQjYCYszXRHoS0BOT5a22m57O02"),
-            uid = "bD09r0l0jCcc6KePd3tM1yBBodH3", // Using the required UID
-            username = "test123" // Using the required username
+            likedBy = emptyList(), // Start with empty likes
+            uid = currentUser.uid, // Use current user's UID
+            username = currentUser.username ?: currentUser.displayName ?: "Anonymous" // Use current user's username or displayName
         )
 
         val documentRef = postsCollection.add(post).await()

@@ -6,10 +6,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:paddingBottom="30dp"
+        android:paddingBottom="100dp"
         android:paddingTop="20dp">
 
         <com.example.common.gradiant4.BottomRoundedGradientView
@@ -412,6 +412,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/lnLogout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="28dp"
@@ -428,13 +429,13 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:textSize="@dimen/_12ssp"
                     android:layout_marginStart="10dp"
                     android:layout_weight="1"
                     android:text="@string/log_out"
-                    android:textColor="#FF0000" />
+                    android:textColor="#FF0000"
+                    android:textSize="@dimen/_12ssp" />
 
-                    />
+                />
 
             </LinearLayout>
 

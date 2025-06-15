@@ -1,5 +1,6 @@
 package com.example.socialposts.di
 
+import com.example.firebaseauth.FirebaseAuthManager
 import com.example.socialposts.repository.PostRepository
 import com.example.socialposts.repository.PostRepositoryImpl
 import com.google.firebase.storage.FirebaseStorage

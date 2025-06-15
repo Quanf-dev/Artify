@@ -1,8 +1,10 @@
 package com.example.socialposts.viewmodel
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.firebaseauth.FirebaseAuthManager
 import com.example.firebaseauth.repository.AuthRepository
 import com.example.socialposts.model.Post
 import com.example.socialposts.repository.PostRepository
@@ -17,7 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class PostViewModel @Inject constructor(
     private val postRepository: PostRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val authManager: FirebaseAuthManager
 ) : ViewModel() {
 
     private val _posts = MutableStateFlow<List<Post>>(emptyList())
@@ -61,6 +64,15 @@ class PostViewModel @Inject constructor(
             _postCreationSuccess.value = false
             
             try {
+                val currentUser = authManager.getCurrentUserWithUsername()
+                if (currentUser == null) {
+                    _errorMessage.value = "User not authenticated"
+                    _isLoading.value = false
+                    return@launch
+                }
+                
+                Log.d("PostViewModel", "Creating post with user: ${currentUser.uid}, username: ${currentUser.username}, photoUrl: ${currentUser.photoUrl}")
+                
                 val result = postRepository.createPost(imageUri, caption)
                 result.onSuccess {
                     _postCreationSuccess.value = true
@@ -77,15 +89,15 @@ class PostViewModel @Inject constructor(
 
     fun toggleLikePost(postId: String) {
         viewModelScope.launch {
-            val currentUser = authRepository.getCurrentUser()
-            if (currentUser != null) {
-                try {
+            try {
+                val currentUser = authManager.getCurrentUserWithUsername()
+                if (currentUser != null) {
                     postRepository.toggleLikePost(postId, currentUser.uid)
-                } catch (e: Exception) {
-                    _errorMessage.value = "Failed to toggle like: ${e.message}"
+                } else {
+                    _errorMessage.value = "You need to be logged in to like posts"
                 }
-            } else {
-                _errorMessage.value = "You need to be logged in to like posts"
+            } catch (e: Exception) {
+                _errorMessage.value = "Failed to toggle like: ${e.message}"
             }
         }
     }

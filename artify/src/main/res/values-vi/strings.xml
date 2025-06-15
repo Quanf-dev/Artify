@@ -174,4 +174,9 @@
     <string name="selected_language">Ngôn ngữ đã chọn</string>
     <string name="ai_logo_maker">Trình tạo Logo AI</string>
     <string name="ai_action_figure">Nhân vật hành động AI</string>
+    <string name="please_check_your_internet_connection_and_try_again">Please check your internet connection and try again</string>
+    <string name="still_no_internet_connection">Still no internet connection</string>
+    <string name="exit">Exit</string>
+    <string name="retry">Retry</string>
+
 </resources> 

@@ -174,4 +174,10 @@
     <string name="selected_language">Idioma seleccionado</string>
     <string name="ai_logo_maker">Creador de Logos con IA</string>
     <string name="ai_action_figure">Figura de Acción con IA</string>
+
+    <string name="please_check_your_internet_connection_and_try_again">Por favor, revisa tu conexión a internet e inténtalo de nuevo</string>
+    <string name="still_no_internet_connection">Aún sin conexión a internet</string>
+    <string name="exit">Salir</string>
+    <string name="retry">Retry</string>
+
 </resources>

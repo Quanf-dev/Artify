@@ -30,7 +30,10 @@ class ImageTuneActivity : BaseEditActivity<ActivityImageTuneBinding>() {
         
         // Ẩn bottom menu để chuẩn bị cho animation
         binding.bottomTuneMenu.root.visibility = View.INVISIBLE
-        
+
+        toolbarBinding.btnClose.setOnClickListener{
+            finish()
+        }
         // Nhận ảnh đầu vào đồng bộ
         getInputBitmap(
             onBitmapReady = { bitmap ->

@@ -7,5 +7,5 @@ data class User(
     val phoneNumber: String?,
     val photoUrl: String?,
     val isEmailVerified: Boolean,
-    val username: String? = null
+    val username: String?
 )

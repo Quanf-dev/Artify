@@ -37,35 +37,6 @@ fun View.slideUp() {
     this.startAnimation(animation)
 }
 
-fun View.slideDown() {
-    val animation = AnimationUtils.loadAnimation(this.context, R.anim.slide_down)
-    animation.setAnimationListener(object : android.view.animation.Animation.AnimationListener {
-        override fun onAnimationStart(animation: android.view.animation.Animation?) {}
-        override fun onAnimationEnd(animation: android.view.animation.Animation?) {
-            this@slideDown.visibility = View.GONE
-        }
-        override fun onAnimationRepeat(animation: android.view.animation.Animation?) {}
-    })
-    this.startAnimation(animation)
-}
-
-fun View.fadeIn() {
-    this.visibility = View.VISIBLE
-    val animation = AnimationUtils.loadAnimation(this.context, R.anim.fade_in)
-    this.startAnimation(animation)
-}
-
-fun View.fadeOut() {
-    val animation = AnimationUtils.loadAnimation(this.context, R.anim.fade_out)
-    animation.setAnimationListener(object : android.view.animation.Animation.AnimationListener {
-        override fun onAnimationStart(animation: android.view.animation.Animation?) {}
-        override fun onAnimationEnd(animation: android.view.animation.Animation?) {
-            this@fadeOut.visibility = View.GONE
-        }
-        override fun onAnimationRepeat(animation: android.view.animation.Animation?) {}
-    })
-    this.startAnimation(animation)
-}
 
 fun View.scaleIn() {
     this.visibility = View.VISIBLE
@@ -73,17 +44,6 @@ fun View.scaleIn() {
     this.startAnimation(animation)
 }
 
-fun View.scaleOut() {
-    val animation = AnimationUtils.loadAnimation(this.context, R.anim.scale_out)
-    animation.setAnimationListener(object : android.view.animation.Animation.AnimationListener {
-        override fun onAnimationStart(animation: android.view.animation.Animation?) {}
-        override fun onAnimationEnd(animation: android.view.animation.Animation?) {
-            this@scaleOut.visibility = View.GONE
-        }
-        override fun onAnimationRepeat(animation: android.view.animation.Animation?) {}
-    })
-    this.startAnimation(animation)
-}
 
 fun View.animateImageIn() {
     // Reset trạng thái ban đầu
@@ -108,6 +68,7 @@ fun View.animateImageIn() {
 abstract class BaseEditActivity<VB : ViewBinding> : AppCompatActivity() {
 
     protected lateinit var baseBinding: ActivityBaseEditBinding
+
     protected lateinit var binding: VB
     protected var currentImageBitmap: Bitmap? = null
 
@@ -124,6 +85,10 @@ abstract class BaseEditActivity<VB : ViewBinding> : AppCompatActivity() {
 
         binding = inflateBinding()
         baseBinding.contentContainerEdit.addView(binding.root)
+
+
+
+
     }
 
     // Phương thức để hiển thị bottom bar với animation

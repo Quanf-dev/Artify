@@ -1,9 +1,12 @@
 package com.example.artify.ui.profile
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 // import android.graphics.drawable.Drawable // No longer needed here
 import android.os.Bundle
+import android.util.Log
+import android.view.View
 // import android.view.View // No longer needed here
 import android.widget.Toast // Added import for Toast
 import androidx.activity.viewModels
@@ -17,6 +20,8 @@ import com.example.artify.R
 import com.example.artify.databinding.ActivitySetupUsernameBinding
 import com.example.common.base.BaseActivity
 import com.example.artify.ui.home.HomeActivity
+import com.example.artify.ui.splash.SplashViewModel
+import com.example.firebaseauth.model.User
 import dagger.hilt.android.AndroidEntryPoint
 // import com.example.artify.ui.profile.AvatarAdapter // No longer directly used here
 
@@ -24,8 +29,19 @@ import dagger.hilt.android.AndroidEntryPoint
 class SetupUsernameActivity : BaseActivity<ActivitySetupUsernameBinding>() {
 
     private val viewModel: SetupUsernameViewModel by viewModels()
+    private val splashViewModel: SplashViewModel by viewModels()
     private var selectedAvatarUrl: String? = null
     private var currentAvatarList: List<String> = emptyList() // To store the fetched avatar list
+
+    // Đường dẫn mặc định cho avatar
+    private val defaultAvatarUrl = "default_avatar.png"
+    
+    // SharedPreferences constants
+    private val PREFS_NAME = "ArtifyPrefs"
+    private val KEY_USER_LOGGED_IN = "user_logged_in"
+    private val KEY_USER_ID = "user_id"
+    private val KEY_USERNAME = "username"
+    private val KEY_EMAIL_VERIFIED = "email_verified"
 
     // The hardcoded list is removed from here
     // private val avatarUrls: List<String> = listOf(...)
@@ -36,7 +52,6 @@ class SetupUsernameActivity : BaseActivity<ActivitySetupUsernameBinding>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // setupDefaultAvatar() is now called after avatar list is loaded
         setupViews()
         observeViewModel()
     }
@@ -44,25 +59,36 @@ class SetupUsernameActivity : BaseActivity<ActivitySetupUsernameBinding>() {
     private fun setupDefaultAvatar(avatars: List<String>) {
         if (avatars.isEmpty()) return
 
-        // Current user's photoUrl from ViewModel is prioritized
+        // Kiểm tra nếu người dùng đã có avatar từ trước
         val userPhotoUrl: String? = viewModel.currentUser.value?.photoUrl
         
-        if (userPhotoUrl != null) {
+        if (userPhotoUrl != null && userPhotoUrl != defaultAvatarUrl && avatars.contains(userPhotoUrl)) {
+            // Nếu người dùng đã có avatar hợp lệ
             selectedAvatarUrl = userPhotoUrl
-        } else if (selectedAvatarUrl == null) { // If no selected URL yet and no user photoUrl
-            selectedAvatarUrl = avatars[0] // Default to the first avatar from the fetched list
+            updateSelectedAvatarDisplay(selectedAvatarUrl)
+        } else {
+            // Hiển thị giao diện chọn avatar
+            selectedAvatarUrl = null
+            updateSelectedAvatarDisplay(null)
+            // Hiển thị thông báo yêu cầu chọn avatar
+            binding.avatarSelectionHint?.visibility = View.VISIBLE
         }
-        // If selectedAvatarUrl is still null (e.g. empty list from server, though unlikely with current static list), use the first from list
-        updateSelectedAvatarDisplay(selectedAvatarUrl ?: avatars.getOrNull(0))
     }
 
     private fun setupViews() {
         binding.btncOK?.setOnClickListener {
             val username: String = binding.usernameEditText.text.toString().trim()
-            // Ensure a default is picked if somehow still null and list is not empty
-            if (selectedAvatarUrl == null && currentAvatarList.isNotEmpty()) { 
-                selectedAvatarUrl = currentAvatarList[0]
+            
+            // Kiểm tra xem người dùng đã chọn avatar chưa
+            if (selectedAvatarUrl == null || selectedAvatarUrl == defaultAvatarUrl) {
+                Toast.makeText(this, getString(R.string.avatar_not_selected_error), Toast.LENGTH_SHORT).show()
+                // Hiển thị giao diện chọn avatar
+                if (currentAvatarList.isNotEmpty()) {
+                    showAvatarSelectionDialog(currentAvatarList)
+                }
+                return@setOnClickListener
             }
+            
             viewModel.saveUsernameAndAvatar(username, selectedAvatarUrl)
         }
 
@@ -76,6 +102,9 @@ class SetupUsernameActivity : BaseActivity<ActivitySetupUsernameBinding>() {
         }
         binding.selectedAvatarImageView?.setOnClickListener(avatarClickListener)
         binding.tvChooseAvatar?.setOnClickListener(avatarClickListener)
+        
+        // Hiển thị thông báo yêu cầu chọn avatar
+        binding.avatarSelectionHint?.visibility = View.VISIBLE
     }
 
     private fun showAvatarSelectionDialog(avatars: List<String>) {
@@ -86,27 +115,35 @@ class SetupUsernameActivity : BaseActivity<ActivitySetupUsernameBinding>() {
         val dialog = AvatarSelectionDialogFragment.newInstance(avatars) { avatarUrl ->
             selectedAvatarUrl = avatarUrl
             updateSelectedAvatarDisplay(selectedAvatarUrl)
+            // Ẩn thông báo yêu cầu chọn avatar
+            binding.avatarSelectionHint?.visibility = View.GONE
         }
         dialog.show(supportFragmentManager, AvatarSelectionDialogFragment.TAG)
     }
 
     private fun updateSelectedAvatarDisplay(avatarUrl: String?) {
         binding.selectedAvatarImageView.let { imageView ->
-            avatarUrl?.let {
-                if (imageView != null) {
+            if (imageView != null) {
+                if (avatarUrl == null || avatarUrl == defaultAvatarUrl) {
+                    // Hiển thị placeholder cho avatar
                     Glide.with(this)
-                        .load(it)
-                        .placeholder(R.drawable.ic_launcher_background)
-                        .error(R.drawable.ic_launcher_foreground)
+                        .load(R.drawable.default_avatar)
                         .circleCrop()
                         .into(imageView)
-                }
-            } ?: run {
-                if (imageView != null) {
+                    
+                    // Hiển thị thông báo yêu cầu chọn avatar
+                    binding.avatarSelectionHint?.visibility = View.VISIBLE
+                } else {
+                    // Hiển thị avatar đã chọn
                     Glide.with(this)
-                        .load(R.drawable.ic_launcher_background)
+                        .load(avatarUrl)
+                        .placeholder(R.drawable.default_avatar)
+                        .error(R.drawable.default_avatar)
                         .circleCrop()
                         .into(imageView)
+                    
+                    // Ẩn thông báo yêu cầu chọn avatar
+                    binding.avatarSelectionHint?.visibility = View.GONE
                 }
             }
         }
@@ -119,6 +156,12 @@ class SetupUsernameActivity : BaseActivity<ActivitySetupUsernameBinding>() {
                 is SetupUsernameState.Loading -> showLoading()
                 is SetupUsernameState.Success -> {
                     hideLoading()
+                    // Save user login state
+                    splashViewModel.setUserLoggedIn(true)
+                    
+                    // Save user data to SharedPreferences
+                    viewModel.currentUser.value?.let { saveUserToPreferences(it) }
+                    
                     navigateToMain()
                 }
                 is SetupUsernameState.Error -> {
@@ -128,6 +171,12 @@ class SetupUsernameActivity : BaseActivity<ActivitySetupUsernameBinding>() {
                 }
                 is SetupUsernameState.UsernameAlreadySet -> {
                     hideLoading()
+                    // Save user login state
+                    splashViewModel.setUserLoggedIn(true)
+                    
+                    // Save user data to SharedPreferences
+                    viewModel.currentUser.value?.let { saveUserToPreferences(it) }
+                    
                     navigateToMain()
                 }
                 is SetupUsernameState.Idle -> {
@@ -139,22 +188,42 @@ class SetupUsernameActivity : BaseActivity<ActivitySetupUsernameBinding>() {
 
         viewModel.currentUser.observe(this) { user ->
             user?.username?.let { binding.usernameEditText.setText(it) }
-            // selectedAvatarUrl will be primarily set by user interaction or default from availableAvatars list
-            // If user object has photoUrl, it will be used to initialize selectedAvatarUrl via setupDefaultAvatar
-            // We need to ensure setupDefaultAvatar is called after currentAvatarList is populated.
-            if (currentAvatarList.isNotEmpty()) {
-                 // If user photoUrl exists, it takes precedence. Otherwise, selectedAvatarUrl might be from previous selection or default.
-                selectedAvatarUrl = user?.photoUrl ?: selectedAvatarUrl ?: currentAvatarList.getOrNull(0)
+            
+            // Kiểm tra nếu người dùng đã có avatar từ trước
+            val userPhotoUrl = user?.photoUrl
+            if (userPhotoUrl != null && userPhotoUrl != defaultAvatarUrl && currentAvatarList.contains(userPhotoUrl)) {
+                selectedAvatarUrl = userPhotoUrl
                 updateSelectedAvatarDisplay(selectedAvatarUrl)
             }
         }
 
         viewModel.availableAvatars.observe(this) { avatars ->
             currentAvatarList = avatars
-            // Now that we have the avatar list, setup the default avatar display
-            // This also handles the initial avatar display based on currentUser data
             setupDefaultAvatar(avatars)
         }
+    }
+    
+    private fun saveUserToPreferences(user: User) {
+        val sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        sharedPreferences.edit().apply {
+            putBoolean(KEY_USER_LOGGED_IN, true)
+            putString(KEY_USER_ID, user.uid)
+            putString(KEY_USERNAME, user.username)
+            putBoolean(KEY_EMAIL_VERIFIED, user.isEmailVerified)
+            apply()
+        }
+        
+        // Also update the SplashViewModel
+        splashViewModel.setUserLoggedIn(true)
+        
+        // Log detailed information
+        Log.d("SetupUsernameActivity", "Saved user to preferences: uid=${user.uid}, username=${user.username}, email=${user.email}, isEmailVerified=${user.isEmailVerified}")
+        
+        // Verify the data was saved correctly
+        val savedIsLoggedIn = sharedPreferences.getBoolean(KEY_USER_LOGGED_IN, false)
+        val savedUserId = sharedPreferences.getString(KEY_USER_ID, null)
+        val savedUsername = sharedPreferences.getString(KEY_USERNAME, null)
+        Log.d("SetupUsernameActivity", "Verification - isLoggedIn: $savedIsLoggedIn, userId: $savedUserId, username: $savedUsername")
     }
 
     private fun navigateToMain() {

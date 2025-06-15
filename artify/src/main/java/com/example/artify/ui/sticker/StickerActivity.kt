@@ -29,6 +29,9 @@ class StickerActivity : BaseEditActivity<ActivityStickerBinding>() {
             val editedBitmap = imageStickerView.getEditedBitmap()
             returnEditedImage(editedBitmap)
         }
+        toolbarBinding.btnClose.setOnClickListener{
+            finish()
+        }
 
         // Nhận ảnh đầu vào đồng bộ
         getInputBitmap(
