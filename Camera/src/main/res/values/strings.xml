@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Camera Controls -->
+    <string name="take_photo">Take Photo</string>
+    <string name="switch_camera">Switch Camera</string>
+    <string name="flash_mode">Flash Mode</string>
+    <string name="timer">Timer</string>
+    <string name="gallery">Gallery</string>
+    <string name="face_detection">Face Detection</string>
+    
+    <!-- Aspect Ratios -->
+    <string name="aspect_ratio_title">Choose Aspect Ratio</string>
+    <string name="aspect_ratio_1_1">1:1</string>
+    <string name="aspect_ratio_4_3">4:3</string>
+    <string name="aspect_ratio_16_9">16:9</string>
+    <string name="aspect_ratio_3_4">3:4</string>
+    <string name="aspect_ratio_full">Full</string>
+    
+    <!-- Filters -->
+    <string name="filter_none">None</string>
+    <string name="filter_sepia">Sepia</string>
+    <string name="filter_black_white">B&amp;W</string>
+    <string name="filter_cinematic">Cinema</string>
+    <string name="filter_vintage">Vintage</string>
+    <string name="filter_cold">Cold</string>
+    <string name="filter_warm">Warm</string>
+    <string name="filter_icon">Filter Icon</string>
+    
+    <!-- Face Masks -->
+    <string name="dog_ears">Dog Ears</string>
+    <string name="sunglasses">Sunglasses</string>
+    <string name="cat_face">Cat Face</string>
+    <string name="mustache">Mustache</string>
+    <string name="face_mask_preview">Face Mask Preview</string>
+    
+    <!-- Permissions -->
+    <string name="camera_permission_required">Camera permissions are required to use the camera</string>
+    <string name="camera_permissions_denied">Camera permissions were denied. Please enable them in Settings.</string>
+    
+    <!-- Photo Actions -->
+    <string name="retake">Retake</string>
+    <string name="save">Save</string>
+    <string name="edit">Edit</string>
+    
+    <!-- Timer Options -->
+    <string name="timer_title">Set Timer</string>
+    <string name="timer_off">Off</string>
+    <string name="timer_3s">3 seconds</string>
+    <string name="timer_5s">5 seconds</string>
+    <string name="timer_10s">10 seconds</string>
+    
+    <!-- Error Messages -->
+    <string name="camera_error">Camera error occurred</string>
+    <string name="photo_capture_failed">Failed to capture photo</string>
+    <string name="face_detection_error">Face detection failed</string>
+    
+    <!-- UI Elements -->
+    <string name="grid_lines">Grid Lines</string>
+    
+    <!-- Content Descriptions -->
+    <string name="zoom_in">Zoom In</string>
+    <string name="zoom_out">Zoom Out</string>
+    <string name="brightness_high">High Brightness</string>
+    <string name="brightness_low">Low Brightness</string>
+
+    <string name="ok">OK</string>
+    <string name="permission_camera_rationale">Access to the camera is needed for detection</string>
+    <string name="no_camera_permission">This application cannot run because it does not have the camera permission.  The application will now exit.</string>
+    <string name="low_storage_error">Face detector dependencies cannot be downloaded due to low device storage</string>
+</resources> 

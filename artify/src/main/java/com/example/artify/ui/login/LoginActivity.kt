@@ -1,6 +1,7 @@
 package com.example.artify.ui.login
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
@@ -12,8 +13,14 @@ import com.example.artify.R
 import com.example.artify.databinding.ActivityLoginBinding
 import com.example.common.base.BaseActivity
 import com.example.artify.ui.phone.PhoneLoginActivity
+import com.example.artify.ui.profile.SetupUsernameActivity
+import com.example.artify.ui.splash.SplashViewModel
 import com.example.artify.utils.dpToPx
+import com.example.artify.utils.navigate
 import com.example.common.gradiant4.GradientDotDrawable
+import com.example.artify.ui.posts.PostsActivity
+import com.example.artify.ui.home.HomeActivity
+import com.example.firebaseauth.model.User
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -24,6 +31,14 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
     }
 
     private val viewModel: LoginViewModel by viewModels()
+    private val splashViewModel: SplashViewModel by viewModels()
+    
+    // SharedPreferences constants
+    private val PREFS_NAME = "ArtifyPrefs"
+    private val KEY_USER_LOGGED_IN = "user_logged_in"
+    private val KEY_USER_ID = "user_id"
+    private val KEY_USERNAME = "username"
+    private val KEY_EMAIL_VERIFIED = "email_verified"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,22 +86,25 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                 }
                 is LoginState.Success -> {
                     hideLoading()
+                    // Save login state
+                    splashViewModel.setUserLoggedIn(true)
+                    
+                    // Save user data to SharedPreferences
+                    saveUserToPreferences(state.user)
+                    
                     Toast.makeText(this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show()
                     Log.d("LoginActivity", "Đăng nhập thành công: ${state.user}")
-                    // TODO: Chuyển đến màn hình chính (MainActivity)
-                    // Example: startActivity(Intent(this, MainActivity::class.java))
-                    // finishAffinity() // Close all previous activities
+                    navigate(HomeActivity::class.java)
+                    finish() // Close login activity
                 }
                 is LoginState.UsernameSetupRequired -> {
                     hideLoading()
                     Toast.makeText(this, getString(R.string.please_setup_username), Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, com.example.artify.ui.profile.SetupUsernameActivity::class.java))
-                    // Do not finish LoginActivity yet, user might come back
+                    navigate(SetupUsernameActivity::class.java)
                 }
                 is LoginState.Error -> {
                     hideLoading()
-                    Toast.makeText(this, state.message, Toast.LENGTH_SHORT).show()
-                    Log.e("LoginActivity", "Lỗi đăng nhập: ${state.message}")
+                    Toast.makeText(this, "Sai Email - Password ", Toast.LENGTH_SHORT).show()
                 }
                 is LoginState.PasswordResetEmailSent -> {
                     hideLoading()
@@ -102,6 +120,29 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                 }
             }
         }
+    }
+    
+    private fun saveUserToPreferences(user: User) {
+        val sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        sharedPreferences.edit().apply {
+            putBoolean(KEY_USER_LOGGED_IN, true)
+            putString(KEY_USER_ID, user.uid)
+            putString(KEY_USERNAME, user.username)
+            putBoolean(KEY_EMAIL_VERIFIED, user.isEmailVerified)
+            apply()
+        }
+        
+        // Also update the SplashViewModel
+        splashViewModel.setUserLoggedIn(true)
+        
+        // Log detailed information
+        Log.d("LoginActivity", "Saved user to preferences: uid=${user.uid}, username=${user.username}, email=${user.email}, isEmailVerified=${user.isEmailVerified}")
+        
+        // Verify the data was saved correctly
+        val savedIsLoggedIn = sharedPreferences.getBoolean(KEY_USER_LOGGED_IN, false)
+        val savedUserId = sharedPreferences.getString(KEY_USER_ID, null)
+        val savedUsername = sharedPreferences.getString(KEY_USERNAME, null)
+        Log.d("LoginActivity", "Verification - isLoggedIn: $savedIsLoggedIn, userId: $savedUserId, username: $savedUsername")
     }
 
     private fun validateInput(email: String, password: String): Boolean {

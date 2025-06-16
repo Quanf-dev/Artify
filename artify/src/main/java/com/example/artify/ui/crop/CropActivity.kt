@@ -2,6 +2,7 @@ package com.example.artify.ui.crop
 
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import com.example.artify.constants.Constants
@@ -68,10 +69,14 @@ class CropActivity : BaseEditActivity<ActivityCropBinding>() {
         if (requestCode == UCrop.REQUEST_CROP) {
             if (resultCode == RESULT_OK) {
                 val resultUri = UCrop.getOutput(data!!)
-                setResult(RESULT_OK, Intent().apply {
-                    putExtra(Constants.EXTRA_EDITED_IMAGE_PATH, resultUri?.path)
-                })
-                finish()
+                if (resultUri != null) {
+                    // Load bitmap từ result URI và trả về bằng returnEditedImage
+                    val croppedBitmap = BitmapFactory.decodeFile(resultUri.path)
+                    returnEditedImage(croppedBitmap)
+                } else {
+                    setResult(RESULT_CANCELED)
+                    finish()
+                }
             } else { // Bao gồm cả RESULT_CANCELED và UCrop.RESULT_ERROR
                 setResult(RESULT_CANCELED)
                 finish()

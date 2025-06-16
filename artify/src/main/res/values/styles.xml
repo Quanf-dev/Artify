@@ -62,4 +62,10 @@
         <item name="android:activityCloseExitAnimation">@anim/slide_out_right</item>
     </style>
 
+    <!-- Theme transition animation style -->
+    <style name="ThemeTransitionAnimation">
+        <item name="android:windowEnterAnimation">@anim/theme_fade_in</item>
+        <item name="android:windowExitAnimation">@anim/theme_fade_out</item>
+    </style>
+
 </resources>

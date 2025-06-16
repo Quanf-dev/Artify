@@ -38,7 +38,7 @@ import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import eightbitlab.com.blurview.RenderScriptBlur
 import java.io.InputStream
 
-class PaintActivity : BaseEditActivity<ActivityPaintBinding>() {
+class   PaintActivity : BaseEditActivity<ActivityPaintBinding>() {
     private lateinit var toolbarBinding: ItemToolbarPaintBinding
     private lateinit var bottomBinding: ItemBottomPaintBinding
     private lateinit var imagePickerLauncher: ActivityResultLauncher<Intent>
@@ -72,6 +72,10 @@ class PaintActivity : BaseEditActivity<ActivityPaintBinding>() {
         // Set default tool to Freestyle
         binding.paintEditorView.setTool(FreestyleTool())
         updateToolSelection(bottomBinding.llFreeStyle)
+
+        toolbarBinding.btnClose.setOnClickListener{
+            finish()
+        }
 
         // Ưu tiên nhận image_path từ Intent
         getInputBitmap(
@@ -368,5 +372,12 @@ class PaintActivity : BaseEditActivity<ActivityPaintBinding>() {
         paintSettingsDialog?.dismiss()
         paintSettingsDialog = null
         dialogBinding = null
+    }
+
+    override fun onBackPressed() {
+        val editedBitmap = binding.paintEditorView.getBitmap()
+        returnEditedImage(editedBitmap)
+        super.onBackPressed()
+
     }
 }

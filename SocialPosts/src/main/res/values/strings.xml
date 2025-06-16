@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="artify_social">Artify Social</string>
+    <string name="create_post">Create Post</string>
+    <string name="no_posts_yet_ncreate_your_first_post">No posts yet.\nCreate your first post!</string>
+</resources>

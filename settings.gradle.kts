@@ -20,3 +20,6 @@ include(":artify")
 include(":ImageEditor")
 include(":ImageAigen")
 include(":Common")
+include(":Camera")
+include(":SocialPosts")
+

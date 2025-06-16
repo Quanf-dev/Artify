@@ -16,7 +16,6 @@ class EditImageActivity : BaseActivity<ActivityEditImageBinding>() {
     private val viewModel: EditImageViewModel by viewModels()
     private var originalBitmap: Bitmap? = null
     private var editedBitmap: Bitmap? = null
-    private var isFirstEdit = true
 
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -36,6 +35,17 @@ class EditImageActivity : BaseActivity<ActivityEditImageBinding>() {
         super.onCreate(savedInstanceState)
         setupObservers()
         setupClickListeners()
+        
+        // Kiểm tra xem có URI ảnh được truyền từ EditMainActivity không
+        val imageUriString = intent.getStringExtra("image_uri")
+        if (!imageUriString.isNullOrEmpty()) {
+            try {
+                val imageUri = Uri.parse(imageUriString)
+                loadImageFromUri(imageUri)
+            } catch (e: Exception) {
+                showErrorMessage("Error loading image: ${e.localizedMessage}")
+            }
+        }
     }
 
     private fun setupObservers() {
@@ -44,14 +54,9 @@ class EditImageActivity : BaseActivity<ActivityEditImageBinding>() {
             if (isLoading) showLoading() else hideLoading()
         }
         viewModel.imageEditResult.observe(this) { result ->
-            if (result.isError) {
-                showErrorMessage("Error: ${result.errorMessage}")
-                return@observe
-            }
             result.bitmap?.let { bitmap ->
-                editedBitmap = bitmap
+                editedBitmap = bitmap as Bitmap
                 binding.originalImageView.setImageBitmap(bitmap)
-                isFirstEdit = false
                 binding.editPromptEditText.setText("") // Clear prompt after successful edit
             }
         }
@@ -69,9 +74,7 @@ class EditImageActivity : BaseActivity<ActivityEditImageBinding>() {
             originalBitmap?.let { bitmap ->
                 val prompt = binding.editPromptEditText.text.toString().trim()
                 if (prompt.isNotEmpty()) {
-                    if (isFirstEdit) {
                         viewModel.editImage(bitmap, prompt)
-                    }
                 } else {
                     showErrorMessage("Please enter an edit prompt")
                 }
@@ -99,7 +102,6 @@ class EditImageActivity : BaseActivity<ActivityEditImageBinding>() {
             binding.lnUpload.visibility = View.GONE
             binding.uploadContainer.background = null
             binding.editImageButton.isEnabled = true
-            isFirstEdit = true // Reset edit state when loading new image
         } catch (e: Exception) {
             showErrorMessage("Error loading image: ${e.localizedMessage}")
         }

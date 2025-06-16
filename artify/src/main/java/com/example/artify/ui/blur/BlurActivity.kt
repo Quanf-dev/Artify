@@ -86,6 +86,10 @@ class BlurActivity : BaseEditActivity<ActivityBlurBinding>() {
             binding.seekBarBlur.progress = newLevel.toInt()
         }
 
+        toolbarBinding.btnClose.setOnClickListener{
+            finish()
+        }
+
         toolbarBinding.ivRedo.setOnClickListener {
             // Increase blur level (for demo, just increase by 5)
             val newLevel = (currentBlurLevel + 5).coerceAtMost(25f)

@@ -50,6 +50,9 @@ class FrameActivity : BaseEditActivity<ActivityFrameBinding>() {
             val editedBitmap = binding.imageFrameView.getCurrentBitmap()
             returnEditedImage(editedBitmap)
         }
+        toolbarBinding.btnClose.setOnClickListener{
+            finish()
+        }
 
         // Nhận ảnh đầu vào đồng bộ
         getInputBitmap(

@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.view.animation.OvershootInterpolator
@@ -37,35 +38,6 @@ fun View.slideUp() {
     this.startAnimation(animation)
 }
 
-fun View.slideDown() {
-    val animation = AnimationUtils.loadAnimation(this.context, R.anim.slide_down)
-    animation.setAnimationListener(object : android.view.animation.Animation.AnimationListener {
-        override fun onAnimationStart(animation: android.view.animation.Animation?) {}
-        override fun onAnimationEnd(animation: android.view.animation.Animation?) {
-            this@slideDown.visibility = View.GONE
-        }
-        override fun onAnimationRepeat(animation: android.view.animation.Animation?) {}
-    })
-    this.startAnimation(animation)
-}
-
-fun View.fadeIn() {
-    this.visibility = View.VISIBLE
-    val animation = AnimationUtils.loadAnimation(this.context, R.anim.fade_in)
-    this.startAnimation(animation)
-}
-
-fun View.fadeOut() {
-    val animation = AnimationUtils.loadAnimation(this.context, R.anim.fade_out)
-    animation.setAnimationListener(object : android.view.animation.Animation.AnimationListener {
-        override fun onAnimationStart(animation: android.view.animation.Animation?) {}
-        override fun onAnimationEnd(animation: android.view.animation.Animation?) {
-            this@fadeOut.visibility = View.GONE
-        }
-        override fun onAnimationRepeat(animation: android.view.animation.Animation?) {}
-    })
-    this.startAnimation(animation)
-}
 
 fun View.scaleIn() {
     this.visibility = View.VISIBLE
@@ -73,17 +45,6 @@ fun View.scaleIn() {
     this.startAnimation(animation)
 }
 
-fun View.scaleOut() {
-    val animation = AnimationUtils.loadAnimation(this.context, R.anim.scale_out)
-    animation.setAnimationListener(object : android.view.animation.Animation.AnimationListener {
-        override fun onAnimationStart(animation: android.view.animation.Animation?) {}
-        override fun onAnimationEnd(animation: android.view.animation.Animation?) {
-            this@scaleOut.visibility = View.GONE
-        }
-        override fun onAnimationRepeat(animation: android.view.animation.Animation?) {}
-    })
-    this.startAnimation(animation)
-}
 
 fun View.animateImageIn() {
     // Reset trạng thái ban đầu
@@ -108,6 +69,7 @@ fun View.animateImageIn() {
 abstract class BaseEditActivity<VB : ViewBinding> : AppCompatActivity() {
 
     protected lateinit var baseBinding: ActivityBaseEditBinding
+
     protected lateinit var binding: VB
     protected var currentImageBitmap: Bitmap? = null
 
@@ -124,6 +86,10 @@ abstract class BaseEditActivity<VB : ViewBinding> : AppCompatActivity() {
 
         binding = inflateBinding()
         baseBinding.contentContainerEdit.addView(binding.root)
+
+
+
+
     }
 
     // Phương thức để hiển thị bottom bar với animation
@@ -188,7 +154,7 @@ abstract class BaseEditActivity<VB : ViewBinding> : AppCompatActivity() {
         }
     }
 
-    private fun saveBitmapToTempFile(bitmap: Bitmap?): File? {
+    protected fun saveBitmapToTempFile(bitmap: Bitmap?): File? {
         if (bitmap == null) return null
         
         try {
@@ -213,14 +179,30 @@ abstract class BaseEditActivity<VB : ViewBinding> : AppCompatActivity() {
      * Nhận bitmap đầu vào từ intent (ưu tiên image_path, sau đó share intent, fallback ảnh mẫu nếu cần)
      */
     protected fun getInputBitmap(onBitmapReady: (Bitmap) -> Unit, onError: (() -> Unit)? = null) {
-        val imagePath = intent.getStringExtra(Constants.EXTRA_IMAGE_PATH)
+        // Kiểm tra image_path từ PreviewActivity hoặc các activity khác
+        val imagePath = intent.getStringExtra("image_path")
         if (!imagePath.isNullOrEmpty()) {
-            val bitmap = BitmapFactory.decodeFile(imagePath)
+            try {
+                val bitmap = BitmapFactory.decodeFile(imagePath)
+                if (bitmap != null) {
+                    onBitmapReady(bitmap)
+                    return
+                }
+            } catch (e: Exception) {
+                Log.e("BaseEditActivity", "Error loading from image_path: ${e.message}", e)
+            }
+        }
+        
+        // Kiểm tra image_path từ Constants
+        val constantsImagePath = intent.getStringExtra(Constants.EXTRA_IMAGE_PATH)
+        if (!constantsImagePath.isNullOrEmpty()) {
+            val bitmap = BitmapFactory.decodeFile(constantsImagePath)
             if (bitmap != null) {
                 onBitmapReady(bitmap)
                 return
             }
         }
+        
         // Nếu không có image_path, thử lấy từ share intent
         if (intent.action == Intent.ACTION_SEND && intent.type?.startsWith("image/") == true) {
             val imageUri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
@@ -233,9 +215,12 @@ abstract class BaseEditActivity<VB : ViewBinding> : AppCompatActivity() {
                         onBitmapReady(bitmap)
                         return
                     }
-                } catch (_: Exception) {}
+                } catch (e: Exception) {
+                    Log.e("BaseEditActivity", "Error loading from intent URI: ${e.message}", e)
+                }
             }
         }
+        
         // Nếu vẫn không có, gọi onError hoặc load ảnh mẫu
         onError?.invoke()
     }

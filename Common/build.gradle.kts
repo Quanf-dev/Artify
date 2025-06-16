@@ -49,4 +49,10 @@ dependencies {
     // BlurView
     implementation("com.github.Dimezis:BlurView:version-2.0.6")
 
+    implementation ("com.airbnb.android:lottie:6.4.0" )
+
+    //language
+    implementation ("com.zeugmasolutions.localehelper:locale-helper-android:1.5.1")
+
+
 }

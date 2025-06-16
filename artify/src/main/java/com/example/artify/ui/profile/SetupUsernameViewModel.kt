@@ -30,6 +30,9 @@ class SetupUsernameViewModel @Inject constructor(
     private val _availableAvatars = MutableLiveData<List<String>>()
     val availableAvatars: LiveData<List<String>> = _availableAvatars
 
+    // Đường dẫn mặc định cho avatar
+    private val defaultAvatarUrl = "default_avatar.png"
+
     init {
         fetchCurrentUser()
         loadAvailableAvatars()
@@ -112,10 +115,17 @@ class SetupUsernameViewModel @Inject constructor(
             _setupState.value = SetupUsernameState.Error(context.getString(R.string.username_error_invalid_chars))
             return
         }
-        // Avatar URL can be null if user doesn't select one, or if you make it optional
-        // If avatar is mandatory, add a check here
-        if (avatarUrl == null){
-            _setupState.value = SetupUsernameState.Error(context.getString(R.string.avatar_not_selected_error)) // Add this string to your strings.xml
+        
+        // Kiểm tra xem người dùng đã chọn avatar chưa
+        if (avatarUrl == null || avatarUrl == defaultAvatarUrl) {
+            _setupState.value = SetupUsernameState.Error(context.getString(R.string.avatar_not_selected_error))
+            return
+        }
+        
+        // Kiểm tra xem avatar có nằm trong danh sách avatar hợp lệ không
+        val availableAvatars = _availableAvatars.value ?: emptyList()
+        if (!availableAvatars.contains(avatarUrl)) {
+            _setupState.value = SetupUsernameState.Error(context.getString(R.string.invalid_avatar_error))
             return
         }
 

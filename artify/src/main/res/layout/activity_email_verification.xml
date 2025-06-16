@@ -75,6 +75,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnCheckVerification" />
 
+    <Button
+        android:id="@+id/btnContinueAnyway"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/continue_anyway"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnResendEmail"
+        app:layout_constraintWidth_percent="0.7" />
+
     <com.example.common.gradiant4.GradientTextView
         android:id="@+id/tv_logout"
         android:layout_width="wrap_content"

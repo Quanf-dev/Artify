@@ -45,10 +45,13 @@ class FilterActivity : BaseEditActivity<ActivityFilterBinding>() {
 
         // Initialize views
         imageFilterView = binding.imageFilterView
-        toolbarBinding = ItemToolbarEditMainBinding.bind(binding.root)
-        toolbarBinding = ItemToolbarEditMainBinding.bind(binding.root)
+        // Bind toolbar từ include layout
+        val toolbarView = findViewById<android.widget.LinearLayout>(R.id.tbMain)
+        toolbarBinding = ItemToolbarEditMainBinding.bind(toolbarView)
 
-        
+        toolbarBinding.btnClose.setOnClickListener{
+            finish()
+        }
         // Ẩn các thành phần UI để chuẩn bị cho animation
 
         // Nhận ảnh đầu vào đồng bộ

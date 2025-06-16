@@ -6,9 +6,11 @@ import android.graphics.Color
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.LayoutInflater
+import android.view.View
 import android.view.Window
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.example.artify.R
 import com.example.artify.databinding.ActivityEmailVerificationBinding
 import com.example.artify.databinding.DialogVerificationStatusBinding
@@ -17,12 +19,16 @@ import com.example.artify.ui.login.LoginActivity
 import com.example.artify.ui.profile.SetupUsernameActivity
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.core.graphics.drawable.toDrawable
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class EmailVerificationActivity : BaseActivity<ActivityEmailVerificationBinding>() {
 
     private val viewModel: EmailVerificationViewModel by viewModels()
     private var resendTimer: CountDownTimer? = null
+    private var verificationDialog: Dialog? = null
+    private var verificationRetryCount = 0
 
     override fun inflateBinding(): ActivityEmailVerificationBinding {
         return ActivityEmailVerificationBinding.inflate(layoutInflater)
@@ -32,26 +38,42 @@ class EmailVerificationActivity : BaseActivity<ActivityEmailVerificationBinding>
         super.onCreate(savedInstanceState)
         setupListeners()
         observeViewModel()
-        viewModel.checkEmailVerification()
+        
+        // Initial verification check
+        lifecycleScope.launch {
+            delay(500) // Small delay to ensure UI is ready
+            viewModel.checkEmailVerification()
+        }
     }
 
     override fun onResume() {
         super.onResume()
+        // Check verification status when returning to the activity
         viewModel.checkEmailVerification()
     }
 
     override fun onDestroy() {
         resendTimer?.cancel()
+        verificationDialog?.dismiss()
         super.onDestroy()
     }
 
     private fun setupListeners() {
         binding.btnCheckVerification.setOnClickListener {
-            viewModel.checkEmailVerification()
+            verificationRetryCount++
+            showLoading()
+            // Force refresh the verification status from server
+            viewModel.refreshAndCheckEmailVerification()
         }
+        
         binding.btnResendEmail.setOnClickListener {
             viewModel.resendVerificationEmail()
         }
+        
+        binding.btnContinueAnyway?.setOnClickListener {
+            showConfirmationDialog()
+        }
+        
         binding.tvLogout?.setOnClickListener {
             viewModel.logout()
             navigateToLogin()
@@ -64,23 +86,45 @@ class EmailVerificationActivity : BaseActivity<ActivityEmailVerificationBinding>
                 is EmailVerificationState.Loading -> {
                     showLoading()
                     binding.btnResendEmail.isEnabled = false
+                    binding.btnCheckVerification.isEnabled = false
+                    binding.btnContinueAnyway?.visibility = View.GONE
                 }
+                
                 is EmailVerificationState.Verified -> {
                     hideLoading()
+                    // Only show success dialog when verification is successful
                     showStatusDialog(
                         isSuccess = true,
                         title = getString(R.string.verification_successful),
                         message = getString(R.string.email_verified_proceed_setup)
                     ) { navigateToSetupUsername() }
                 }
+                
                 is EmailVerificationState.NotVerified -> {
                     hideLoading()
                     binding.btnResendEmail.isEnabled = true
+                    binding.btnCheckVerification.isEnabled = true
                     binding.tvVerificationMessage.text =
                         getString(R.string.email_not_verified_check_mailbox)
+                    
+                    // Show "Continue Anyway" button after multiple verification attempts
+                    if (verificationRetryCount >= 2) {
+                        binding.btnContinueAnyway?.visibility = View.VISIBLE
+                    } else {
+                        binding.btnContinueAnyway?.visibility = View.GONE
+                    }
+                    
+                    // Show toast to inform user verification is still pending
+                    Toast.makeText(
+                        this,
+                        getString(R.string.email_not_verified_yet),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
+                
                 is EmailVerificationState.EmailSent -> {
                     hideLoading()
+                    binding.btnCheckVerification.isEnabled = true
                     Toast.makeText(
                         this,
                         getString(R.string.verification_email_resent_success),
@@ -88,9 +132,16 @@ class EmailVerificationActivity : BaseActivity<ActivityEmailVerificationBinding>
                     ).show()
                     startResendEmailCountdown()
                 }
+                
                 is EmailVerificationState.Error -> {
                     hideLoading()
                     binding.btnResendEmail.isEnabled = true
+                    binding.btnCheckVerification.isEnabled = true
+
+                    // Show "Continue Anyway" button after errors with verification
+                    if (verificationRetryCount >= 2) {
+                        binding.btnContinueAnyway?.visibility = View.VISIBLE
+                    }
 
                     if (state.message.contains("Phiên đăng nhập đã hết hạn") ||
                         state.message.contains("Không tìm thấy người dùng")
@@ -100,8 +151,15 @@ class EmailVerificationActivity : BaseActivity<ActivityEmailVerificationBinding>
                             getString(R.string.session_expired),
                             state.message
                         ) { navigateToLogin() }
+                    } else if (state.message.contains("Không thể cập nhật trạng thái xác thực")) {
+                        // Show specific message for verification status update failure
+                        Toast.makeText(this, state.message, Toast.LENGTH_LONG).show()
+                        
+                        // Update UI to show the issue
+                        binding.tvVerificationMessage.text = getString(R.string.verification_status_update_failed)
                     } else {
-                        showStatusDialog(false, getString(R.string.error_occurred), state.message)
+                        // Show error message
+                        Toast.makeText(this, state.message, Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -132,17 +190,50 @@ class EmailVerificationActivity : BaseActivity<ActivityEmailVerificationBinding>
         message: String,
         onDismissAction: (() -> Unit)? = null
     ) {
-        val dialogBinding =
-            DialogVerificationStatusBinding.inflate(LayoutInflater.from(this))
+        // Dismiss any existing dialog
+        verificationDialog?.dismiss()
+        
+        val dialogBinding = DialogVerificationStatusBinding.inflate(LayoutInflater.from(this))
         val dialog = Dialog(this)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setContentView(dialogBinding.root)
         dialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
         dialog.setCancelable(false)
 
+        // Set dialog content
         dialogBinding.tvStatusTitle.text = title
         dialogBinding.tvStatusMessage.text = message
-
+        
+        // Set appropriate icon based on success/failure
+        if (isSuccess) {
+            dialogBinding.tvLabel.setImageResource(R.drawable.ic_success)
+        } else {
+            dialogBinding.tvLabel.setImageResource(R.drawable.ic_error)
+        }
+        
+        // Add a button to dismiss the dialog
+        dialogBinding.btnOk.setOnClickListener {
+            dialog.dismiss()
+            onDismissAction?.invoke()
+        }
+        
+        // Store reference to dialog
+        verificationDialog = dialog
+        
+        dialog.show()
+    }
+    
+    private fun showConfirmationDialog() {
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(getString(R.string.continue_without_verification))
+            .setMessage(getString(R.string.verification_continue_confirmation))
+            .setPositiveButton(getString(R.string.continue_button)) { _, _ ->
+                // User confirms they've verified their email
+                navigateToSetupUsername()
+            }
+            .setNegativeButton(getString(R.string.cancel), null)
+            .create()
+        
         dialog.show()
     }
 
@@ -158,5 +249,4 @@ class EmailVerificationActivity : BaseActivity<ActivityEmailVerificationBinding>
         startActivity(intent)
         finishAffinity()
     }
-
 }

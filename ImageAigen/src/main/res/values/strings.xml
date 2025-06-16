@@ -9,4 +9,12 @@
     <string name="describe_how_you_want_to_edit_the_image">Describe how you want to edit the image</string>
     <string name="original_image">Original Image</string>
     <string name="generate_image">Generate Image</string>
+    <string name="generate_logo">Generate Logo</string>
+    <string name="generate_toy_figure">Generate Toy Figure</string>
+    <string name="enter_company_name">Enter company or brand name</string>
+    <string name="describe_logo">Describe your logo (style, colors, industry, etc.)</string>
+    <string name="name">Name</string>
+    <string name="occupation">Occupation</string>
+    <string name="accessories">Accessories</string>
+    <string name="clothing_description">Clothing Description</string>
 </resources>

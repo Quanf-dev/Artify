@@ -8,15 +8,14 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
-import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.widget.TextView
@@ -39,6 +38,8 @@ import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import android.app.AlertDialog
+import androidx.core.content.FileProvider
 
 class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
     private var imageUri: Uri? = null
@@ -83,13 +84,38 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
                 binding.editorView.setImageBitmap(bitmap)
                 binding.editorView.animateImageIn()
                 animateBottomBar(bottomBarView)
+                
+                // Log thông tin về ảnh đã nhận
+                Log.d("EditMainActivity", "Bitmap loaded successfully: ${bitmap.width}x${bitmap.height}")
             },
             onError = {
-                // Nếu có image_uri (từ HomeActivity), load vào
+                // Kiểm tra trường hợp nhận từ PreviewActivity (sử dụng image_path)
+                val imagePath = intent.getStringExtra("image_path")
+                if (imagePath != null) {
+                    try {
+                        Log.d("EditMainActivity", "Loading from image_path: $imagePath")
+                        val bitmap = BitmapFactory.decodeFile(imagePath)
+                        if (bitmap != null) {
+                            currentImageBitmap = bitmap
+                            originalBitmap = bitmap.copy(bitmap.config!!, true)
+                            binding.editorView.setImageBitmap(bitmap)
+                            binding.editorView.animateImageIn()
+                            animateBottomBar(bottomBarView)
+                            return@getInputBitmap
+                        } else {
+                            Log.e("EditMainActivity", "Failed to decode bitmap from file: $imagePath")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("EditMainActivity", "Error loading image from path: ${e.message}", e)
+                    }
+                }
+                
+                // Nếu không có image_uri (từ HomeActivity), load vào
                 val uriString = intent.getStringExtra("image_uri")
                 if (uriString != null) {
                     val uri = Uri.parse(uriString)
                     try {
+                        Log.d("EditMainActivity", "Loading from image_uri: $uriString")
                         val inputStream = contentResolver.openInputStream(uri)
                         val bitmap = BitmapFactory.decodeStream(inputStream)
                         inputStream?.close()
@@ -101,7 +127,9 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
                             animateBottomBar(bottomBarView)
                             return@getInputBitmap
                         }
-                    } catch (_: Exception) {}
+                    } catch (e: Exception) {
+                        Log.e("EditMainActivity", "Error loading image from URI: ${e.message}", e)
+                    }
                 }
                 // Nếu vẫn không có, có thể load ảnh mẫu hoặc báo lỗi
                 Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show()
@@ -110,6 +138,10 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
                 animateBottomBar(bottomBarView)
             }
         )
+
+        toolbarBinding.btnClose.setOnClickListener{
+            finish()
+        }
 
         with(toolbarBinding) {
             ivRedo.visibility = View.GONE
@@ -182,19 +214,101 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
 
         toolbarBinding.ivDone.setOnClickListener {
             it.scaleIn()
-            checkPermissionsAndSave()
+            showCompletionOptionsDialog()
         }
 
         toolbarBinding.ivUndo.setOnClickListener {
             it.scaleIn()
             originalBitmap?.let {
                 currentImageBitmap = it.copy(it.config!!, true)
+                binding.stickerView.clearSticker()
                 binding.editorView.setImageBitmap(currentImageBitmap)
             }
         }
+    }
 
-        toolbarBinding.root.setOnClickListener {
-            finish() // Return to HomeActivity
+    private fun showCompletionOptionsDialog() {
+        // Luôn cập nhật bitmap mới nhất từ container (bao gồm sticker/text)
+        updateCurrentImageBitmapFromContainer()
+        
+        if (currentImageBitmap == null) {
+            Toast.makeText(this, "No image to save", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val options = arrayOf("Save Image", "Edit with AI", "Share to Social")
+        
+        AlertDialog.Builder(this)
+            .setTitle("Complete Editing")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> checkPermissionsAndSave() // Lưu ảnh
+                    1 -> openEditWithAI() // Mở EditImageActivity
+                    2 -> shareToSocial() // Mở CreatePostActivity
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun openEditWithAI() {
+        val tempFile = saveBitmapToTempFile(currentImageBitmap)
+        tempFile?.let {
+            try {
+                // Tạo URI từ file tạm để truyền cho EditImageActivity
+                val fileUri = androidx.core.content.FileProvider.getUriForFile(
+                    this,
+                    applicationContext.packageName + ".provider",
+                    it
+                )
+                
+                val intent = Intent(this, com.example.imageaigen.ui.edit.EditImageActivity::class.java)
+                
+                // Truyền URI để EditImageActivity có thể trực tiếp load vào originalBitmap
+                intent.putExtra("image_uri", fileUri.toString())
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                
+                Log.d("EditMainActivity", "Opening EditImageActivity with URI: $fileUri")
+                startActivity(intent)
+            } catch (e: Exception) {
+                Log.e("EditMainActivity", "Error opening EditImageActivity: ${e.message}", e)
+                Toast.makeText(this, "Failed to open AI editor: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        } ?: run {
+            Toast.makeText(this, "Failed to prepare image for AI editing", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun shareToSocial() {
+        val tempFile = saveBitmapToTempFile(currentImageBitmap)
+        tempFile?.let {
+            try {
+                // Tạo URI từ file tạm để truyền cho CreatePostActivity
+                val fileUri = androidx.core.content.FileProvider.getUriForFile(
+                    this,
+                    applicationContext.packageName + ".provider",
+                    it
+                )
+                
+                // Tìm class CreatePostActivity trong package com.example.socialposts
+                val createPostActivityClass = Class.forName("com.example.socialposts.ui.CreatePostActivity")
+                val intent = Intent(this, createPostActivityClass)
+                
+                // Truyền URI để CreatePostActivity có thể trực tiếp load vào selectedImageUri và ivPostImage
+                intent.putExtra("selected_image_uri", fileUri.toString())
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                
+                Log.d("EditMainActivity", "Opening CreatePostActivity with URI: $fileUri")
+                startActivity(intent)
+            } catch (e: ClassNotFoundException) {
+                Log.e("EditMainActivity", "CreatePostActivity not found: ${e.message}", e)
+                Toast.makeText(this, "Social posting feature not available", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Log.e("EditMainActivity", "Error opening CreatePostActivity: ${e.message}", e)
+                Toast.makeText(this, "Failed to share to social: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        } ?: run {
+            Toast.makeText(this, "Failed to prepare image for sharing", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -221,47 +335,63 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
     }
 
     private fun saveImage() {
+        // Luôn cập nhật bitmap mới nhất từ container (bao gồm sticker/text)
+        updateCurrentImageBitmapFromContainer()
+
+        val mergedBitmap = currentImageBitmap
+        if (mergedBitmap == null) {
+            Toast.makeText(this, "No image to save (bitmap null)", Toast.LENGTH_SHORT).show()
+            android.util.Log.e("EditMainActivity", "currentImageBitmap null sau updateCurrentImageBitmapFromContainer")
+            return
+        }
+        var fos: OutputStream? = null
         try {
-            var fos: OutputStream? = null
             val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
             val imageFileName = "Artify_" + timeStamp
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                // For Android 10+
                 val contentValues = ContentValues().apply {
                     put(MediaStore.MediaColumns.DISPLAY_NAME, "$imageFileName.jpg")
                     put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-                    put(
-                        MediaStore.MediaColumns.RELATIVE_PATH,
-                        Environment.DIRECTORY_PICTURES + "/Artify"
-                    )
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Artify")
                 }
-
-                val uri = contentResolver.insert(
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                    contentValues
-                )
-                uri?.let { fos = contentResolver.openOutputStream(it) }
+                val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+                if (uri == null) {
+                    Toast.makeText(this, "Failed to create image file", Toast.LENGTH_SHORT).show()
+                    android.util.Log.e("EditMainActivity", "contentResolver.insert trả về null")
+                    return
+                }
+                fos = contentResolver.openOutputStream(uri)
             } else {
-                // For Android 9 and below
-                val imagesDir =
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES + "/Artify")
-                if (!imagesDir.exists()) {
-                    imagesDir.mkdirs()
-                }
+                val imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES + "/Artify")
+                if (!imagesDir.exists()) imagesDir.mkdirs()
                 val image = File(imagesDir, "$imageFileName.jpg")
                 fos = FileOutputStream(image)
             }
 
-            fos?.use {
-                currentImageBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, it)
+            if (fos == null) {
+                Toast.makeText(this, "Failed to open output stream", Toast.LENGTH_SHORT).show()
+                android.util.Log.e("EditMainActivity", "fos là null")
+                return
+            }
+
+            val success = mergedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+            fos.flush()
+            fos.close()
+            if (success) {
                 Toast.makeText(this, "Image saved successfully", Toast.LENGTH_SHORT).show()
-                // Return to home activity
+                android.util.Log.d("EditMainActivity", "Lưu ảnh thành công")
                 finish()
+            } else {
+                Toast.makeText(this, "Failed to save image (compress error)", Toast.LENGTH_SHORT).show()
+                android.util.Log.e("EditMainActivity", "compress trả về false")
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Failed to save image: ${e.message}", Toast.LENGTH_SHORT).show()
+            android.util.Log.e("EditMainActivity", "Exception khi lưu ảnh: ${e.message}")
+        } finally {
+            try { fos?.close() } catch (_: Exception) {}
         }
     }
 
@@ -359,7 +489,6 @@ class EditMainActivity : BaseEditActivity<ActivityEditMainBinding>() {
         if (container.width > 0 && container.height > 0) {
             currentImageBitmap = getBitmapFromView(container)
             currentImageBitmap = getEditedBitmap()
-
         }
     }
 }

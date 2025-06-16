@@ -10,4 +10,4 @@ data class GeminiResponse(
     val text: String? = null,
     val isError: Boolean = false,
     val errorMessage: String? = null
-) 
+)
