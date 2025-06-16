@@ -35,6 +35,17 @@ class EditImageActivity : BaseActivity<ActivityEditImageBinding>() {
         super.onCreate(savedInstanceState)
         setupObservers()
         setupClickListeners()
+        
+        // Kiểm tra xem có URI ảnh được truyền từ EditMainActivity không
+        val imageUriString = intent.getStringExtra("image_uri")
+        if (!imageUriString.isNullOrEmpty()) {
+            try {
+                val imageUri = Uri.parse(imageUriString)
+                loadImageFromUri(imageUri)
+            } catch (e: Exception) {
+                showErrorMessage("Error loading image: ${e.localizedMessage}")
+            }
+        }
     }
 
     private fun setupObservers() {
@@ -43,12 +54,8 @@ class EditImageActivity : BaseActivity<ActivityEditImageBinding>() {
             if (isLoading) showLoading() else hideLoading()
         }
         viewModel.imageEditResult.observe(this) { result ->
-            if (result.isError) {
-                showErrorMessage("Error: ${result.errorMessage}")
-                return@observe
-            }
             result.bitmap?.let { bitmap ->
-                editedBitmap = bitmap
+                editedBitmap = bitmap as Bitmap
                 binding.originalImageView.setImageBitmap(bitmap)
                 binding.editPromptEditText.setText("") // Clear prompt after successful edit
             }

@@ -1,4 +1,4 @@
-package com.example.camera.filter
+package com.example.artify.ui.camera
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -10,10 +10,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.ColorMatrix
-import android.graphics.ColorMatrixColorFilter
 import android.graphics.Matrix
-import android.graphics.Paint
 import android.hardware.Camera
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -28,7 +25,11 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.artify.ui.previewcamera.PreviewActivity
 import com.example.camera.R
+import com.example.camera.databinding.ActivityFaceFilterBinding
+import com.example.camera.filter.FaceGraphic
+import com.example.camera.filter.GraphicOverlay
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.vision.CameraSource
@@ -38,11 +39,9 @@ import com.google.android.gms.vision.Tracker
 import com.google.android.gms.vision.face.Face
 import com.google.android.gms.vision.face.FaceDetector
 import com.google.android.material.snackbar.Snackbar
-import com.iammert.library.cameravideobuttonlib.CameraVideoButton
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.util.ArrayList
 import kotlin.math.abs
 
 class FaceFilterActivity : AppCompatActivity() {
@@ -53,10 +52,12 @@ class FaceFilterActivity : AppCompatActivity() {
         FULL(-1f)                  // -1f: full screen, sẽ xử lý riêng
     }
 
+    // ViewBinding
+    private lateinit var binding: ActivityFaceFilterBinding
+
     // Camera and detection properties
     private var mCameraSource: CameraSource? = null
-    private var mPreview: CameraSourcePreview? = null
-    private var mGraphicOverlay: GraphicOverlay? = null
+    private var mFaceDetector: FaceDetector? = null
 
     // Filter and camera state
     private var currentFilterType: Int = 0
@@ -75,51 +76,23 @@ class FaceFilterActivity : AppCompatActivity() {
 
     // Timer functionality
     private var countDownTimer: CountDownTimer? = null
-    private var timerTextView: TextView? = null
 
-    // UI elements
-    private var faceButton: ImageButton? = null
-    private var flashButton: ImageButton? = null
-    private var cameraButton: CameraVideoButton? = null
-    private var timerButton: ImageButton? = null
-    private var switchCameraButton: ImageButton? = null
-    private var zoomSeekBar: SeekBar? = null
-    private var brightnessSeekBar: SeekBar? = null
-    private var aspectRatioButton: ImageButton? = null
-    private var zoomToggleButton: ImageButton? = null
-    
     // List to store captured image paths
-    private val capturedImagePaths: ArrayList<String> = ArrayList()
+    private val capturedImagePaths: java.util.ArrayList<String> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_face_filter)
-
+        binding = ActivityFaceFilterBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         initializeViews()
         setupZoomGesture()
         checkCameraPermission()
     }
 
     private fun initializeViews() {
-        mPreview = findViewById(R.id.preview)
-        mGraphicOverlay = findViewById(R.id.faceOverlay)
-        timerTextView = findViewById(R.id.timerText)
-
-        // Initialize buttons
-        faceButton = findViewById(R.id.face)
-        flashButton = findViewById(R.id.flash)
-        cameraButton = findViewById(R.id.camera)
-        timerButton = findViewById(R.id.timer)
-        switchCameraButton = findViewById(R.id.change)
-        zoomSeekBar = findViewById(R.id.seekBarZoom)
-        brightnessSeekBar = findViewById(R.id.seekBarBrightness)
-        aspectRatioButton = findViewById(R.id.aspect_ratio_button)
-        zoomToggleButton = findViewById(R.id.zoom_toggle_button)
-
         // Hide zoom and brightness seekbars by default
-        zoomSeekBar?.visibility = View.GONE
-        brightnessSeekBar?.visibility = View.GONE
-
+        binding.seekBarZoom.visibility = View.GONE
+        binding.seekBarBrightness.visibility = View.GONE
         setupUIClickListeners()
         setupFilterButtons()
     }
@@ -132,58 +105,52 @@ class FaceFilterActivity : AppCompatActivity() {
                     scaleFactor *= detector.scaleFactor
                     scaleFactor = scaleFactor.coerceIn(minZoom, maxZoom)
                     setZoom(scaleFactor)
-
                     // Update seekbar progress
                     val progress = ((scaleFactor - minZoom) / (maxZoom - minZoom) * 100).toInt()
-                    zoomSeekBar?.progress = progress
+                    binding.seekBarZoom.progress = progress
                     return true
                 }
             })
-
         // Set touch listener to preview
-        mPreview?.setOnTouchListener { _, event ->
+        binding.preview.setOnTouchListener { _, event ->
             scaleGestureDetector?.onTouchEvent(event)
             true
         }
     }
 
     private fun setupUIClickListeners() {
-        faceButton?.setOnClickListener { toggleFilterVisibility() }
-        flashButton?.setOnClickListener { toggleFlash() }
-        
+        binding.face.setOnClickListener { toggleFilterVisibility() }
+        binding.flash.setOnClickListener { toggleFlash() }
         // Cấu hình CameraVideoButton
-        cameraButton?.apply {
+        binding.camera.apply {
             enablePhotoTaking(true)
             enableVideoRecording(false) // Tạm thời tắt chức năng quay video
-            
             actionListener = object : com.iammert.library.cameravideobuttonlib.CameraVideoButton.ActionListener {
                 override fun onStartRecord() {
                     Log.d(TAG, "onStartRecord called")
                     // Không xử lý quay video trong phiên bản này
                 }
-
                 override fun onEndRecord() {
                     Log.d(TAG, "onEndRecord called")
                     // Không xử lý quay video trong phiên bản này
                 }
-
                 override fun onDurationTooShortError() {
                     Log.d(TAG, "onDurationTooShortError called")
                 }
-
                 override fun onSingleTap() {
                     Log.d(TAG, "onSingleTap called - taking photo")
                     capturePhoto()
                 }
             }
         }
-        
-        timerButton?.setOnClickListener { showTimerDialog() }
-        switchCameraButton?.setOnClickListener { switchCamera() }
-        aspectRatioButton?.setOnClickListener { showAspectRatioDialog() }
-        zoomToggleButton?.setOnClickListener { toggleZoomVisibility() }
-
-        zoomSeekBar?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        binding.thumbnailPreview.setOnClickListener {
+            navigateToPreview()
+        }
+        binding.timer.setOnClickListener { showTimerDialog() }
+        binding.change.setOnClickListener { switchCamera() }
+        binding.aspectRatioButton.setOnClickListener { showAspectRatioDialog() }
+        binding.zoomToggleButton.setOnClickListener { toggleZoomVisibility() }
+        binding.seekBarZoom.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
                     val scale = minZoom + (progress / 100f) * (maxZoom - minZoom)
@@ -191,19 +158,16 @@ class FaceFilterActivity : AppCompatActivity() {
                     scaleFactor = scale // Update scaleFactor for consistency
                 }
             }
-
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
-
-        brightnessSeekBar?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        binding.seekBarBrightness.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
                     brightness = (progress - 50) / 50f // Convert 0-100 to -1.0 to 1.0
                     setBrightness(brightness)
                 }
             }
-
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
@@ -217,7 +181,6 @@ class FaceFilterActivity : AppCompatActivity() {
             R.id.hat to 12, R.id.hat2 to 13, R.id.spiderman to 14, R.id.songoku to 15,
             R.id.ronaldo to 16
         )
-
         filterButtons.forEach { (buttonId, filterType) ->
             findViewById<ImageButton>(buttonId)?.setOnClickListener {
                 selectFilter(filterType)
@@ -226,34 +189,26 @@ class FaceFilterActivity : AppCompatActivity() {
     }
 
     private fun toggleFilterVisibility() {
-        val scrollView = findViewById<View>(R.id.scrollView)
-        val isVisible = scrollView.visibility == View.VISIBLE
-
-        scrollView.visibility = if (isVisible) View.GONE else View.VISIBLE
-
+        val isVisible = binding.scrollView.visibility == View.VISIBLE
+        binding.scrollView.visibility = if (isVisible) View.GONE else View.VISIBLE
         val iconResource = if (isVisible) R.drawable.face else R.drawable.face_select
-        faceButton?.setImageResource(iconResource)
+        binding.face.setImageResource(iconResource)
     }
 
     @SuppressLint("SuspiciousIndentation")
     private fun selectFilter(filterType: Int) {
         findViewById<View>(FILTER_BUTTON_IDS[currentFilterType])?.background =
             ContextCompat.getDrawable(this, R.drawable.round_background)
-
         currentFilterType = filterType
-
         findViewById<View>(FILTER_BUTTON_IDS[currentFilterType])?.background =
             ContextCompat.getDrawable(this, R.drawable.round_background_select)
-
         refreshFaceDetection()
     }
 
     private fun toggleFlash() {
         isFlashEnabled = !isFlashEnabled
-
         val tintColor = if (isFlashEnabled) Color.YELLOW else Color.WHITE
-        flashButton?.setColorFilter(tintColor)
-
+        binding.flash.setColorFilter(tintColor)
         setFlashMode(if (isFlashEnabled) Camera.Parameters.FLASH_MODE_TORCH else Camera.Parameters.FLASH_MODE_OFF)
     }
 
@@ -263,14 +218,29 @@ class FaceFilterActivity : AppCompatActivity() {
                 val camera = getCamera(source)
                 camera?.let {
                     val params = it.parameters
-                    if (params.supportedFlashModes?.contains(flashMode) == true) {
+                    if (params.supportedFlashModes != null && params.supportedFlashModes.contains(flashMode)) {
                         params.flashMode = flashMode
                         it.parameters = params
                         Log.d(TAG, "Flash mode set to $flashMode")
+                    } else {
+                        Log.w(TAG, "Flash mode $flashMode not supported")
+                        // Nếu không hỗ trợ flash, hiển thị thông báo
+                        if (isFlashEnabled) {
+                            runOnUiThread {
+                                Toast.makeText(this, "Flash không được hỗ trợ trên thiết bị này", Toast.LENGTH_SHORT).show()
+                                isFlashEnabled = false
+                                binding.flash.setColorFilter(Color.WHITE)
+                            }
+                        }
                     }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to set flash mode", e)
+                runOnUiThread {
+                    Toast.makeText(this, "Không thể bật flash: ${e.message}", Toast.LENGTH_SHORT).show()
+                    isFlashEnabled = false
+                    binding.flash.setColorFilter(Color.WHITE)
+                }
             }
         }
     }
@@ -293,7 +263,6 @@ class FaceFilterActivity : AppCompatActivity() {
     private fun showTimerDialog() {
         val timerOptions = arrayOf("Off", "3s", "5s", "10s")
         val timerValues = intArrayOf(0, 3, 5, 10)
-
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.timer_title))
             .setItems(timerOptions) { _, which ->
@@ -305,21 +274,18 @@ class FaceFilterActivity : AppCompatActivity() {
 
     private fun updateTimerButton() {
         val tintColor = if (currentTimerSeconds > 0) Color.YELLOW else Color.WHITE
-        timerButton?.setColorFilter(tintColor)
+        binding.timer.setColorFilter(tintColor)
     }
 
     private fun switchCamera() {
         Log.d(TAG, "Switching camera")
-        mPreview?.stop()
-        mCameraSource?.release()
-        mCameraSource = null
-
+        binding.preview.stop()
+        releaseCameraAndDetector()
         cameraFacing = if (cameraFacing == CameraSource.CAMERA_FACING_FRONT) {
             CameraSource.CAMERA_FACING_BACK
         } else {
             CameraSource.CAMERA_FACING_FRONT
         }
-
         createCameraSource()
         startCameraSource()
     }
@@ -333,15 +299,13 @@ class FaceFilterActivity : AppCompatActivity() {
     }
 
     private fun startTimer() {
-        timerTextView?.visibility = View.VISIBLE
-
+        binding.timerText.visibility = View.VISIBLE
         countDownTimer = object : CountDownTimer((currentTimerSeconds * 1000).toLong(), 1000) {
             override fun onTick(millisUntilFinished: Long) {
-                timerTextView?.text = (millisUntilFinished / 1000 + 1).toString()
+                binding.timerText.text = (millisUntilFinished / 1000 + 1).toString()
             }
-
             override fun onFinish() {
-                timerTextView?.visibility = View.GONE
+                binding.timerText.visibility = View.GONE
                 takePhoto()
             }
         }.start()
@@ -360,7 +324,6 @@ class FaceFilterActivity : AppCompatActivity() {
                 runOnUiThread { showErrorMessage("Camera is not available") }
                 return
             }
-            
             // Chụp ảnh từ camera
             mCameraSource?.takePicture(null, object : CameraSource.PictureCallback {
                 override fun onPictureTaken(bytes: ByteArray?) {
@@ -371,7 +334,6 @@ class FaceFilterActivity : AppCompatActivity() {
                     }
                     try {
                         Log.d(TAG, "Photo captured, processing image...")
-                        
                         // Xử lý ảnh từ camera
                         val cameraBitmap = try {
                             processCapturedImage(bytes)
@@ -380,17 +342,12 @@ class FaceFilterActivity : AppCompatActivity() {
                             runOnUiThread { showErrorMessage("Failed to decode image: ${e.message}") }
                             return
                         }
-                        
                         Log.d(TAG, "Camera bitmap processed: ${cameraBitmap.width}x${cameraBitmap.height}")
-                        
                         // Tạo bitmap kết hợp với overlay
                         val finalBitmap = createFinalImageWithOverlay(cameraBitmap)
-                        
                         Log.d(TAG, "Final bitmap created: ${finalBitmap.width}x${finalBitmap.height}")
-                        
                         // Lưu và hiển thị ảnh
                         saveBitmapToCacheAndPreview(finalBitmap)
-                        
                     } catch (e: Exception) {
                         Log.e(TAG, "Error processing captured image", e)
                         runOnUiThread { showErrorMessage("Failed to save photo: ${e.message}") }
@@ -402,30 +359,25 @@ class FaceFilterActivity : AppCompatActivity() {
             runOnUiThread { showErrorMessage("Camera error: ${e.message}") }
         }
     }
-    
+
     /**
      * Tạo bitmap cuối cùng kết hợp ảnh từ camera với các filter và mask từ GraphicOverlay
      */
     private fun createFinalImageWithOverlay(cameraBitmap: Bitmap): Bitmap {
         Log.d(TAG, "Creating final image with overlay")
-        
         try {
             // Tạo bitmap mới với kích thước của ảnh camera
             val resultBitmap = Bitmap.createBitmap(
-                cameraBitmap.width, 
-                cameraBitmap.height, 
+                cameraBitmap.width,
+                cameraBitmap.height,
                 Bitmap.Config.ARGB_8888
             )
-            
             // Tạo canvas để vẽ
             val canvas = Canvas(resultBitmap)
-            
             // Vẽ ảnh camera làm nền
             canvas.drawBitmap(cameraBitmap, 0f, 0f, null)
-            
             // Vẽ face filter overlay nếu có
             drawFaceFiltersOnBitmap(canvas, cameraBitmap.width, cameraBitmap.height)
-            
             Log.d(TAG, "Final image created successfully: ${resultBitmap.width}x${resultBitmap.height}")
             return resultBitmap
         } catch (e: Exception) {
@@ -439,16 +391,13 @@ class FaceFilterActivity : AppCompatActivity() {
     private fun drawFaceFiltersOnBitmap(canvas: Canvas, imageWidth: Int, imageHeight: Int) {
         // Chỉ vẽ face filter nếu currentFilterType > 0 (không phải no_filter)
         if (currentFilterType <= 0) return
-        
         try {
             // Lấy thông tin face từ overlay hiện tại
-            mGraphicOverlay?.let { overlay ->
+            binding.faceOverlay.let { overlay ->
                 val graphics = overlay.getGraphics()
-                
                 // Tính toán scale factors để map từ overlay coordinates sang image coordinates
                 val scaleX = imageWidth.toFloat() / overlay.width.toFloat()
                 val scaleY = imageHeight.toFloat() / overlay.height.toFloat()
-                
                 // Vẽ từng graphic
                 for (graphic in graphics) {
                     if (graphic is FaceGraphic) {
@@ -473,37 +422,39 @@ class FaceFilterActivity : AppCompatActivity() {
             runOnUiThread { showErrorMessage("Failed to save image: ${e.message}") }
             return
         }
-
         runOnUiThread {
             if (!imageFile.exists() || imageFile.length() == 0L) {
                 Log.e(TAG, "Image file does not exist or is empty: ${imageFile.absolutePath}")
                 showErrorMessage("Image file not saved correctly")
                 return@runOnUiThread
             }
-            
             // Add the image path to our list
             capturedImagePaths.add(imageFile.absolutePath)
+            
+            // Update thumbnail preview with latest image
+            updateThumbnailPreview(bitmap)
             
             try {
                 val intent = Intent(
                     this@FaceFilterActivity,
-                    com.example.camera.ui.preview.PreviewActivity::class.java
+                    PreviewActivity::class.java
                 ).apply {
                     putExtra(
-                        com.example.camera.ui.preview.PreviewActivity.EXTRA_IMAGE_PATH,
+                        PreviewActivity.EXTRA_IMAGE_PATH,
                         imageFile.absolutePath
                     )
                     // Pass the array of all captured image paths
                     putStringArrayListExtra(
-                        com.example.camera.ui.preview.PreviewActivity.EXTRA_IMAGE_PATHS,
+                        PreviewActivity.EXTRA_IMAGE_PATHS,
                         capturedImagePaths
                     )
                     // Pass the current position in the array
                     putExtra(
-                        com.example.camera.ui.preview.PreviewActivity.EXTRA_CURRENT_POSITION,
+                        PreviewActivity.EXTRA_CURRENT_POSITION,
                         capturedImagePaths.size - 1
                     )
                 }
+                Log.d(TAG, "Starting PreviewActivity with image path: ${imageFile.absolutePath}")
                 startActivity(intent)
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to navigate to preview", e)
@@ -515,10 +466,8 @@ class FaceFilterActivity : AppCompatActivity() {
     private fun processCapturedImage(bytes: ByteArray): Bitmap {
         val decodedBitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
             ?: throw IOException("Failed to decode byte array.")
-
         // Tính toán góc xoay dựa trên hướng camera
         val rotation = if (cameraFacing == CameraSource.CAMERA_FACING_FRONT) 270f else 90f
-        
         // Tạo matrix cho việc xoay và lật ảnh
         val matrix = Matrix().apply {
             postRotate(rotation)
@@ -527,7 +476,6 @@ class FaceFilterActivity : AppCompatActivity() {
                 postScale(-1f, 1f, decodedBitmap.width / 2f, decodedBitmap.height / 2f)
             }
         }
-
         // Xoay ảnh theo góc đã tính
         val rotatedBitmap = Bitmap.createBitmap(
             decodedBitmap,
@@ -538,7 +486,6 @@ class FaceFilterActivity : AppCompatActivity() {
             matrix,
             false
         )
-
         // Cắt ảnh theo tỉ lệ đã chọn để khớp với preview
         val finalBitmap = when (currentAspectRatio) {
             AspectRatio.RATIO_1_1 -> cropToAspectRatioFromCenter(rotatedBitmap, 1f)
@@ -548,7 +495,6 @@ class FaceFilterActivity : AppCompatActivity() {
                 cropToAspectRatioFromCenter(rotatedBitmap, previewRatio)
             }
         }
-
         // Giới hạn kích thước ảnh nếu cần nhưng giữ nguyên tỉ lệ
         return resizeBitmapKeepRatio(finalBitmap, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT)
     }
@@ -558,7 +504,6 @@ class FaceFilterActivity : AppCompatActivity() {
         val width = bitmap.width
         val height = bitmap.height
         val currentRatio = width.toFloat() / height.toFloat()
-
         return if (abs(currentRatio - targetRatio) < 0.01f) {
             // Tỉ lệ hiện tại đã gần đúng, không cần cắt
             bitmap
@@ -580,23 +525,19 @@ class FaceFilterActivity : AppCompatActivity() {
         if (bitmap.width <= maxWidth && bitmap.height <= maxHeight) {
             return bitmap
         }
-
         val ratio = bitmap.width.toFloat() / bitmap.height.toFloat()
-
         var finalWidth = maxWidth
         var finalHeight = (finalWidth / ratio).toInt()
-
         if (finalHeight > maxHeight) {
             finalHeight = maxHeight
             finalWidth = (finalHeight * ratio).toInt()
         }
-
         return Bitmap.createScaledBitmap(bitmap, finalWidth, finalHeight, true)
     }
 
     // Hàm mới để lấy aspect ratio của preview
     private fun getPreviewAspectRatio(): Float {
-        return mPreview?.let { preview ->
+        return binding.preview.let { preview ->
             val previewWidth = preview.width
             val previewHeight = preview.height
             if (previewHeight > 0) {
@@ -604,7 +545,7 @@ class FaceFilterActivity : AppCompatActivity() {
             } else {
                 getScreenAspectRatio()
             }
-        } ?: getScreenAspectRatio()
+        }
     }
 
     private fun saveImageToCache(bitmap: Bitmap): File {
@@ -613,30 +554,24 @@ class FaceFilterActivity : AppCompatActivity() {
             val created = cachePath.mkdirs()
             Log.d(TAG, "Cache dir created: $created at ${cachePath.absolutePath}")
         }
-        
         // Tạo tên file với timestamp để tránh trùng lặp
         val timestamp = System.currentTimeMillis()
         val filename = "captured_image_$timestamp.jpg"
         val file = File(cachePath, filename)
-        
         try {
             FileOutputStream(file).use { out ->
                 // Sử dụng chất lượng cao hơn (95) để đảm bảo ảnh rõ nét
                 val success = bitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, out)
                 Log.d(TAG, "Bitmap compress success: $success, file: ${file.absolutePath}, size: ${file.length()} bytes")
-                
                 if (!success) {
                     throw IOException("Bitmap compress failed")
                 }
-                
                 // Đảm bảo dữ liệu được ghi xuống đĩa
                 out.flush()
             }
-            
             if (!file.exists() || file.length() == 0L) {
                 throw IOException("File not written: ${file.absolutePath}")
             }
-            
             Log.d(TAG, "Image saved successfully: ${file.absolutePath}, size: ${file.length()} bytes, dimensions: ${bitmap.width}x${bitmap.height}")
             return file
         } catch (e: Exception) {
@@ -677,7 +612,7 @@ class FaceFilterActivity : AppCompatActivity() {
             return
         }
         Snackbar.make(
-            mGraphicOverlay!!,
+            binding.faceOverlay,
             R.string.permission_camera_rationale,
             Snackbar.LENGTH_INDEFINITE
         )
@@ -719,47 +654,38 @@ class FaceFilterActivity : AppCompatActivity() {
         val dialog = AlertDialog.Builder(this)
             .setView(dialogView)
             .create()
-
         dialogView.findViewById<TextView>(R.id.aspectRatio11).setOnClickListener {
             setAspectRatio(AspectRatio.RATIO_1_1)
             dialog.dismiss()
         }
-
         dialogView.findViewById<TextView>(R.id.aspectRatioFull).setOnClickListener {
             setAspectRatio(AspectRatio.FULL)
             dialog.dismiss()
         }
-
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.show()
     }
 
     private fun setAspectRatio(aspectRatio: AspectRatio) {
         if (currentAspectRatio == aspectRatio) return
-
         currentAspectRatio = aspectRatio
         Log.d(TAG, "Setting aspect ratio to: ${aspectRatio.ratio}")
-
         // Đặt aspect ratio cho preview
         val previewRatio = when (aspectRatio) {
             AspectRatio.FULL -> -1f // Sử dụng full screen
             else -> aspectRatio.ratio
         }
-        
-        mPreview?.setAspectRatio(previewRatio)
-
+        binding.preview.setAspectRatio(previewRatio)
         // Restart camera với cài đặt mới
-        mPreview?.stop()
-        mCameraSource?.release()
-        mCameraSource = null
+        binding.preview.stop()
+        releaseCameraAndDetector()
         createCameraSource()
         startCameraSource()
     }
 
     private fun createCameraSource() {
         Log.d(TAG, "Creating camera source for facing: $cameraFacing")
-
-        val detector = FaceDetector.Builder(applicationContext)
+        mFaceDetector = FaceDetector.Builder(applicationContext)
             .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
             .setLandmarkType(FaceDetector.ALL_LANDMARKS)
             .setProminentFaceOnly(true)
@@ -767,20 +693,16 @@ class FaceFilterActivity : AppCompatActivity() {
             .setMode(FaceDetector.ACCURATE_MODE)
             .setMinFaceSize(MIN_FACE_SIZE)
             .build()
-
-        detector.setProcessor(MultiProcessor.Builder<Face?>(GraphicFaceTrackerFactory()).build())
-
-        if (!detector.isOperational()) {
+        mFaceDetector?.setProcessor(MultiProcessor.Builder<Face?>(GraphicFaceTrackerFactory()).build())
+        if (mFaceDetector?.isOperational != true) {
             handleDetectorNotOperational()
             return
         }
-
         val targetRatio = if (currentAspectRatio == AspectRatio.FULL) {
             getScreenAspectRatio()
         } else {
             currentAspectRatio.ratio
         }
-
         val tempCamera = try {
             Camera.open(if (cameraFacing == CameraSource.CAMERA_FACING_FRONT) Camera.CameraInfo.CAMERA_FACING_FRONT else Camera.CameraInfo.CAMERA_FACING_BACK)
         } catch (e: Exception) {
@@ -788,20 +710,16 @@ class FaceFilterActivity : AppCompatActivity() {
             showErrorMessage("Could not configure camera.")
             return
         }
-
         try {
             val params = tempCamera.parameters
             val bestPreviewSize = findBestSize(params.supportedPreviewSizes, targetRatio)
             val bestPictureSize = findBestSize(params.supportedPictureSizes, targetRatio)
-
-            val builder = CameraSource.Builder(applicationContext, detector)
+            val builder = CameraSource.Builder(applicationContext, mFaceDetector!!)
                 .setFacing(cameraFacing)
                 .setAutoFocusEnabled(true)
                 .setRequestedFps(PREVIEW_FPS)
                 .setRequestedPreviewSize(bestPreviewSize.width, bestPreviewSize.height)
-
             mCameraSource = builder.build()
-
             // Set picture size directly on the camera instance
             getCamera(mCameraSource!!)?.let { camera ->
                 val camParams = camera.parameters
@@ -809,14 +727,12 @@ class FaceFilterActivity : AppCompatActivity() {
                 camera.parameters = camParams
                 Log.d(TAG, "Set picture size to: ${bestPictureSize.width}x${bestPictureSize.height}")
             }
-
         } catch (e: Exception) {
             Log.e(TAG, "Failed to create camera source or set parameters.", e)
             showErrorMessage("Failed to setup camera.")
         } finally {
             tempCamera.release()
         }
-
         Log.d(TAG, "Camera source created successfully")
     }
 
@@ -829,6 +745,47 @@ class FaceFilterActivity : AppCompatActivity() {
 
     private fun showErrorMessage(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+    }
+
+    private fun navigateToPreview() {
+        if (capturedImagePaths.isEmpty()) {
+            Toast.makeText(this, "No images captured yet", Toast.LENGTH_SHORT).show()
+            return
+        }
+        try {
+            val intent = Intent(this, PreviewActivity::class.java).apply {
+                putStringArrayListExtra(PreviewActivity.EXTRA_IMAGE_PATHS, capturedImagePaths)
+                putExtra(PreviewActivity.EXTRA_CURRENT_POSITION, capturedImagePaths.size - 1) // Show latest image
+            }
+            Log.d(TAG, "Navigating to PreviewActivity with ${capturedImagePaths.size} images")
+            startActivity(intent)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to navigate to preview", e)
+            showErrorMessage("Failed to open preview: ${e.message}")
+        }
+    }
+
+    private fun updateThumbnailPreview(bitmap: Bitmap) {
+        try {
+            // Create a small thumbnail version
+            val thumbnailSize = 120 // dp
+            val density = resources.displayMetrics.density
+            val thumbnailSizePx = (thumbnailSize * density).toInt()
+            
+            val thumbnail = Bitmap.createScaledBitmap(
+                bitmap,
+                thumbnailSizePx,
+                thumbnailSizePx,
+                true
+            )
+            
+            binding.thumbnailPreview.setImageBitmap(thumbnail)
+            binding.thumbnailPreview.visibility = View.VISIBLE
+            
+            Log.d(TAG, "Thumbnail preview updated")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to update thumbnail preview", e)
+        }
     }
 
     override fun onResume() {
@@ -849,15 +806,42 @@ class FaceFilterActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         Log.d(TAG, "onPause called")
-        mPreview?.stop()
+        binding.preview.stop()
         countDownTimer?.cancel()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mPreview?.release()
-        mCameraSource?.release()
-        countDownTimer?.cancel()
+        Log.d(TAG, "onDestroy called")
+        try {
+            countDownTimer?.cancel()
+            countDownTimer = null
+            binding.preview.release()
+            releaseCameraAndDetector()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error during onDestroy", e)
+        }
+    }
+
+    private fun releaseCameraAndDetector() {
+        try {
+            mCameraSource?.let { cameraSource ->
+                cameraSource.release()
+                mCameraSource = null
+                Log.d(TAG, "Camera source released")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error releasing camera source", e)
+        }
+        try {
+            mFaceDetector?.let { detector ->
+                detector.release()
+                mFaceDetector = null
+                Log.d(TAG, "Face detector released")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error releasing face detector", e)
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -893,10 +877,9 @@ class FaceFilterActivity : AppCompatActivity() {
             GoogleApiAvailability.getInstance().getErrorDialog(this, code, RC_HANDLE_GMS)?.show()
             return
         }
-
         mCameraSource?.let {
             try {
-                mPreview?.start(it, mGraphicOverlay)
+                binding.preview.start(it, binding.faceOverlay)
                 Log.d(TAG, "Camera preview started")
             } catch (e: IOException) {
                 Log.e(TAG, "Unable to start camera source", e)
@@ -908,11 +891,11 @@ class FaceFilterActivity : AppCompatActivity() {
     }
 
     private fun refreshFaceDetection() {
-        mGraphicOverlay?.clear()
+        binding.faceOverlay.clear()
     }
 
     private inner class GraphicFaceTrackerFactory : MultiProcessor.Factory<Face?> {
-        override fun create(face: Face?): Tracker<Face?> = GraphicFaceTracker(mGraphicOverlay!!)
+        override fun create(face: Face?): Tracker<Face?> = GraphicFaceTracker(binding.faceOverlay)
     }
 
     private inner class GraphicFaceTracker(private val overlay: GraphicOverlay) : Tracker<Face?>() {
@@ -924,7 +907,6 @@ class FaceFilterActivity : AppCompatActivity() {
                 faceGraphic.updateFace(it, currentFilterType)
             }
         }
-
         override fun onMissing(detections: Detector.Detections<Face?>) = overlay.remove(faceGraphic)
         override fun onDone() = overlay.remove(faceGraphic)
     }
@@ -942,11 +924,9 @@ class FaceFilterActivity : AppCompatActivity() {
     private fun findBestSize(supportedSizes: List<Camera.Size>, targetRatio: Float): Camera.Size {
         var bestSize = supportedSizes[0]
         var minDiff = Float.MAX_VALUE
-
         for (size in supportedSizes) {
             val ratio = size.width.toFloat() / size.height.toFloat()
             val diff = abs(ratio - targetRatio)
-
             if (diff < minDiff) {
                 bestSize = size
                 minDiff = diff
@@ -961,13 +941,11 @@ class FaceFilterActivity : AppCompatActivity() {
 
     private fun toggleZoomVisibility() {
         isZoomVisible = !isZoomVisible
-        zoomSeekBar?.visibility = if (isZoomVisible) View.VISIBLE else View.GONE
-        brightnessSeekBar?.visibility = if (isZoomVisible) View.VISIBLE else View.GONE
-        
+        binding.seekBarZoom.visibility = if (isZoomVisible) View.VISIBLE else View.GONE
+        binding.seekBarBrightness.visibility = if (isZoomVisible) View.VISIBLE else View.GONE
         val tintColor = if (isZoomVisible) Color.YELLOW else Color.WHITE
-        zoomToggleButton?.setColorFilter(tintColor)
+        binding.zoomToggleButton.setColorFilter(tintColor)
     }
-
 
     private fun setBrightness(brightness: Float) {
         mCameraSource?.let { source ->
@@ -1002,7 +980,6 @@ class FaceFilterActivity : AppCompatActivity() {
         private const val JPEG_QUALITY = 95
         private const val RC_HANDLE_GMS = 9001
         private const val RC_HANDLE_CAMERA_PERM = 2
-
         private val FILTER_BUTTON_IDS = intArrayOf(
             R.id.no_filter, R.id.hair, R.id.op, R.id.snap,
             R.id.glasses2, R.id.glasses3, R.id.glasses4, R.id.glasses5,
@@ -1012,4 +989,3 @@ class FaceFilterActivity : AppCompatActivity() {
         )
     }
 }
-

@@ -23,8 +23,9 @@
             <!-- Fragment text sẽ nằm trên ảnh -->
             <FrameLayout
                 android:id="@+id/containImage"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:minHeight="400dp"
                 android:layout_gravity="center">
 
                 <ImageView

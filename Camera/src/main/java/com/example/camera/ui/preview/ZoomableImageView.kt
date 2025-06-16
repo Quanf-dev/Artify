@@ -51,7 +51,25 @@ class ZoomableImageView @JvmOverloads constructor(
     /**
      * Set color filter for the image view
      */
-
+    fun setColorFilter(filter: Any?) {
+        if (filter == null) {
+            colorFilterPaint = null
+            invalidate()
+            return
+        }
+        
+        // Nếu filter là ColorMatrixColorFilter, áp dụng nó
+        if (filter is ColorMatrixColorFilter) {
+            if (colorFilterPaint == null) {
+                colorFilterPaint = Paint()
+            }
+            colorFilterPaint?.colorFilter = filter
+            invalidate()
+        } else {
+            Log.w(TAG, "Unsupported filter type: ${filter.javaClass.simpleName}")
+        }
+    }
+    
     override fun onDraw(canvas: Canvas) {
         if (canvas == null) return
         

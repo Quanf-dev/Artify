@@ -30,7 +30,7 @@ import kotlin.math.pow
  * Graphic instance for rendering face position, orientation, and landmarks within an associated
  * graphic overlay view.
  */
-internal class FaceGraphic(overlay: GraphicOverlay?, c: Int) : GraphicOverlay.Graphic(overlay) {
+class FaceGraphic(overlay: GraphicOverlay?, c: Int) : GraphicOverlay.Graphic(overlay) {
     private val TAG = "FaceGraphic"
     @Volatile
     private var mFace: Face? = null

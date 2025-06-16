@@ -84,7 +84,7 @@ class GeminiRepository(context: Context) {
         try {
             val imagePrompt: Content = content {
                 image(image)
-                text("Convert this image into a 2D anime illustration, keeping the original composition and structure.")
+                text("Convert this photo into a Disney-style 3D cartoon illustration, keeping the original composition, camera angle, subject placement, proportions, and spatial layout exactly the same. Apply vibrant colors, smooth gradients, soft lighting, and expressive 3D character rendering in the style of modern Disney animation. Preserve all original element positions—transform only the visual style into a polished, cinematic 3D cartoon look.")
             }
 
             val response = model.generateContent(imagePrompt)

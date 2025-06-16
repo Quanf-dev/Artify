@@ -62,6 +62,10 @@ class CameraSourcePreview(context: Context, attrs: AttributeSet?) : ViewGroup(co
         requestLayout()
     }
 
+    fun setColorFilter(filter: Any?) {
+        // Để trống vì không cần xử lý color filter trong phiên bản hiện tại
+        Log.d(tag, "Color filter request ignored")
+    }
 
     @Throws(IOException::class)
     private fun startIfReady() {

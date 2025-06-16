@@ -46,6 +46,19 @@ class CreatePostActivity : BaseActivity<ActivityCreatePostBinding>() {
 
         setupListeners()
         observeViewModel()
+        
+        // Kiểm tra xem có URI ảnh được truyền từ EditMainActivity không
+        val imageUriString = intent.getStringExtra("selected_image_uri")
+        if (!imageUriString.isNullOrEmpty()) {
+            try {
+                val imageUri = Uri.parse(imageUriString)
+                selectedImageUri = imageUri
+                binding.ivPostImage.setImageURI(imageUri)
+                updatePostButtonState()
+            } catch (e: Exception) {
+                Toast.makeText(this, "Error loading image: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun setupListeners() {

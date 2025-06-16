@@ -27,7 +27,7 @@ import com.example.artify.R
 import com.example.artify.databinding.ActivityHomeBinding
 import com.example.artify.ui.editMain.EditMainActivity
 import com.example.artify.ui.setting.SettingActivity
-import com.example.camera.filter.FaceFilterActivity
+import com.example.artify.ui.camera.FaceFilterActivity
 import com.example.common.base.BaseActivity
 import com.example.imageaigen.ui.logo.LogoMakerActivity
 import com.example.imageaigen.ui.toyfigure.ToyFigureActivity

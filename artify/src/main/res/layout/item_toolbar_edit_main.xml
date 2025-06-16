@@ -42,16 +42,15 @@
         iconics:iiv_icon="gmi-redo"
         android:layout_marginEnd="15dp"
         android:background="?android:selectableItemBackground"
-
         iconics:iiv_size="22dp" />
 
     <com.mikepenz.iconics.view.IconicsImageView
         android:id="@+id/ivDone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="?android:selectableItemBackground"
         iconics:iiv_color="@color/iconColor"
         iconics:iiv_icon="gmi-check"
-        android:background="?android:selectableItemBackground"
 
         iconics:iiv_size="22dp" />
 

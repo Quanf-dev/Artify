@@ -150,6 +150,13 @@ dependencies {
 
     implementation ("com.airbnb.android:lottie:6.4.0" )
 
+    implementation ("androidx.viewpager2:viewpager2:1.1.0")
+
+    implementation ("com.google.android.gms:play-services-vision:9.4.0+")
+
+    implementation ("com.github.iammert:CameraVideoButton:0.2")
+
+
 
 
 }
